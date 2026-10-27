@@ -99,6 +99,35 @@ async function sendMessage(target, message) {
         messageId: data.id || (data.target && data.target[0]) || 'sent',
         data
       };
+    } else if (data.reason === 'invalid group id' || (data.detail && data.detail.includes('group'))) {
+      // Auto-heal: sinkronisasi daftar grup di Fonnte lalu coba kirim ulang
+      console.log('Sinkronisasi daftar grup Fonnte secara otomatis...');
+      try {
+        await fetch(`${FONNTE_API_URL}/fetch-group`, {
+          method: 'POST',
+          headers: { 'Authorization': token }
+        });
+        const retryRes = await fetch(`${FONNTE_API_URL}/send`, {
+          method: 'POST',
+          headers: {
+            'Authorization': token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        const retryData = await retryRes.json();
+        if (retryData.status === true || retryData.status === 'true' || retryData.id) {
+          return {
+            success: true,
+            target: cleanTarget,
+            messageId: retryData.id || 'sent',
+            data: retryData
+          };
+        }
+      } catch (retryErr) {
+        console.warn('Retry send error:', retryErr.message);
+      }
+      throw new Error(data.reason || data.detail || 'Gagal mengirim pesan ke grup WhatsApp.');
     } else {
       throw new Error(data.reason || data.detail || 'Gagal mengirim pesan WhatsApp via Fonnte.');
     }
