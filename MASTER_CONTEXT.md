@@ -95,6 +95,9 @@ GOOGLE_DRIVE_FOLDER=https://drive.google.com/drive/folders/1a-JbvPXcU0o9gWDrQEJU
 DATABASE_URL=postgresql://postgres.qpoceyupnsqayxcqfgdx:<PASSWORD>@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres
 DATABASE_URL_DIRECT=postgresql://postgres:<PASSWORD>@db.qpoceyupnsqayxcqfgdx.supabase.co:5432/postgres
 
+# WHATSAPP GATEWAY (FONNTE)
+FONNTE_TOKEN=rdoJoM92YmaiNp343AEE
+
 # PORT
 PORT=3000
 ```

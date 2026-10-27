@@ -75,6 +75,13 @@ const Navbar = {
         <!-- Right: Action Center & Mission Telemetry -->
         <div class="flex items-center gap-1.5 sm:gap-2">
           
+          <!-- WhatsApp Gateway Dispatcher -->
+          <button onclick="WhatsAppDispatcher.openModal()" title="Pusat Pesan WhatsApp Lapangan (Fonnte)" class="btn-ghost py-1 px-2.5 text-emerald-400 border-emerald-500/30 hover:border-emerald-500 flex items-center gap-1.5 cursor-pointer">
+            <span class="text-xs">💬</span>
+            <span class="hidden md:inline text-[10px] font-mono font-bold text-emerald-400">WA DISPATCH</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          </button>
+
           <!-- Staff Profile Capsule -->
           <button onclick="Onboarding.openModal(true)" title="Identitas & Penugasan Staf" class="btn-ghost py-1 px-2.5 group flex items-center gap-2 cursor-pointer">
             <span class="text-xs">👤</span>

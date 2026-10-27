@@ -4,6 +4,7 @@ module.exports = {
   BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || '',
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
   GROUP_CHAT_ID: process.env.CENTRAL_EVENT_GROUP_CHAT_ID || '',
+  FONNTE_TOKEN: process.env.FONNTE_TOKEN || '',
   GOOGLE_SHEET_ID: process.env.GOOGLE_SHEET_ID || '1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0',
   GOOGLE_SHEET_NAME: process.env.GOOGLE_SHEET_NAME || 'Rundown',
   

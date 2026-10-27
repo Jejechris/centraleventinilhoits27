@@ -157,6 +157,16 @@ const Sidebar = {
               </div>
               <span class="text-[9px] font-mono text-blue-400 font-bold">@bolo_ce_bot ↗</span>
             </a>
+
+            <button onclick="WhatsAppDispatcher.openModal()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition border border-emerald-500/20 group">
+              <div class="flex items-center gap-2.5">
+                <span class="text-sm">💬</span>
+                <span class="font-bold text-emerald-300">WhatsApp Dispatch</span>
+              </div>
+              <span class="text-[9px] font-mono text-emerald-400 font-bold flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE ↗
+              </span>
+            </button>
           </div>
         </div>
 

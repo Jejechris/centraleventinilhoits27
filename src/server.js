@@ -10,6 +10,8 @@ const vipService = require('./services/vipService');
 const geminiService = require('./services/geminiService');
 const spreadsheetRegistry = require('./services/spreadsheetRegistry');
 const progressService = require('./services/progressService');
+const whatsappService = require('./services/whatsappService');
+const whatsappBotService = require('./services/whatsappBotService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -535,6 +537,106 @@ app.post('/api/ai/analyze-sheet-tasks', async (req, res) => {
     });
   } catch (err) {
     console.error('API /api/ai/analyze-sheet-tasks error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 7. API WhatsApp Gateway (Fonnte Mission Dispatcher)
+app.get('/api/whatsapp/status', async (req, res) => {
+  try {
+    const status = await whatsappService.getDeviceStatus();
+    res.json(status);
+  } catch (err) {
+    console.error('API /api/whatsapp/status error:', err);
+    res.status(500).json({ success: false, connected: false, error: err.message });
+  }
+});
+
+app.post('/api/whatsapp/send', async (req, res) => {
+  try {
+    const { target, message } = req.body;
+    if (!target || !message) {
+      return res.status(400).json({ success: false, error: 'Target nomor dan isi pesan wajib diisi.' });
+    }
+    const result = await whatsappService.sendMessage(target, message);
+    res.json(result);
+  } catch (err) {
+    console.error('API /api/whatsapp/send error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/whatsapp/broadcast-delay', async (req, res) => {
+  try {
+    const { target, subEventName, sessionTitle, delayMinutes, pic } = req.body;
+    if (!target) {
+      return res.status(400).json({ success: false, error: 'Target nomor / grup WhatsApp wajib diisi.' });
+    }
+    const result = await whatsappService.broadcastDelay({
+      target,
+      subEventName,
+      sessionTitle,
+      delayMinutes,
+      pic
+    });
+    res.json(result);
+  } catch (err) {
+    console.error('API /api/whatsapp/broadcast-delay error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/whatsapp/broadcast-emergency', async (req, res) => {
+  try {
+    const { target, alertTitle, location, instruction } = req.body;
+    if (!target) {
+      return res.status(400).json({ success: false, error: 'Target nomor / grup WhatsApp wajib diisi.' });
+    }
+    const result = await whatsappService.broadcastEmergency({
+      target,
+      alertTitle,
+      location,
+      instruction
+    });
+    res.json(result);
+  } catch (err) {
+    console.error('API /api/whatsapp/broadcast-emergency error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/whatsapp/broadcast-station', async (req, res) => {
+  try {
+    const { target, stationName, status, pic } = req.body;
+    if (!target) {
+      return res.status(400).json({ success: false, error: 'Target nomor / grup WhatsApp wajib diisi.' });
+    }
+    const result = await whatsappService.broadcastStationStatus({
+      target,
+      stationName,
+      status,
+      pic
+    });
+    res.json(result);
+  } catch (err) {
+    console.error('API /api/whatsapp/broadcast-station error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 7.1 Webhook Penerima Pesan WhatsApp Masuk (Group & Personal Chat Command Bot)
+app.post('/api/whatsapp/webhook', async (req, res) => {
+  try {
+    const payload = req.body || {};
+    // console.log('Incoming WhatsApp Webhook:', payload);
+    const reply = await whatsappBotService.handleIncomingMessage(payload);
+    if (reply) {
+      // Protokol auto-reply Fonnte: cukup return JSON { reply }
+      return res.json({ reply, status: true });
+    }
+    res.json({ status: true, message: 'Message acknowledged (no command triggered)' });
+  } catch (err) {
+    console.error('API /api/whatsapp/webhook error:', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
