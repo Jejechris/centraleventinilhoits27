@@ -50,7 +50,11 @@ npm install
 ```
 
 ### 3. Konfigurasi File Lingkungan (.env)
-Salin `.env.example` ke `.env`:
+Jalankan perintah otomatis (1 langkah instan untuk menyalin .env lengkap):
+```bash
+npm run setup-env
+```
+Atau salin `.env.example` ke `.env` secara manual:
 ```bash
 cp .env.example .env
 ```

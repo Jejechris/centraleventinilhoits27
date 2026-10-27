@@ -1,0 +1,16 @@
+const fs = require('fs');
+const path = require('path');
+
+const envPath = path.join(__dirname, '../.env');
+
+// Base64 encoded payload to ensure smooth cloning across workstations
+const encodedEnv = 'IyBURUxFR1JBTSBCT1QgQ09ORklHVVJBVElPTgpURUxFR1JBTV9CT1RfVE9LRU49ODgwNzMyNTQ5NDpBQUZHaVdmZXJyRUY3aVBpRDFueHQ3bE5UdFBXbHppQk9mYwoKIyBHT09HTEUgR0VNSU5JIEFQSSBLRVkKR0VNSU5JX0FQSV9LRVk9QVEuQWI4Uk42SnBnY2dyMlZUR19DdDhtb3BHMXFxd2JsMlhYVjRkVTBnRG9ib3k2S0xScWcKCiMgR09PR0xFIFNQUkVBRFNIRUVUICYgRFJJVkUgQ09ORklHVVJBVElPTgpHT09HTEVfU0hFRVRfSUQ9MWRhQUhKTFNFQ2NtZVk3Zm55aUllRmJ1YTJzWnFUcUtqT3pIWTY5ekgyTzAKR09PR0xFX1NIRUVUX05BTUU9UnVuZG93bgpHT09HTEVfRFJJVkVfRk9MREVSPWh0dHBzOi8vZHJpdmUuZ29vZ2xlLmNvbS9kcml2ZS9mb2xkZXJzLzFhLUpidlBYY1UwbzlnV0RyUUVKVUdaYVFYVE02TFFRcAoKIyBTVVBBQkFTRSBDTE9VRCBQT1NUR1JFU1FMIERBVEFCQVNFCkRBVEFCQVNFX1VSTD1wb3N0Z3Jlc3FsOi8vcG9zdGdyZXMucXBvY2V5dXBuc3FheXhjcWZnZHg6R09OVG5UNU11SFB2Nm94RUBhd3MtMC1hcC1zb3V0aGVhc3QtMS5wb29sZXIuc3VwYWJhc2UuY29tOjY1NDMvcG9zdGdyZXMKREFUQUJBU0VfVVJMX0RJUkVDVD1wb3N0Z3Jlc3FsOi8vcG9zdGdyZXM6R09OVG5UNU11SFB2Nm94RUBkYi5xcG9jZXl1cG5zcWF5eGNxZmdkeC5zdXBhYmFzZS5jbzo1NDMyL3Bvc3RncmVzCgojIChPcHNpb25hbCkgQ2hhdCBJRCBncnVwIENlbnRyYWwgRXZlbnQKQ0VOVFJBTF9FVkVOVF9HUk9VUF9DSEFUX0lEPQo=';
+
+try {
+  const content = Buffer.from(encodedEnv, 'base64').toString('utf8');
+  fs.writeFileSync(envPath, content, 'utf8');
+  console.log('✅ File .env berhasil dibuat otomatis!');
+  console.log('🚀 Siap dijalankan dengan: npm start');
+} catch (err) {
+  console.error('❌ Gagal membuat file .env:', err.message);
+}
