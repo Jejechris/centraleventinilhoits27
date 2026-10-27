@@ -625,13 +625,28 @@ app.post('/api/whatsapp/broadcast-station', async (req, res) => {
 });
 
 // 7.1 Webhook Penerima Pesan WhatsApp Masuk (Group & Personal Chat Command Bot)
+// Fonnte mewajibkan Webhook URL mengizinkan metode GET dan POST
+app.get('/api/whatsapp/webhook', (req, res) => {
+  res.status(200).send('Central Event WhatsApp Webhook is Live & Ready! 🚀');
+});
+
 app.post('/api/whatsapp/webhook', async (req, res) => {
   try {
     const payload = req.body || {};
     // console.log('Incoming WhatsApp Webhook:', payload);
     const reply = await whatsappBotService.handleIncomingMessage(payload);
     if (reply) {
-      // Protokol auto-reply Fonnte: cukup return JSON { reply }
+      // Tentukan target tujuan (ID grup @g.us jika di grup, atau nomor pengirim)
+      const target = (payload.id && payload.id.includes('@g.us')) ? payload.id : (payload.sender || payload.member);
+      
+      // Kirim pesan aktif via API Fonnte untuk kepastian pengiriman 100%
+      if (target) {
+        whatsappService.sendMessage(target, reply).catch(err => {
+          console.warn('Webhook auto-send warning:', err.message);
+        });
+      }
+
+      // Protokol auto-reply Fonnte: juga return JSON { reply, status: true }
       return res.json({ reply, status: true });
     }
     res.json({ status: true, message: 'Message acknowledged (no command triggered)' });
