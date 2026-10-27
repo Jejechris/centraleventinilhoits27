@@ -1,0 +1,1101 @@
+/* ==========================================================================
+   INI LHO ITS! 2027 — CENTRAL EVENT MISSION CONTROL SYSTEM
+   ANTI-GENERIC TACTICAL AEROSPACE / HIGH-TECH COMMAND DECK
+   Bespoke Typography, Double-Bezel Hardware Architecture & Kinetic Physics
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  /* OBSIDIAN MISSION DECK (DARK MODE - DEFAULT) */
+  --bg-space: #07090E;
+  --bg-canvas: #0A0D14;
+  --chassis-outer: rgba(18, 24, 38, 0.65);
+  --chassis-inner: rgba(11, 15, 25, 0.92);
+  --chassis-border: rgba(255, 255, 255, 0.08);
+  --chassis-glow: rgba(30, 96, 255, 0.25);
+  --recessed-bay: rgba(4, 6, 11, 0.75);
+  --header-bg: rgba(7, 9, 14, 0.82);
+  --sidebar-bg: rgba(7, 9, 14, 0.95);
+  --topbar-bg: rgba(7, 9, 14, 0.82);
+  --nav-pill-bg: rgba(255, 255, 255, 0.04);
+  --nav-pill-hover: rgba(255, 255, 255, 0.08);
+  
+  --txt-headline: #FFFFFF;
+  --txt-body: #CBD5E1;
+  --txt-muted: #64748B;
+  --txt-dim: #334155;
+
+  --accent-cobalt: #1E60FF;
+  --accent-cobalt-light: #60A5FA;
+  --accent-amber: #F59E0B;
+  --accent-emerald: #10B981;
+  --accent-rose: #F43F5E;
+
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-focus: rgba(59, 130, 246, 0.6);
+  --inner-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  --panel-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.65), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+
+  --grid-color: rgba(255, 255, 255, 0.025);
+  --grid-dots: rgba(255, 255, 255, 0.06);
+}
+
+html.light-theme, body.light-theme {
+  /* ARCHITECTURAL CAD / HIGH-TRUST SWISS TELEMETRY (LIGHT MODE) */
+  --bg-space: #F0F4F8;
+  --bg-canvas: #F8FAFC;
+  --chassis-outer: rgba(241, 245, 249, 0.85);
+  --chassis-inner: rgba(255, 255, 255, 0.98);
+  --chassis-border: rgba(15, 23, 42, 0.1);
+  --chassis-glow: rgba(30, 96, 255, 0.15);
+  --recessed-bay: rgba(241, 245, 249, 0.9);
+  --header-bg: rgba(255, 255, 255, 0.88);
+  --sidebar-bg: rgba(255, 255, 255, 0.98);
+  --topbar-bg: rgba(255, 255, 255, 0.90);
+  --nav-pill-bg: rgba(15, 23, 42, 0.03);
+  --nav-pill-hover: rgba(15, 23, 42, 0.07);
+
+  --txt-headline: #0B132B;
+  --txt-body: #334155;
+  --txt-muted: #64748B;
+  --txt-dim: #94A3B8;
+
+  --accent-cobalt: #1D4ED8;
+  --accent-cobalt-light: #2563EB;
+  --accent-amber: #D97706;
+  --accent-emerald: #059669;
+  --accent-rose: #E11D48;
+
+  --hairline: rgba(15, 23, 42, 0.08);
+  --hairline-focus: rgba(37, 99, 235, 0.6);
+  --inner-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --panel-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.04), 0 20px 30px -8px rgba(15, 23, 42, 0.07), 0 0 0 1px rgba(15, 23, 42, 0.06);
+
+  --grid-color: rgba(15, 23, 42, 0.03);
+  --grid-dots: rgba(15, 23, 42, 0.08);
+}
+
+/* Base resets & Font assignments */
+* {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
+}
+
+.font-mono, [data-mono] {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+.font-display {
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif !important;
+  letter-spacing: -0.035em;
+}
+
+html {
+  background-color: var(--bg-space);
+  color-scheme: dark;
+}
+html.light-theme {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--bg-space);
+  color: var(--txt-body);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+body.theme-transitioning, 
+body.theme-transitioning * {
+  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease !important;
+}
+
+/* Precision Tactical Aerospace Grid */
+.bg-command-grid {
+  background-color: var(--bg-space);
+  background-image: 
+    radial-gradient(var(--grid-dots) 1px, transparent 1px),
+    linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+  background-size: 28px 28px, 112px 112px, 112px 112px;
+  background-position: center center;
+}
+
+/* Double-Bezel Hardware Architecture (Machined Enclosure) */
+.chassis {
+  background: var(--chassis-outer);
+  border: 1px solid var(--chassis-border);
+  box-shadow: var(--panel-shadow);
+  border-radius: 1.75rem;
+  padding: 0.375rem;
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chassis:hover {
+  border-color: var(--hairline-focus);
+  box-shadow: var(--panel-shadow), 0 0 35px -8px var(--chassis-glow);
+}
+
+.chassis-core {
+  background: var(--chassis-inner);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--inner-highlight);
+  border-radius: calc(1.75rem - 0.375rem);
+  padding: 1.25rem;
+  position: relative;
+  overflow: hidden;
+}
+@media (min-width: 640px) {
+  .chassis-core {
+    padding: 1.5rem;
+  }
+}
+
+/* High-Density Bay (for tables, feeds, timers) */
+.bay-recessed {
+  background: var(--recessed-bay);
+  border: 1px solid var(--hairline);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 1rem;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+/* Tactical Corner Brackets (Aerospace HUD / CAD Marks) */
+.hud-corner {
+  position: relative;
+}
+.hud-corner::before, .hud-corner::after {
+  content: '';
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  pointer-events: none;
+  opacity: 0.4;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.hud-corner::before {
+  top: 8px;
+  left: 8px;
+  border-top: 1.5px solid var(--accent-cobalt-light);
+  border-left: 1.5px solid var(--accent-cobalt-light);
+}
+.hud-corner::after {
+  bottom: 8px;
+  right: 8px;
+  border-bottom: 1.5px solid var(--accent-cobalt-light);
+  border-right: 1.5px solid var(--accent-cobalt-light);
+}
+.hud-corner:hover::before { opacity: 0.9; transform: translate(-1px, -1px); }
+.hud-corner:hover::after { opacity: 0.9; transform: translate(1px, 1px); }
+
+/* Eyebrow Micro-Badge */
+.eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid var(--hairline);
+  background: var(--nav-pill-bg);
+  color: var(--txt-muted);
+  line-height: 1;
+}
+
+.eyebrow-pill.active {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
+  color: #34D399;
+}
+
+.eyebrow-pill.amber {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.1);
+  color: #FBBF24;
+}
+
+.eyebrow-pill.cobalt {
+  border-color: rgba(37, 99, 235, 0.4);
+  background: rgba(37, 99, 235, 0.1);
+  color: #60A5FA;
+}
+
+/* Dashboard Sidebar & Topbar Shells */
+#sidebarNav {
+  background: var(--sidebar-bg);
+  border-color: var(--hairline);
+  box-shadow: 10px 0 35px -10px rgba(0, 0, 0, 0.4);
+}
+
+#topBar {
+  background: var(--topbar-bg);
+  border-color: var(--hairline);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-viewport {
+  margin-left: 0;
+}
+@media (min-width: 1024px) {
+  .dashboard-viewport {
+    margin-left: 18rem; /* 72 * 0.25rem = 18rem (w-72) */
+  }
+}
+
+/* Floating Mission Dock Navigation (Anti-Generic Floating Bar) */
+.floating-dock {
+  background: var(--header-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--chassis-border);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.4), var(--inner-highlight);
+  border-radius: 9999px;
+  padding: 0.375rem 0.75rem;
+  transition: border-color 0.15s ease;
+}
+
+/* Segmented Flight-Deck Pill Switchers */
+.dock-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--txt-muted);
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  text-decoration: none;
+}
+
+.dock-pill:hover {
+  color: var(--txt-headline);
+  background: var(--nav-pill-hover);
+  border-color: var(--hairline);
+  transform: translateY(-1px);
+}
+
+.dock-pill.active {
+  background: linear-gradient(135deg, #1E60FF 0%, #1742B0 100%);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 16px -2px rgba(30, 96, 255, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* Tactical Interactive Button (Button-in-Button architecture) */
+.btn-tactical {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.625rem 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  background: linear-gradient(180deg, #1E60FF 0%, #1545BF 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 14px rgba(30, 96, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.btn-tactical:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(30, 96, 255, 0.45);
+}
+
+.btn-tactical:active {
+  transform: translateY(1px) scale(0.98);
+  filter: brightness(0.95);
+}
+
+.btn-tactical .btn-icon-bay {
+  width: 1.625rem;
+  height: 1.625rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.btn-tactical:hover .btn-icon-bay {
+  transform: translateX(2px);
+}
+
+/* Secondary Ghost Button */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--txt-body);
+  background: var(--nav-pill-bg);
+  border: 1px solid var(--hairline);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  background: var(--nav-pill-hover);
+  border-color: var(--hairline-focus);
+  color: var(--txt-headline);
+  transform: translateY(-1px);
+}
+
+.btn-ghost:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+/* Digital Monospace Telemetry Matrix (Tabular numbers) */
+.telemetry-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: 'tnum' 1, 'zero' 1;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+}
+
+/* Calm Status Dot */
+.beacon-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+}
+.beacon-pulse::before {
+  display: none !important;
+}
+
+/* Custom Scrollbar for Flight Decks */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-cobalt);
+}
+
+/* Shimmer metallic headline effect (Non-generic silver & cobalt) */
+.shimmer-headline {
+  background: linear-gradient(135deg, #FFFFFF 0%, #E2E8F0 45%, #93C5FD 70%, #FFFFFF 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerFlow 8s linear infinite;
+}
+
+html.light-theme .shimmer-headline, body.light-theme .shimmer-headline {
+  background: linear-gradient(135deg, #0B132B 0%, #1E3A8A 50%, #0B132B 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes shimmerFlow {
+  to { background-position: 200% center; }
+}
+
+/* Toast Container & Notification */
+#toastContainer {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  padding: 0.65rem 1.1rem;
+  border-radius: 9999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--hairline);
+  box-shadow: 0 16px 32px rgba(0,0,0,0.35);
+  animation: toastSlide 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@keyframes toastSlide {
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.toast-success { background: rgba(5, 150, 105, 0.92); color: #FFFFFF; border-color: rgba(52, 211, 153, 0.5); }
+.toast-info { background: rgba(30, 96, 255, 0.92); color: #FFFFFF; border-color: rgba(96, 165, 250, 0.5); }
+.toast-error { background: rgba(225, 29, 72, 0.92); color: #FFFFFF; border-color: rgba(251, 113, 133, 0.5); }
+
+/* ==========================================================================
+   SWISS CAD / ARCHITECTURAL TELEMETRY (LIGHT THEME ENGINE)
+   Zero Invisible/Transparent Elements — High-Contrast Industrial Clarity
+   ========================================================================== */
+
+html.light-theme, body.light-theme {
+  --bg-space: #F1F5F9;
+  --bg-canvas: #FFFFFF;
+  --chassis-outer: #FFFFFF;
+  --chassis-inner: #FFFFFF;
+  --chassis-border: #CBD5E1;
+  --chassis-glow: rgba(37, 99, 235, 0.12);
+  --recessed-bay: #F8FAFC;
+  --header-bg: rgba(255, 255, 255, 0.95);
+  --sidebar-bg: #FFFFFF;
+  --topbar-bg: rgba(255, 255, 255, 0.94);
+  --nav-pill-bg: #F1F5F9;
+  --nav-pill-hover: #E2E8F0;
+
+  --txt-headline: #0F172A; /* Slate-900: High-trust deep contrast */
+  --txt-body: #334155;     /* Slate-700: Crisp readability */
+  --txt-muted: #64748B;    /* Slate-500: Secondary telemetry */
+  --txt-dim: #94A3B8;      /* Slate-400: Micro-indicators */
+
+  --accent-cobalt: #1D4ED8;
+  --accent-cobalt-light: #2563EB;
+  --accent-amber: #B45309;
+  --accent-emerald: #047857;
+  --accent-rose: #BE123C;
+
+  --hairline: #E2E8F0;
+  --hairline-focus: #3B82F6;
+  --inner-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --panel-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(15, 23, 42, 0.08);
+
+  --grid-color: rgba(15, 23, 42, 0.04);
+  --grid-dots: rgba(15, 23, 42, 0.09);
+}
+
+/* 1. Global Contrast & Text Fallbacks in Light Mode */
+html.light-theme .text-white {
+  color: #0F172A !important;
+}
+html.light-theme .text-slate-100,
+html.light-theme .text-slate-200 {
+  color: #1E293B !important;
+}
+html.light-theme .text-slate-300 {
+  color: #334155 !important;
+}
+html.light-theme .text-slate-400 {
+  color: #475569 !important;
+}
+html.light-theme .text-slate-500 {
+  color: #64748B !important;
+}
+
+/* Exceptions: Elements that MUST retain pure white text */
+html.light-theme .btn-tactical,
+html.light-theme .btn-tactical *,
+html.light-theme .toast,
+html.light-theme .toast *,
+html.light-theme .brand-glyph,
+html.light-theme .brand-logo-text,
+html.light-theme .bg-blue-600,
+html.light-theme .bg-blue-600 *,
+html.light-theme .bg-emerald-600,
+html.light-theme .bg-emerald-600 *,
+html.light-theme .bg-rose-600,
+html.light-theme .bg-rose-600 *,
+html.light-theme .bg-amber-500,
+html.light-theme .bg-amber-500 *,
+html.light-theme .badge-solid-white {
+  color: #FFFFFF !important;
+}
+
+/* 2. High-Contrast WCAG Accent Colors on Light Backgrounds */
+html.light-theme .text-blue-400,
+html.light-theme .text-blue-300 {
+  color: #1D4ED8 !important;
+}
+html.light-theme .text-emerald-400,
+html.light-theme .text-emerald-300 {
+  color: #047857 !important;
+}
+html.light-theme .text-amber-400,
+html.light-theme .text-amber-300 {
+  color: #B45309 !important;
+}
+html.light-theme .text-rose-400,
+html.light-theme .text-rose-300 {
+  color: #BE123C !important;
+}
+
+/* 3. Fixing Transparent White Borders (Never Invisible) */
+html.light-theme .border-white\/5,
+html.light-theme .border-white\/10,
+html.light-theme .border-white\/15,
+html.light-theme .border-white\/20,
+html.light-theme .border-white\/30,
+html.light-theme .border-white\/40 {
+  border-color: #E2E8F0 !important;
+}
+html.light-theme .hover\:border-white\/15:hover,
+html.light-theme .hover\:border-white\/20:hover,
+html.light-theme .hover\:border-white\/40:hover {
+  border-color: #CBD5E1 !important;
+}
+
+/* 4. Fixing Transparent White Backgrounds (Never Washed Out) */
+html.light-theme .bg-white\/5,
+html.light-theme .bg-white\/10 {
+  background-color: #F8FAFC !important;
+}
+html.light-theme .bg-white\/15,
+html.light-theme .bg-white\/20 {
+  background-color: #F1F5F9 !important;
+}
+html.light-theme .hover\:bg-white\/5:hover,
+html.light-theme .hover\:bg-white\/10:hover {
+  background-color: #F1F5F9 !important;
+}
+
+/* 5. Inset Bays & Recessed Modules */
+html.light-theme .bay-recessed {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+html.light-theme .bay-recessed:hover {
+  border-color: #CBD5E1 !important;
+}
+
+/* 6. Hardware Chassis & Cards */
+html.light-theme .chassis {
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 12px 24px -4px rgba(15, 23, 42, 0.08) !important;
+}
+html.light-theme .chassis:hover {
+  border-color: #94A3B8 !important;
+  box-shadow: 0 6px 12px -2px rgba(15, 23, 42, 0.08), 0 16px 32px -4px rgba(30, 96, 255, 0.12) !important;
+}
+html.light-theme .chassis-core {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: none !important;
+}
+
+/* 7. Input Fields, Select Dropdowns, Textareas */
+html.light-theme input,
+html.light-theme select,
+html.light-theme textarea {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid #CBD5E1 !important;
+}
+html.light-theme input::placeholder,
+html.light-theme textarea::placeholder {
+  color: #94A3B8 !important;
+}
+html.light-theme input:focus,
+html.light-theme select:focus,
+html.light-theme textarea:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+html.light-theme select option {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+}
+
+/* 8. Ghost Buttons & Action Badges */
+html.light-theme .btn-ghost {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+}
+html.light-theme .btn-ghost:hover {
+  background-color: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+}
+
+/* 9. Sidebar and Topbar Refinement */
+html.light-theme #sidebarNav {
+  background: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 4px 0 24px rgba(15, 23, 42, 0.06) !important;
+}
+html.light-theme #topBar {
+  background: rgba(255, 255, 255, 0.94) !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04) !important;
+}
+html.light-theme .sidebar-bottom-tray {
+  background: #F8FAFC !important;
+  border-top: 1px solid #E2E8F0 !important;
+}
+
+/* Sidebar Nav Links */
+html.light-theme .sidebar-nav-link {
+  color: #475569 !important;
+}
+html.light-theme .sidebar-nav-link:hover {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+html.light-theme .sidebar-nav-link.active {
+  background: #EFF6FF !important;
+  border-color: #93C5FD !important;
+  color: #1D4ED8 !important;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.1) !important;
+}
+html.light-theme .sidebar-nav-link.active * {
+  color: #1D4ED8 !important;
+}
+
+/* 10. Modals & Dim Overlays */
+html.light-theme #onboardingGate,
+html.light-theme #simModal,
+html.light-theme #simDrawer,
+html.light-theme #rundownModal,
+html.light-theme #stationModal,
+html.light-theme #eventMetaModal,
+html.light-theme #workspaceModal,
+html.light-theme #sidebarBackdrop {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* 11. Progress Bars & Tracks */
+html.light-theme .bg-slate-800 {
+  background-color: #E2E8F0 !important;
+}
+html.light-theme .bg-slate-900 {
+  background-color: #CBD5E1 !important;
+}
+html.light-theme .bg-slate-950 {
+  background-color: #F8FAFC !important;
+}
+
+/* 12. Pill Tags in Light Mode */
+html.light-theme .eyebrow-pill {
+  border-color: #CBD5E1 !important;
+  background: #F1F5F9 !important;
+  color: #475569 !important;
+}
+html.light-theme .eyebrow-pill.active {
+  border-color: #A7F3D0 !important;
+  background: #ECFDF5 !important;
+  color: #047857 !important;
+}
+html.light-theme .eyebrow-pill.amber {
+  border-color: #FDE68A !important;
+  background: #FFFBEB !important;
+  color: #B45309 !important;
+}
+html.light-theme .eyebrow-pill.cobalt {
+  border-color: #BFDBFE !important;
+  background: #EFF6FF !important;
+  color: #1D4ED8 !important;
+}
+
+/* 13. Active Sessions and Status Highlights */
+html.light-theme .bg-emerald-950\/20 {
+  background-color: #ECFDF5 !important;
+  border-color: #10B981 !important;
+}
+html.light-theme .bg-blue-950\/40 {
+  background-color: #EFF6FF !important;
+  border-color: #3B82F6 !important;
+}
+html.light-theme .bg-rose-950\/30 {
+  background-color: #FFF1F2 !important;
+  border-color: #F43F5E !important;
+}
+
+/* 14. Station Standby / Verifikasi Status Pills */
+html.light-theme .bg-emerald-500\/20 {
+  background-color: #D1FAE5 !important;
+  color: #065F46 !important;
+  border-color: #34D399 !important;
+}
+html.light-theme .bg-blue-500\/20 {
+  background-color: #DBEAFE !important;
+  color: #1E40AF !important;
+  border-color: #93C5FD !important;
+}
+html.light-theme .bg-rose-500\/20 {
+  background-color: #FFE4E6 !important;
+  color: #9F1239 !important;
+  border-color: #FDA4AF !important;
+}
+
+/* 15. Ambient Specular Lighting Suppression */
+html.light-theme .blur-\[160px\] {
+  opacity: 0.15 !important;
+}
+
+/* ==========================================================================
+   16. IN-APP WORKSPACE & GOOGLE DRIVE EXPLORER (NON-BREAKOUT ENGINE)
+   ========================================================================== */
+.ws-surface-primary {
+  background-color: #0A0E18;
+}
+.ws-surface-secondary {
+  background-color: #07090F;
+}
+.ws-surface-card {
+  background-color: #0F1422;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.ws-surface-card:hover {
+  background-color: #141B2E;
+  border-color: rgba(59, 130, 246, 0.4);
+  transform: translateY(-1px);
+}
+.ws-text-title {
+  color: #F8FAFC;
+}
+.ws-text-muted {
+  color: #94A3B8;
+}
+.ws-text-dim {
+  color: #64748B;
+}
+
+/* Light Theme Overrides for Workspace Modal */
+html.light-theme .ws-surface-primary {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+html.light-theme .ws-surface-secondary {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+}
+html.light-theme .ws-surface-card {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+html.light-theme .ws-surface-card:hover {
+  background-color: #F1F5F9 !important;
+  border-color: #3B82F6 !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08) !important;
+  transform: translateY(-1px);
+}
+html.light-theme .ws-text-title {
+  color: #0F172A !important;
+}
+html.light-theme .ws-text-muted {
+  color: #334155 !important;
+}
+html.light-theme .ws-text-dim {
+  color: #64748B !important;
+}
+html.light-theme #workspaceModal input {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+html.light-theme #workspaceModal input:focus {
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+html.light-theme #workspaceModal iframe {
+  background-color: #FFFFFF !important;
+}
+
+/* ==========================================================================
+   17. UNIVERSAL MODAL SCROLL CONTAINMENT (PREVENT BACKGROUND PAGE JITTER)
+   ========================================================================== */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+  touch-action: none !important;
+  overscroll-behavior: contain !important;
+}
+
+#workspaceModal,
+#workspaceChassis,
+#wsViewerContainer,
+#wsViewerIframe,
+#wsExplorerContainer,
+#wsItemsGrid,
+#addMilestoneModal,
+#editMilestoneModal,
+#customPctModal,
+#deleteConfirmModal,
+#aiTaskModal,
+#simModal,
+#rundownModal,
+#stationModal {
+  overscroll-behavior: contain !important;
+}
+
+/* ==========================================================================
+   18. TACTILE PROGRESS SELECTOR PILLS (0% - 100%) & SUPERVISOR QUICK PRESETS
+   Anti-Generic, High-Contrast WCAG Compliant Architecture for Light & Dark
+   ========================================================================== */
+.pct-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.25rem;
+  border-radius: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+}
+.pct-pill-btn:active {
+  transform: scale(0.95) !important;
+}
+
+/* 0% Pill - Standby / Inactive */
+.pct-pill-0 {
+  background: rgba(30, 41, 59, 0.75);
+  color: #94A3B8;
+  border: 1.5px solid rgba(100, 116, 139, 0.45);
+}
+.pct-pill-0:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #F8FAFC;
+  border-color: #94A3B8;
+}
+.pct-pill-0.active {
+  background: #E2E8F0 !important;
+  color: #0F172A !important;
+  border: 2px solid #FFFFFF !important;
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.4) !important;
+  transform: scale(1.04);
+}
+
+/* 25% Pill - Amber / Tahap Awal */
+.pct-pill-25 {
+  background: rgba(245, 158, 11, 0.14);
+  color: #FBBF24;
+  border: 1.5px solid rgba(245, 158, 11, 0.45);
+}
+.pct-pill-25:hover {
+  background: rgba(245, 158, 11, 0.25);
+  color: #FDE68A;
+  border-color: #F59E0B;
+}
+.pct-pill-25.active {
+  background: #F59E0B !important;
+  color: #000000 !important;
+  border: 2px solid #FEF3C7 !important;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.55) !important;
+  transform: scale(1.04);
+}
+
+/* 50% Pill - Blue / Sedang Berjalan */
+.pct-pill-50 {
+  background: rgba(37, 99, 235, 0.16);
+  color: #60A5FA;
+  border: 1.5px solid rgba(59, 130, 246, 0.5);
+}
+.pct-pill-50:hover {
+  background: rgba(37, 99, 235, 0.3);
+  color: #BFDBFE;
+  border-color: #3B82F6;
+}
+.pct-pill-50.active {
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+  border: 2px solid #DBEAFE !important;
+  box-shadow: 0 0 16px rgba(37, 99, 235, 0.55) !important;
+  transform: scale(1.04);
+}
+
+/* 75% Pill - Cyan / Hampir Rampung */
+.pct-pill-75 {
+  background: rgba(6, 182, 212, 0.14);
+  color: #22D3EE;
+  border: 1.5px solid rgba(6, 182, 212, 0.45);
+}
+.pct-pill-75:hover {
+  background: rgba(6, 182, 212, 0.25);
+  color: #A5F3FC;
+  border-color: #06B6D4;
+}
+.pct-pill-75.active {
+  background: #06B6D4 !important;
+  color: #000000 !important;
+  border: 2px solid #CFFAFE !important;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.55) !important;
+  transform: scale(1.04);
+}
+
+/* 100% Pill - Emerald / Selesai */
+.pct-pill-100 {
+  background: rgba(16, 185, 129, 0.14);
+  color: #34D399;
+  border: 1.5px solid rgba(16, 185, 129, 0.45);
+}
+.pct-pill-100:hover {
+  background: rgba(16, 185, 129, 0.25);
+  color: #A7F3D0;
+  border-color: #10B981;
+}
+.pct-pill-100.active {
+  background: #10B981 !important;
+  color: #000000 !important;
+  border: 2px solid #D1FAE5 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.55) !important;
+  transform: scale(1.04);
+}
+
+/* ==========================================================================
+   LIGHT MODE OVERRIDES FOR PILLS (Zero Mud, Pure Crisp Contrast)
+   ========================================================================== */
+html.light-theme .pct-pill-0 {
+  background: #F1F5F9 !important;
+  color: #334155 !important;
+  border: 1.5px solid #CBD5E1 !important;
+}
+html.light-theme .pct-pill-0:hover {
+  background: #E2E8F0 !important;
+  color: #0F172A !important;
+  border-color: #94A3B8 !important;
+}
+html.light-theme .pct-pill-0.active {
+  background: #0F172A !important;
+  color: #FFFFFF !important;
+  border: 2px solid #334155 !important;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.25) !important;
+}
+
+html.light-theme .pct-pill-25 {
+  background: #FFFBEB !important;
+  color: #B45309 !important;
+  border: 1.5px solid #FCD34D !important;
+}
+html.light-theme .pct-pill-25:hover {
+  background: #FEF3C7 !important;
+  color: #78350F !important;
+  border-color: #F59E0B !important;
+}
+html.light-theme .pct-pill-25.active {
+  background: #D97706 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #78350F !important;
+  box-shadow: 0 3px 12px rgba(217, 119, 6, 0.35) !important;
+}
+
+html.light-theme .pct-pill-50 {
+  background: #EFF6FF !important;
+  color: #1D4ED8 !important;
+  border: 1.5px solid #93C5FD !important;
+}
+html.light-theme .pct-pill-50:hover {
+  background: #DBEAFE !important;
+  color: #1E3A8A !important;
+  border-color: #3B82F6 !important;
+}
+html.light-theme .pct-pill-50.active {
+  background: #1D4ED8 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #1E3A8A !important;
+  box-shadow: 0 3px 12px rgba(29, 78, 216, 0.35) !important;
+}
+
+html.light-theme .pct-pill-75 {
+  background: #ECFEFF !important;
+  color: #0E7490 !important;
+  border: 1.5px solid #67E8F9 !important;
+}
+html.light-theme .pct-pill-75:hover {
+  background: #CFFAFE !important;
+  color: #164E63 !important;
+  border-color: #06B6D4 !important;
+}
+html.light-theme .pct-pill-75.active {
+  background: #0891B2 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #164E63 !important;
+  box-shadow: 0 3px 12px rgba(8, 145, 178, 0.35) !important;
+}
+
+html.light-theme .pct-pill-100 {
+  background: #ECFDF5 !important;
+  color: #047857 !important;
+  border: 1.5px solid #6EE7B7 !important;
+}
+html.light-theme .pct-pill-100:hover {
+  background: #D1FAE5 !important;
+  color: #064E3B !important;
+  border-color: #10B981 !important;
+}
+html.light-theme .pct-pill-100.active {
+  background: #059669 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #064E3B !important;
+  box-shadow: 0 3px 12px rgba(5, 150, 105, 0.35) !important;
+}
+
+/* Custom % Button in Light Mode */
+html.light-theme .btn-custom-pct {
+  background: #FFFBEB !important;
+  color: #B45309 !important;
+  border-color: #FCD34D !important;
+}
+html.light-theme .btn-custom-pct:hover {
+  background: #FEF3C7 !important;
+  color: #78350F !important;
+  border-color: #F59E0B !important;
+}
+
+/* Light Mode Overrides for Progress Cockpit Cards */
+html.light-theme .supervisor-cockpit-bar {
+  background-color: #FFFBEB !important;
+  border-color: #FCD34D !important;
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.08) !important;
+}
+html.light-theme .supervisor-cockpit-bar input[type="text"] {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+html.light-theme .supervisor-cockpit-bar input[type="range"] {
+  background-color: #CBD5E1 !important;
+}
+html.light-theme .milestone-card-surface {
+  background-color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+}
+html.light-theme .milestone-notes-box {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+html.light-theme .milestone-notes-box * {
+  color: #334155 !important;
+}
+html.light-theme .milestone-notes-box strong,
+html.light-theme .milestone-notes-box b {
+  color: #0F172A !important;
+}

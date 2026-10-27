@@ -1,0 +1,28 @@
+{
+  "name": "ini-lho-its-central-event-bot",
+  "version": "1.0.0",
+  "description": "Telegram Command Center & Web Dashboard for Central Event Ini Lho ITS! 2027",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "bot": "node src/bot.js",
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [
+    "telegram-bot",
+    "ini-lho-its",
+    "central-event",
+    "dashboard",
+    "google-sheets",
+    "gemini"
+  ],
+  "author": "Central Event ILI 2027",
+  "license": "MIT",
+  "dependencies": {
+    "@google/genai": "^2.30.0",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "pg": "^8.23.1",
+    "telegraf": "^4.16.3"
+  }
+}

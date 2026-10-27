@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Central Event 2027 — Mission Operations Deck</title>
+
+  <!-- Instant Pre-paint Zero-Flicker Theme Engine & CSS Reset -->
+  <style>
+    :root { color-scheme: dark light; }
+    html { background-color: #07090E; }
+    html.light, html.light-theme { background-color: #F0F4F8; }
+  </style>
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem('ce_theme') || 'dark';
+        if (theme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light', 'light-theme');
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light', 'light-theme');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#07090E">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            its: { blue: '#002B49', gold: '#FFB81C', cyan: '#00A3E0' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Anti-Generic Mission Control Stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-command-grid min-h-screen relative custom-scrollbar pb-20">
+
+  <!-- Ambient Aerospace Specular Lighting -->
+  <div class="fixed top-[-20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-blue-600/10 blur-[160px] pointer-events-none"></div>
+  <div class="fixed bottom-[-15%] right-[-15%] w-[700px] h-[700px] rounded-full bg-indigo-600/8 blur-[180px] pointer-events-none"></div>
+
+  <!-- Left Sidebar Console -->
+  <aside id="sidebarNav"></aside>
+
+  <!-- Main Viewport -->
+  <div class="dashboard-viewport flex-1 flex flex-col min-w-0">
+    <!-- Top Navigation Bar -->
+    <header id="topBar"></header>
+
+    <!-- MAIN MISSION CONTROL WORKSPACE -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- HERO MISSION COCKPIT (Double-Bezel Chassis) -->
+    <section class="chassis hud-corner">
+      <div class="chassis-core">
+        
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div>
+            <!-- Eyebrow Telemetry Strip -->
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="eyebrow-pill active font-mono">
+                OPS PROTOCOL ACTIVE
+              </span>
+              <span class="eyebrow-pill cobalt font-mono">
+                CENTRAL EVENT 2027
+              </span>
+              <span class="eyebrow-pill amber font-mono">
+                4 CORE SUB-EVENTS
+              </span>
+            </div>
+
+            <!-- Display Headline -->
+            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight font-display shimmer-headline leading-tight">
+              Central Event Mission Control
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-2xl leading-relaxed">
+              Direktorat Operasional Acara Pusat <b>Ini Lho ITS! 2027</b>. Arsitektur modular panggung utama, sinkronisasi Google Sheets live, repositori Google Drive, dan asistensi AI Gemini 3.1 Flash Lite.
+            </p>
+          </div>
+
+          <!-- Mission Control Actions & Digital Countdown -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            
+            <!-- Digital Mission Clock Capsule -->
+            <div class="bay-recessed p-3 flex flex-col justify-center text-center sm:text-right border-white/10">
+              <span class="text-[9px] font-mono text-slate-400 uppercase tracking-widest">MISSION H-DAY TARGET</span>
+              <div class="flex items-center justify-center sm:justify-end gap-1.5 mt-0.5">
+                <span class="text-xl sm:text-2xl font-mono font-black text-amber-400 tracking-tight" id="heroCountdownDigits">H-81</span>
+                <span class="text-[10px] font-mono text-slate-500 uppercase">HARI</span>
+              </div>
+              <span class="text-[9px] font-mono text-emerald-400 mt-0.5">10 JANUARI 2027</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col gap-2">
+              <a href="/safari.html" class="btn-tactical text-xs justify-center font-bold">
+                <span>🏛️ Safari Faculty Hub</span>
+                <div class="btn-icon-bay">→</div>
+              </a>
+              <button onclick="WorkspaceModal.openDrive()" class="btn-ghost text-xs justify-center text-blue-400 border-blue-500/30 hover:border-blue-500 font-bold">
+                <span>📁 Repositori Drive</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Telemetry Ribbon (Asymmetric 4-Bay Matrix) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/5">
+          
+          <div class="bay-recessed p-3.5">
+            <div class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+              <span>PILAR ACARA</span>
+              <span class="text-blue-400">4 INTI</span>
+            </div>
+            <div class="text-xl sm:text-2xl font-mono font-black text-white mt-1">4 Sub-Events</div>
+            <div class="text-[10px] font-mono text-slate-400 mt-1">Start Point s/d Technocraft</div>
+          </div>
+
+          <div class="bay-recessed p-3.5">
+            <div class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+              <span>PROGRESS CENTRAL</span>
+              <span class="text-emerald-400 text-[10px] font-mono font-bold">STAFF AHLI</span>
+            </div>
+            <div id="totalReadinessMetric" class="text-xl sm:text-2xl font-mono font-black text-emerald-400 mt-1">52% Rata-rata</div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+              <div id="totalReadinessBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 52%"></div>
+            </div>
+          </div>
+
+          <div class="bay-recessed p-3.5">
+            <div class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+              <span>SPREADSHEET HUB</span>
+              <span class="text-amber-400">IN-APP</span>
+            </div>
+            <div class="text-xl sm:text-2xl font-mono font-black text-amber-300 mt-1">4 Master Sheets</div>
+            <div class="text-[10px] font-mono text-slate-400 mt-1">Terhubung & Mandiri</div>
+          </div>
+
+          <div class="bay-recessed p-3.5">
+            <div class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+              <span>DRIVE REPO</span>
+              <span class="text-indigo-400">REALTIME</span>
+            </div>
+            <div class="text-xl sm:text-2xl font-mono font-black text-indigo-300 mt-1">7 Folder Riil</div>
+            <div class="text-[10px] font-mono text-slate-400 mt-1">Tersinkronisasi Lapangan</div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TACTICAL STAGING: REPOSITORI BERKAS DOKUMEN & MASTER SPREADSHEET HUB (TAHAP PERSIAPAN) -->
+    <div class="chassis hud-corner">
+      <div class="chassis-core">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-white/5 mb-3 gap-2">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="eyebrow-pill amber text-[9px] font-mono font-bold">TAHAP PERSIAPAN AKTIF</span>
+              <span class="eyebrow-pill cobalt text-[9px] font-mono font-bold">CLOUD DRIVE REPOSITORY</span>
+            </div>
+            <h3 class="text-sm sm:text-base font-extrabold text-white font-display flex items-center gap-2">
+              <span>📁</span> Repositori Dokumen, Surat Resmi & Spreadsheet Terpadu
+            </h3>
+            <p class="text-[11px] text-slate-300 font-mono mt-0.5">7 Folder operasional resmi Divisi Central Event terverifikasi Google Cloud</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="WorkspaceModal.openSheet('safari')" class="btn-tactical py-1.5 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 font-bold flex items-center gap-1.5 shadow-sm">
+              <span>📊</span>
+              <span>Buka Spreadsheet</span>
+            </button>
+            <button onclick="WorkspaceModal.openDrive()" class="btn-ghost py-1.5 px-3 text-xs text-blue-400 border-blue-500/30 hover:border-blue-500 flex items-center gap-1.5 font-bold">
+              <span>📁</span>
+              <span>Jelajah Drive In-App</span>
+            </button>
+            <button onclick="WorkspaceModal.openUploadModal()" class="btn-ghost py-1.5 px-2.5 text-xs text-slate-300 hover:text-white border-white/10 flex items-center gap-1">
+              <span>📤 Unggah</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="driveGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-7 gap-3">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 SUB-DIVISI CENTRAL EVENT — REAL-TIME OPERATIONAL PROGRESS & COMMAND DECK -->
+    <div>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 px-1 gap-2">
+        <div>
+          <h2 class="text-base sm:text-xl font-extrabold text-white font-display flex items-center gap-2">
+            <span>📡</span> Kesiapan & Progress Realtime 4 Sub-Divisi Central Event
+          </h2>
+          <p class="text-xs text-slate-400 mt-0.5">Pemantauan operasional real-time: Safari Faculty, Start Point, One Day Lecture, dan Technocraft</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] font-mono text-slate-400 uppercase">STATUS:</span>
+          <span class="eyebrow-pill active font-mono text-[9px]">4 SUB-DIVISI LIVE</span>
+        </div>
+      </div>
+
+      <!-- Staff Assignment Notice Ribbon -->
+      <div id="staffAssignmentDeckNotice" class="mb-3 px-1"></div>
+
+      <!-- Bento Grid (Varying Visual Weight for 4 Sub-Divisi) -->
+      <div id="subEventsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
+        <!-- Injected dynamically by JS with Asymmetric Bento styling -->
+        <div class="col-span-12 p-8 text-center text-slate-500 text-xs font-mono">Memuat matriks operasional 4 sub-divisi...</div>
+      </div>
+    </div>
+
+    <!-- LOWER DECK: TACTICAL GEMINI 3.5 FLASH COPILOT -->
+    <div class="chassis hud-corner">
+      <div class="chassis-core flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
+          <div>
+            <h3 class="text-sm font-extrabold text-white font-display flex items-center gap-2">
+              <span>🤖</span> Gemini 3.5 Flash Tactical AI Copilot
+            </h3>
+            <p class="text-[11px] text-slate-400 font-mono">Asistensi cerdas monitoring kesiapan 4 sub-divisi, lembar kerja, & dokumen repositori drive</p>
+          </div>
+          <span class="eyebrow-pill active font-mono text-[9px]">GEMINI 3.5 FLASH</span>
+        </div>
+
+        <div id="aiChatBox" class="h-44 overflow-y-auto custom-scrollbar p-3.5 bay-recessed text-xs space-y-2">
+          <div class="text-slate-400 italic">
+            Terminal Asistensi Taktis Aktif. Kamu bisa menanyakan:
+            <ul class="list-disc ml-4 mt-1 text-slate-400 space-y-0.5 font-mono text-[11px]">
+              <li>"Berapa persen progres kesiapan Safari Faculty saat ini?"</li>
+              <li>"Apa saja milestone yang belum selesai di Start Point?"</li>
+              <li>"Dokumen apa saja yang sudah terunggah di Google Drive?"</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 mt-3">
+          <input type="text" id="aiQuestionInput" placeholder="Ketik transmisi pertanyaan ke Gemini 3.5 Flash..." class="flex-1 bay-recessed px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 transition font-mono">
+          <button onclick="askAi()" id="aiSendBtn" class="btn-tactical py-2 px-4 text-xs font-bold">
+            <span>KIRIM</span>
+            <div class="btn-icon-bay">↑</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  <!-- Modular Scripts -->
+  <script src="/js/theme.js"></script>
+  <script src="/js/onboarding.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/workspaceModal.js"></script>
+  <script src="/js/sidebar.js"></script>
+
+  <script>
+    Sidebar.init('dashboard');
+
+    let cachedOverviewData = null;
+
+    async function loadMasterOverview() {
+      try {
+        const data = await CE_API.getOverview();
+        if (!data || !data.events) return;
+        cachedOverviewData = data;
+
+        const progressList = data.progress || [];
+        renderSubEvents(data.events, progressList);
+        renderDrive(data.driveFiles);
+
+        // Overall Progress Average (0-100% Khusus Staff Ahli)
+        let avgProgress = 52;
+        if (progressList.length > 0) {
+          const sum = progressList.reduce((acc, curr) => acc + (curr.percentage || 0), 0);
+          avgProgress = Math.round(sum / progressList.length);
+        }
+        document.getElementById('totalReadinessMetric').innerText = `${avgProgress}% Rata-rata`;
+        document.getElementById('totalReadinessBar').style.width = `${avgProgress}%`;
+
+        // Update Sidebar Mini-Widget
+        const sbPct = document.getElementById('sidebarReadinessPct');
+        const sbBar = document.getElementById('sidebarReadinessBar');
+        const sbCount = document.getElementById('sidebarReadinessCount');
+        const sbBadge = document.getElementById('sidebarCountdownBadge');
+        if (sbPct) sbPct.innerText = `${avgProgress}%`;
+        if (sbBar) sbBar.style.width = `${avgProgress}%`;
+        if (sbCount) sbCount.innerText = `${avgProgress}% Total`;
+
+        // Update H-Day digit
+        const safariEv = data.events.find(e => e.id === 'safari');
+        if (safariEv) {
+          document.getElementById('heroCountdownDigits').innerText = `H-${safariEv.daysUntil}`;
+          if (sbBadge) sbBadge.innerText = `H-${safariEv.daysUntil} DAYS`;
+        }
+
+      } catch (err) {
+        console.error('Error loading master overview:', err);
+        showToast('Gagal memuat overview: ' + err.message, 'error');
+      }
+    }
+
+    function toggleSubMilestones(subId) {
+      const el = document.getElementById(`milestones_${subId}`);
+      const arrow = document.getElementById(`arrow_${subId}`);
+      if (el) {
+        el.classList.toggle('hidden');
+        if (arrow) arrow.innerText = el.classList.contains('hidden') ? '▼' : '▲';
+      }
+    }
+
+    async function quickToggleMilestone(subId, milestoneId) {
+      const isAhli = typeof Onboarding !== 'undefined' && typeof Onboarding.isStaffAhli === 'function' ? Onboarding.isStaffAhli() : true;
+      if (!isAhli) {
+        alert('Hanya Staff Ahli yang dapat mengubah checklist progress.');
+        return;
+      }
+      try {
+        const res = await fetch('/api/progress/toggle-milestone', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ subEventId: subId, milestoneId, user: 'Staff Ahli' })
+        });
+        const json = await res.json();
+        if (json.success) {
+          loadMasterOverview();
+        }
+      } catch (e) {
+        console.error('Error quick toggling milestone:', e);
+      }
+    }
+
+    // Bento Layout for 4 Sub-Divisi — Dedicated 0-100% Progress Tracker
+    function renderSubEvents(events, progressList = []) {
+      const container = document.getElementById('subEventsGrid');
+      if (!container || !events) return;
+
+      const profile = typeof Onboarding !== 'undefined' ? Onboarding.getProfile() : { roleType: 'core', assignedEvent: 'all' };
+      const isAhli = typeof Onboarding !== 'undefined' && typeof Onboarding.isStaffAhli === 'function' ? Onboarding.isStaffAhli() : true;
+
+      // Render Staff Assignment Notice
+      const noticeContainer = document.getElementById('staffAssignmentDeckNotice');
+      if (noticeContainer) {
+        if (isAhli) {
+          noticeContainer.innerHTML = `
+            <div class="bay-recessed p-2.5 rounded-xl border border-amber-500/30 bg-amber-950/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-base flex-shrink-0">👑</span>
+                <span class="font-mono text-[10px] text-amber-300 font-extrabold uppercase flex-shrink-0">AKSES STAFF AHLI:</span>
+                <span class="text-slate-300 text-xs truncate">Login sebagai <b>${profile.roleTitle || 'Staff Ahli'}</b> (Akses penuh 4 sub-divisi, overview, edit tracker progress 0-100%, sheets & drive)</span>
+              </div>
+              <button onclick="Onboarding.openModal(true)" class="text-[10px] font-mono text-amber-400 hover:text-amber-300 hover:underline font-bold flex-shrink-0">
+                Beralih Peran ↗
+              </button>
+            </div>
+          `;
+        } else {
+          const mySub = Onboarding.subEventMap[profile.assignedEvent] || { name: profile.assignedEvent, code: 'SUB' };
+          noticeContainer.innerHTML = `
+            <div class="bay-recessed p-2.5 rounded-xl border border-blue-500/30 bg-blue-950/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-base flex-shrink-0">🛡️</span>
+                <span class="font-mono text-[10px] text-blue-300 font-extrabold uppercase flex-shrink-0">FOKUS PENUGASAN:</span>
+                <span class="text-slate-300 text-xs truncate">Ditugaskan khusus di <b>${mySub.name} (${mySub.code})</b>. Mode baca aktif untuk progres sub-divisi lain.</span>
+              </div>
+              <button onclick="Onboarding.openModal(true)" class="text-[10px] font-mono text-blue-400 hover:text-blue-300 hover:underline font-bold flex-shrink-0">
+                Ganti Sub-Divisi ↗
+              </button>
+            </div>
+          `;
+        }
+      }
+
+      const pageMap = {
+        safari: { url: '/safari.html', span: 'lg:col-span-7', code: 'SF-01', accent: 'from-blue-600 to-indigo-600', textAccent: 'text-blue-400' },
+        startpoint: { url: '/startpoint.html', span: 'lg:col-span-5', code: 'SP-02', accent: 'from-amber-500 to-orange-600', textAccent: 'text-amber-400' },
+        odl: { url: '/odl.html', span: 'lg:col-span-5', code: 'ODL-03', accent: 'from-emerald-500 to-teal-600', textAccent: 'text-emerald-400' },
+        technocraft: { url: '/technocraft.html', span: 'lg:col-span-7', code: 'TC-04', accent: 'from-indigo-500 to-purple-600', textAccent: 'text-indigo-400' }
+      };
+
+      container.innerHTML = events.map(ev => {
+        const config = pageMap[ev.id] || { url: '/safari.html', span: 'lg:col-span-6', code: 'CE-00', accent: 'from-blue-600 to-indigo-600', textAccent: 'text-blue-400' };
+        const isMySubEvent = !isAhli && profile.assignedEvent === ev.id;
+        const isRestricted = !isAhli && profile.assignedEvent !== ev.id;
+
+        // Progress Data for this sub-divisi
+        const prog = progressList.find(p => p.subEventId === ev.id) || {
+          percentage: ev.id === 'safari' ? 71 : 0,
+          statusLabel: ev.id === 'safari' ? 'Penyusunan Modul Lab & Plotting Alur 6 Departemen' : 'Belum Dikonfigurasi (Menunggu Input Staff Ahli)',
+          updatedBy: 'Staff Ahli',
+          milestones: []
+        };
+        const pct = Math.max(0, Math.min(100, prog.percentage || 0));
+        const milestones = prog.milestones || [];
+        const doneCount = milestones.filter(m => m.status === 'done').length;
+
+        let cardHighlight = '';
+        let assignmentTag = '';
+        if (isMySubEvent) {
+          cardHighlight = 'ring-2 ring-blue-500 shadow-xl shadow-blue-500/15';
+          assignmentTag = '<span class="eyebrow-pill active text-[9px] font-mono">★ PENUGASAN ANDA</span>';
+        } else if (isRestricted) {
+          cardHighlight = 'opacity-85 hover:opacity-100';
+          assignmentTag = '<span class="eyebrow-pill red text-[9px] font-mono">🔒 SUB-DIVISI LAIN</span>';
+        } else if (isAhli && ev.isPrimary) {
+          assignmentTag = '<span class="eyebrow-pill amber text-[9px] font-mono">★ FOKUS UTAMA</span>';
+        }
+
+        const liveBadge = ev.isLiveSheet ? `<span class="eyebrow-pill active">LIVE SHEETS</span>` : '';
+
+        // Dynamic theme for progress
+        let pctBadgeClass = 'border-white/10 text-slate-400 bg-white/5';
+        let pulseDotClass = 'bg-slate-600';
+        let barGradient = 'from-slate-600 to-slate-700';
+        if (pct >= 70) {
+          pctBadgeClass = 'active';
+          pulseDotClass = 'bg-emerald-400 animate-pulse';
+          barGradient = 'from-emerald-500 to-teal-400';
+        } else if (pct >= 40) {
+          pctBadgeClass = 'cobalt';
+          pulseDotClass = 'bg-blue-400 animate-pulse';
+          barGradient = 'from-blue-600 to-indigo-500';
+        } else if (pct > 0) {
+          pctBadgeClass = 'amber';
+          pulseDotClass = 'bg-amber-400 animate-pulse';
+          barGradient = 'from-amber-500 to-orange-500';
+        }
+
+        return `
+          <div class="${config.span} chassis hud-corner flex flex-col justify-between ${cardHighlight}">
+            <div class="chassis-core h-full flex flex-col justify-between">
+              
+              <div>
+                <!-- Top Header Row -->
+                <div class="flex items-start justify-between gap-3 mb-3">
+                  <div class="flex items-start gap-3 min-w-0 flex-1">
+                    <span class="text-3xl leading-none flex-shrink-0 pt-0.5">${ev.icon}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                        <span class="text-[9px] font-mono font-bold text-slate-500 uppercase px-1.5 py-0.5 rounded bay-recessed">${config.code}</span>
+                        ${assignmentTag}
+                        ${liveBadge}
+                        <span class="eyebrow-pill ${pctBadgeClass} text-[9px] font-mono">
+                          ● ${pct}% PROGRESS
+                        </span>
+                      </div>
+                      <h3 class="text-base sm:text-lg font-extrabold text-white font-display leading-snug tracking-tight">${ev.name}</h3>
+                    </div>
+                  </div>
+                  
+                  <div class="bay-recessed px-3 py-1.5 text-right border-white/10 flex-shrink-0">
+                    <span class="text-[9px] font-mono text-slate-400 block leading-none">TARGET</span>
+                    <span class="text-xs font-mono font-extrabold text-amber-400 tracking-tight mt-0.5 block">H-${ev.daysUntil} Hari</span>
+                  </div>
+                </div>
+
+                <!-- Tagline & Description -->
+                <p class="text-xs text-slate-400 leading-relaxed mb-3">
+                  ${ev.tagline}
+                </p>
+
+                <!-- Dedicated 0-100% Progress Tracker Ribbon -->
+                <div class="bay-recessed p-3 rounded-xl border border-white/10 mb-3 bg-black/40">
+                  <div class="flex items-center justify-between text-xs font-mono mb-1.5">
+                    <span class="text-slate-300 text-[10px] uppercase font-bold tracking-wider flex items-center gap-1.5">
+                      <span class="w-2 h-2 rounded-full ${pulseDotClass}"></span>
+                      Tracker Progress Kesiapan:
+                    </span>
+                    <span class="font-extrabold text-sm ${pct >= 70 ? 'text-emerald-400' : (pct >= 40 ? 'text-blue-400' : (pct > 0 ? 'text-amber-400' : 'text-slate-400'))}">
+                      ${pct}%
+                      <span class="text-slate-400 text-[10px] font-mono font-normal ml-1">(${doneCount}/${milestones.length} Tugas)</span>
+                    </span>
+                  </div>
+
+                  <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden p-[1px] border border-white/10">
+                    <div class="bg-gradient-to-r ${barGradient} h-full rounded-full transition-all duration-700" style="width: ${pct}%"></div>
+                  </div>
+
+                  <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mt-2">
+                    <span class="truncate max-w-[240px] text-slate-300">📌 ${prog.statusLabel || 'Fase Persiapan Operasional'}</span>
+                    <span class="text-amber-400 font-bold ml-2 flex-shrink-0">${prog.updatedBy || 'Staff Ahli'}</span>
+                  </div>
+                </div>
+
+                <!-- EXPANDABLE ACCORDION: Check & View Details -->
+                <button onclick="toggleSubMilestones('${ev.id}')" class="w-full bay-recessed p-2 rounded-xl border border-white/5 hover:border-white/20 transition flex items-center justify-between text-xs mb-3 text-left">
+                  <span class="font-mono text-[11px] text-blue-400 font-bold flex items-center gap-1.5">
+                    <span>🔍</span> Buka Rincian Tugas & Capaian (${milestones.length} Milestone)
+                  </span>
+                  <span id="arrow_${ev.id}" class="text-slate-400 font-mono text-xs">▼</span>
+                </button>
+
+                <div id="milestones_${ev.id}" class="hidden space-y-2 mb-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                  ${milestones.length === 0 ? `
+                    <div class="p-4 rounded-xl bay-recessed border border-dashed border-white/10 text-center text-xs font-mono text-slate-500">
+                      Belum ada tugas terdaftar. Menunggu input dari Staff Ahli.
+                    </div>
+                  ` : milestones.map((m, idx) => {
+                    const mp = Math.max(0, Math.min(100, parseInt(m.progress, 10) || (m.status === 'done' ? 100 : (m.status === 'in_progress' ? 50 : 0))));
+                    let mpColor = 'text-slate-400';
+                    let mpBorder = 'border-white/10';
+                    let mpLabel = `⚪ Belum Mulai (${mp}%)`;
+                    if (mp === 100) {
+                      mpColor = 'text-emerald-400';
+                      mpBorder = 'border-emerald-500/30 bg-emerald-950/15';
+                      mpLabel = `✅ Selesai (100%)`;
+                    } else if (mp >= 75) {
+                      mpColor = 'text-cyan-400';
+                      mpBorder = 'border-cyan-500/30 bg-cyan-950/15';
+                      mpLabel = `🔥 Hampir Rampung (${mp}%)`;
+                    } else if (mp >= 50) {
+                      mpColor = 'text-blue-400';
+                      mpBorder = 'border-blue-500/30 bg-blue-950/15';
+                      mpLabel = `⚡ Berjalan (${mp}%)`;
+                    } else if (mp > 0) {
+                      mpColor = 'text-amber-400';
+                      mpBorder = 'border-amber-500/30 bg-amber-950/15';
+                      mpLabel = `⏳ Tahap Awal (${mp}%)`;
+                    }
+                    return `
+                      <div class="p-2.5 rounded-xl bay-recessed border ${mpBorder} text-xs">
+                        <div class="flex items-center justify-between gap-2 mb-1 flex-wrap">
+                          <span class="text-[9px] font-mono text-slate-300 uppercase font-bold px-1.5 py-0.5 rounded bg-white/5 border border-white/10">TUGAS #${idx + 1}</span>
+                          <span class="text-[9px] font-mono font-bold ${mpColor}">
+                            ${mpLabel}
+                          </span>
+                        </div>
+                        <div class="font-bold text-white text-xs leading-snug">${m.title}</div>
+                        <div class="text-[10px] font-mono text-slate-300 mt-1 leading-relaxed bay-recessed p-2 rounded-lg border border-white/5">
+                          <span class="text-slate-400 font-bold">📌 Sampai Mana:</span> ${m.notes || 'Dalam proses pengerjaan.'}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+
+              </div>
+
+              <!-- Action Link Bar (Triple Direct In-App Access) -->
+              <div class="pt-3 border-t border-white/5 flex flex-wrap items-center justify-between gap-2">
+                <div class="text-xs font-mono text-slate-400 truncate max-w-[180px]">
+                  PIC: <b class="text-slate-200 font-semibold">${ev.pic}</b>
+                </div>
+                
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button onclick="WorkspaceModal.openSheet('${ev.id}')" title="Buka Spreadsheet ${ev.name} In-App" class="btn-ghost py-1 px-2.5 text-xs text-emerald-400 hover:text-emerald-300 border-emerald-500/30 hover:border-emerald-500 font-mono font-bold flex items-center gap-1">
+                    <span>📊</span>
+                    <span>Sheet</span>
+                  </button>
+                  <button onclick="WorkspaceModal.openDriveForSubEvent('${ev.id}')" title="Jelajah Repositori ${ev.name} In-App" class="btn-ghost py-1 px-2.5 text-xs text-blue-400 hover:text-blue-300 border-blue-500/30 hover:border-blue-500 font-mono font-bold flex items-center gap-1">
+                    <span>📁</span>
+                    <span>Drive</span>
+                  </button>
+                  <a href="${config.url}" class="btn-tactical py-1 px-3 text-xs flex items-center gap-1 font-bold">
+                    <span>BUKA HUB</span>
+                    <span class="btn-icon-bay text-[10px]">→</span>
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderDrive(files) {
+      const container = document.getElementById('driveGrid');
+      if (!files || files.length === 0) return;
+
+      container.innerHTML = files.map(f => {
+        const escapedName = (f.name || '').replace(/'/g, "\\'");
+        return `
+          <button onclick="WorkspaceModal.openDriveFolder('${f.id}', '${escapedName}')" class="p-3.5 rounded-xl bay-recessed border border-white/5 hover:border-blue-500/40 hover:bg-blue-500/5 transition flex flex-col justify-between group min-h-[96px] text-left w-full">
+            <div class="min-w-0">
+              <div class="text-xl mb-1.5 leading-none">📁</div>
+              <div class="font-extrabold text-slate-200 text-xs truncate group-hover:text-blue-400 transition leading-snug">${f.name}</div>
+            </div>
+            <div class="text-[9px] font-mono text-slate-500 mt-2 flex items-center justify-between pt-1.5 border-t border-white/5">
+              <span>EXPLORE IN-APP</span>
+              <span class="group-hover:text-blue-400 text-xs font-bold">→</span>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // AI Copilot
+    async function askAi() {
+      const input = document.getElementById('aiQuestionInput');
+      const question = input.value.trim();
+      if (!question) return;
+
+      const chatBox = document.getElementById('aiChatBox');
+      const btn = document.getElementById('aiSendBtn');
+
+      chatBox.innerHTML += `<div class="mt-2 text-blue-400 font-mono font-bold text-[11px]">👤 Kamu: ${question}</div>`;
+      chatBox.innerHTML += `<div id="aiLoading" class="mt-1 text-slate-400 font-mono italic text-[11px]">🤖 Gemini sedang menganalisis transmisi...</div>`;
+      input.value = '';
+      btn.disabled = true;
+
+      try {
+        const data = await CE_API.askAi(question, 'safari');
+        document.getElementById('aiLoading')?.remove();
+        chatBox.innerHTML += `<div class="mt-2 text-slate-200 bay-recessed p-2.5 border-white/5 text-[11px] whitespace-pre-wrap leading-relaxed font-mono">${data.answer}</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (err) {
+        document.getElementById('aiLoading')?.remove();
+        chatBox.innerHTML += `<div class="mt-1 text-rose-400 font-mono text-[11px]">⚠️ Terjadi kesalahan: ${err.message}</div>`;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Gladi Simulation
+    function openSimulationModal() {
+      document.getElementById('simModal').classList.remove('opacity-0', 'pointer-events-none');
+    }
+    function closeSimulationModal() {
+      document.getElementById('simModal').classList.add('opacity-0', 'pointer-events-none');
+    }
+    async function setSim(time) {
+      await CE_API.setSimulasi(time);
+      playChimeSound('alert');
+      closeSimulationModal();
+      showToast(`Mode simulasi aktif: ${time} WIB`, 'info');
+      loadMasterOverview();
+    }
+    async function resetSim() {
+      await CE_API.setSimulasi(null);
+      playChimeSound('chime');
+      closeSimulationModal();
+      showToast('Simulasi dimatikan. Kembali ke jam real-time.', 'info');
+      loadMasterOverview();
+    }
+
+    loadMasterOverview();
+    setInterval(loadMasterOverview, 10000);
+  </script>
+</body>
+</html>

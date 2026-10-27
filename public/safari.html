@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safari Faculty — Mission Command Deck</title>
+
+  <!-- Instant Pre-paint Zero-Flicker Theme Engine & CSS Reset -->
+  <style>
+    :root { color-scheme: dark light; }
+    html { background-color: #07090E; }
+    html.light, html.light-theme { background-color: #F0F4F8; }
+  </style>
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem('ce_theme') || 'dark';
+        if (theme === 'light') {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.add('light', 'light-theme');
+        } else {
+          document.documentElement.classList.add('dark');
+          document.documentElement.classList.remove('light', 'light-theme');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#07090E">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            its: { blue: '#002B49', gold: '#FFB81C', cyan: '#00A3E0' }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-command-grid min-h-screen relative custom-scrollbar pb-20">
+
+  <!-- Ambient Specular Lighting -->
+  <div class="fixed top-[-20%] left-[-15%] w-[600px] h-[600px] rounded-full bg-blue-600/12 blur-[160px] pointer-events-none"></div>
+
+  <!-- Left Sidebar Console -->
+  <aside id="sidebarNav"></aside>
+
+  <!-- Main Viewport -->
+  <div class="dashboard-viewport flex-1 flex flex-col min-w-0">
+    <!-- Top Navigation Bar -->
+    <header id="topBar"></header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+
+    <!-- HERO MISSION COCKPIT -->
+    <section class="chassis hud-corner">
+      <div class="chassis-core">
+        
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span class="eyebrow-pill amber">★ FOKUS UTAMA DIRECTIVE</span>
+              <span class="eyebrow-pill active">LIVE SHEETS SYNC</span>
+              <span class="eyebrow-pill cobalt">SF-01 DECK</span>
+            </div>
+
+            <h1 id="heroEventTitle" class="text-2xl sm:text-3xl font-black tracking-tight font-display text-white">
+              Safari Faculty Command Hub
+            </h1>
+            <p id="heroEventTagline" class="text-xs sm:text-sm text-slate-300 mt-1.5 max-w-2xl leading-relaxed">
+              Eksplorasi Kampus, 6 Departemen & Laboratorium Riset Unggulan. Tersambung live Google Sheets & Google Drive.
+            </p>
+            <div class="text-xs font-mono text-slate-400 mt-3 flex flex-wrap items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bay-recessed text-[10px] font-bold text-slate-400 uppercase tracking-wider">📍 VENUE</span>
+              <span id="heroVenue" class="text-blue-400 font-bold tracking-tight">Seluruh Fakultas & Departemen ITS Sukolilo</span>
+            </div>
+          </div>
+
+          <!-- Controls & Actions -->
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button onclick="WorkspaceModal.openSheet('safari')" class="btn-tactical text-xs py-2 px-3.5 bg-emerald-600 hover:bg-emerald-500 font-bold">
+              <span>📊 BUKA SHEET</span>
+              <div class="btn-icon-bay">↗</div>
+            </button>
+            <button onclick="WorkspaceModal.openDriveForSubEvent('safari')" class="btn-ghost text-xs py-2 px-3.5 text-blue-400 border-blue-500/30 hover:border-blue-500 font-bold">
+              <span>📁 REPOSITORI DRIVE</span>
+            </button>
+            <button onclick="WorkspaceModal.openUploadModal()" class="btn-ghost text-xs py-2 px-3 text-emerald-400 border-emerald-500/30 hover:border-emerald-500 font-bold">
+              <span>📤 UNGGAH BERKAS</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Telemetry Ribbon -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5 mt-6 pt-5 border-t border-white/5">
+          <div class="bay-recessed p-3.5 flex flex-col justify-between">
+            <div class="text-[9px] font-mono text-slate-400 uppercase tracking-wider">TARGET PESERTA</div>
+            <div id="kpiPeserta" class="text-lg sm:text-xl font-mono font-black text-white mt-1 leading-tight">1.450 / 1.500</div>
+            <div class="text-[9px] font-mono text-emerald-400 mt-1 font-bold">KUOTA RESMI</div>
+          </div>
+          <div class="bay-recessed p-3.5 flex flex-col justify-between">
+            <div class="text-[9px] font-mono text-slate-400 uppercase tracking-wider">KETERLIBATAN HMD</div>
+            <div id="kpiKeterlibatan" class="text-lg sm:text-xl font-mono font-black text-white mt-1 leading-tight">39 HMD (100%)</div>
+            <div class="text-[9px] font-mono text-blue-400 mt-1 font-bold">ELEMEN AKTIF</div>
+          </div>
+          <div class="bay-recessed p-3.5 flex flex-col justify-between">
+            <div class="text-[9px] font-mono text-slate-400 uppercase tracking-wider">PROGRESS KESIAPAN</div>
+            <div id="readinessMetric" class="text-lg sm:text-xl font-mono font-black text-emerald-400 mt-1 leading-tight">68%</div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+              <div id="readinessBar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 68%"></div>
+            </div>
+          </div>
+          <div class="bay-recessed p-3.5 flex flex-col justify-between">
+            <div class="text-[9px] font-mono text-slate-400 uppercase tracking-wider">TANGGAL HARI-H</div>
+            <div id="heroDateStr" class="text-lg sm:text-xl font-mono font-black text-amber-300 mt-1 leading-tight">10 Jan 2027</div>
+            <div class="text-[9px] font-mono text-slate-400 mt-1 font-bold" id="countdownBadge">H-81 HARI</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- TACTICAL PREPARATION STAGE: REPOSITORI BERKAS & SPREADSHEET (UPPER DECK) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- LEFT: Drive Files & Document Explorer (7 Cols) -->
+      <div class="lg:col-span-7 chassis hud-corner">
+        <div class="chassis-core flex flex-col h-full">
+          <div class="flex items-center justify-between pb-3.5 border-b border-white/5 mb-3">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="eyebrow-pill active text-[9px] font-mono">BERKAS PERSIAPAN</span>
+                <span class="eyebrow-pill cobalt text-[9px] font-mono">GDRIVE REPOSITORY</span>
+              </div>
+              <h3 class="text-sm font-extrabold text-white font-display flex items-center gap-2">
+                <span>📁</span> Berkas & Dokumen Safari Faculty Real-Time
+              </h3>
+              <p class="text-[11px] font-mono text-slate-300">7 Subfolder resmi terverifikasi: PPT HMD, Surat, Notulensi & Request</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="WorkspaceModal.openUploadModal()" class="btn-ghost py-1 px-2.5 text-xs text-emerald-400 border-emerald-500/30 hover:border-emerald-500">
+                <span>📤 Unggah</span>
+              </button>
+              <button onclick="WorkspaceModal.openDriveForSubEvent('safari')" class="btn-tactical py-1 px-3 text-xs font-bold">
+                <span>EKSPLORASI DRIVE</span>
+                <div class="btn-icon-bay">↗</div>
+              </button>
+            </div>
+          </div>
+
+          <div id="driveContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto custom-scrollbar flex-1 min-h-[140px]">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Shared Spreadsheet Hub Safari Faculty (5 Cols) -->
+      <div class="lg:col-span-5 chassis hud-corner" id="sharedSpreadsheetMount">
+        <!-- Injected dynamically by SpreadsheetHub.init('safari') -->
+      </div>
+
+    </div>
+
+    <!-- TRACKER PROGRESS KESIAPAN 0-100% (KHUSUS STAFF AHLI) -->
+    <div id="progressTrackerMount" class="w-full">
+      <!-- Injected by ProgressTracker.init('safari') -->
+      <div class="chassis hud-corner p-8 text-center text-slate-500 text-xs font-mono">
+        Memuat Tracker Progress 0-100% Safari Faculty...
+      </div>
+    </div>
+
+    <!-- GEMINI 3.5 FLASH TACTICAL AI COPILOT CARD -->
+    <div class="chassis hud-corner">
+      <div class="chassis-core flex flex-col">
+        <div class="flex items-center justify-between pb-3 border-b border-white/5 mb-3">
+          <div>
+            <h3 class="text-sm font-extrabold text-white font-display flex items-center gap-2">
+              <span>🤖</span> Gemini 3.5 Flash Tactical AI Copilot (Safari)
+            </h3>
+            <p class="text-[11px] font-mono text-slate-400">Asisten cerdas analisis progres kesiapan, lembar kerja, & dokumen repositori drive</p>
+          </div>
+          <span class="eyebrow-pill active font-mono text-[9px]">GEMINI 3.5 FLASH</span>
+        </div>
+
+        <div id="aiChatBox" class="h-32 overflow-y-auto custom-scrollbar p-3 bay-recessed text-xs font-mono space-y-1.5">
+          <div class="text-slate-400 italic">Transmisi siap. Tanyakan progres persiapan, dokumen pendukung, atau detail lab 6 departemen...</div>
+        </div>
+
+        <div class="flex items-center gap-2 mt-3">
+          <input type="text" id="aiQuestionInput" placeholder="Tanya Gemini 3.5 Flash seputar progres Safari..." class="flex-1 bay-recessed px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 font-mono">
+          <button onclick="EventHub.askAi()" id="aiSendBtn" class="btn-tactical py-2 px-4 text-xs font-bold">
+            <span>KIRIM</span>
+            <div class="btn-icon-bay">↑</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    </main>
+  </div>
+
+  <!-- Modular Scripts -->
+  <script src="/js/theme.js"></script>
+  <script src="/js/onboarding.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/workspaceModal.js"></script>
+  <script src="/js/sidebar.js"></script>
+  <script src="/js/eventHub.js"></script>
+  <script src="/js/spreadsheetHub.js"></script>
+  <script src="/js/progressTracker.js"></script>
+
+  <script>
+    Sidebar.init('safari');
+    Onboarding.enforceAccess('safari');
+    EventHub.init('safari');
+    SpreadsheetHub.init('safari', 'sharedSpreadsheetMount');
+    ProgressTracker.init('safari', 'progressTrackerMount');
+  </script>
+</body>
+</html>

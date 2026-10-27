@@ -1,0 +1,49 @@
+{
+  "name": "Central Event Command Center - Ini Lho ITS! 2027",
+  "short_name": "CE ILI 2027",
+  "description": "Aplikasi Resmi Komando & Monitoring Panggung Divisi Central Event Ini Lho ITS! 2027",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Safari Faculty",
+      "short_name": "Safari",
+      "description": "Buka Command Hub Safari Faculty",
+      "url": "/safari.html",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Start Point",
+      "short_name": "Start Point",
+      "description": "Buka Command Hub Start Point",
+      "url": "/startpoint.html",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "One Day Lecture",
+      "short_name": "ODL",
+      "description": "Buka Command Hub One Day Lecture",
+      "url": "/odl.html",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Technocraft",
+      "short_name": "Technocraft",
+      "description": "Buka Command Hub Technocraft Playhouse",
+      "url": "/technocraft.html",
+      "icons": [{ "src": "/icons/icon.svg", "sizes": "192x192" }]
+    }
+  ],
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

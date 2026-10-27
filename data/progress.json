@@ -1,0 +1,101 @@
+{
+  "safari": {
+    "subEventId": "safari",
+    "name": "Safari Faculty",
+    "icon": "🏛️",
+    "code": "SF-01",
+    "percentage": 72,
+    "statusLabel": "Penyusunan Modul Lab & Plotting Alur 6 Departemen",
+    "updatedBy": "Staff Ahli (Staff Ahli)",
+    "updatedAt": "2026-10-25T13:25:20.224Z",
+    "milestones": [
+      {
+        "id": "sf_m1",
+        "notes": "Konsep rute 6 fakultas disetujui pimpinan BEM, LO & Dosen Pendamping. Validasi posko selesai 100%.",
+        "title": "Pematangan Konsep & Alur Eksplorasi 6 Fakultas",
+        "status": "done",
+        "category": "Perencanaan & Kurikulum",
+        "progress": 100,
+        "updatedAt": "25 Okt"
+      },
+      {
+        "id": "sf_m2",
+        "notes": "Seluruh 39 HMD telah mengirimkan LO & perwakilan materi stan lab.",
+        "title": "Koordinasi 39 Himpunan Mahasiswa Departemen (HMD)",
+        "status": "done",
+        "category": "Koordinasi HMD",
+        "progress": 100,
+        "updatedAt": "25 Okt"
+      },
+      {
+        "id": "sf_m3",
+        "notes": "Survei titik kumpul dan lab utama selesai, menunggu lab robotika.",
+        "title": "Plotting & Verifikasi Fasilitas 6 Pos Departemen",
+        "status": "done",
+        "category": "Venue & Lapangan",
+        "progress": 100,
+        "updatedAt": "25 Okt"
+      },
+      {
+        "id": "sf_m4",
+        "notes": "Modul pengenalan riset sedang direview oleh koordinator akademik.",
+        "title": "Penyusunan Modul Praktikum & Eksperimen Singkat Peserta",
+        "status": "in_progress",
+        "category": "Materi & Modul",
+        "progress": 80,
+        "updatedAt": "25 Okt"
+      },
+      {
+        "id": "sf_m5",
+        "notes": "Pengajuan obat-obatan & jalur evakuasi Manyar-Sukolilo siap 50%.",
+        "title": "Penyusunan Berkas Logistik & Standar Medis K3",
+        "status": "in_progress",
+        "category": "K3 & Logistik",
+        "progress": 50,
+        "updatedAt": "23 Okt 2026"
+      },
+      {
+        "id": "sf_m6",
+        "notes": "Dijadwalkan H-14 sebelum hari-H pelaksanaan.",
+        "title": "Gladi Kotor & Briefing LO Pemandu Kluster",
+        "status": "pending",
+        "category": "Simulasi & Pelaksanaan",
+        "progress": 0,
+        "updatedAt": "20 Okt 2026"
+      }
+    ]
+  },
+  "startpoint": {
+    "subEventId": "startpoint",
+    "name": "Start Point",
+    "icon": "🚀",
+    "code": "SP-02",
+    "percentage": 0,
+    "statusLabel": "Belum Dikonfigurasi (Menunggu Input Staff Ahli)",
+    "updatedBy": "Sistem Central Event",
+    "updatedAt": "2026-10-25T12:08:51.678Z",
+    "milestones": []
+  },
+  "odl": {
+    "subEventId": "odl",
+    "name": "One Day Lecture",
+    "icon": "🎓",
+    "code": "ODL-03",
+    "percentage": 0,
+    "statusLabel": "Belum Dikonfigurasi (Menunggu Input Staff Ahli)",
+    "updatedBy": "Sistem Central Event",
+    "updatedAt": "2026-10-25T12:08:51.710Z",
+    "milestones": []
+  },
+  "technocraft": {
+    "subEventId": "technocraft",
+    "name": "Technocraft Playhouse",
+    "icon": "⚡",
+    "code": "TC-04",
+    "percentage": 0,
+    "statusLabel": "Belum Dikonfigurasi (Menunggu Input Staff Ahli)",
+    "updatedBy": "Sistem Central Event",
+    "updatedAt": "2026-10-25T12:08:51.740Z",
+    "milestones": []
+  }
+}
