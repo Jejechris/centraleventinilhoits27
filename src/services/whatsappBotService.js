@@ -14,22 +14,30 @@ async function handleIncomingMessage(payload) {
   if (!payload || !payload.message) return null;
 
   const rawMessage = payload.message.trim();
-  const senderNumber = payload.sender || payload.member || '';
   const senderName = payload.name || 'Rekan Panitia';
-  const isGroup = !!(payload.id && payload.id.includes('@g.us'));
+  const isGroup = !!(
+    (payload.id && payload.id.includes('@g.us')) || 
+    (payload.sender && payload.sender.includes('@g.us'))
+  );
 
-  // Hanya proses jika diawali tanda ! atau /
-  if (!rawMessage.startsWith('!') && !rawMessage.startsWith('/')) {
-    // Jika di chat pribadi (bukan grup) dan user menyapa
-    if (!isGroup && /^(halo|hai|p|ping|assalamualaikum|siang|pagi|malam|bot)/i.test(rawMessage)) {
+  let cleanMsg = rawMessage;
+  const hasPrefix = cleanMsg.startsWith('!') || cleanMsg.startsWith('/') || cleanMsg.startsWith('#');
+
+  if (hasPrefix) {
+    cleanMsg = cleanMsg.substring(1).trim();
+  } else {
+    // Jika tidak pakai tanda ! di chat pribadi
+    if (!isGroup && /^(halo|hai|p|ping|assalamualaikum|siang|pagi|malam|bot)/i.test(cleanMsg)) {
       return getHelpMessage(senderName);
     }
-    return null;
+    // Jika di grup atau chat pribadi ketik kata kunci langsung (misal: status, rundown, pos, menu, help)
+    if (!/^(status|rundown|pos|menu|help|planb|hujan|kpi|ready|delay)\b/i.test(cleanMsg)) {
+      return null;
+    }
   }
 
   // Pisahkan perintah dan argumen
-  const cleanCmd = rawMessage.substring(1).trim();
-  const parts = cleanCmd.split(/\s+/);
+  const parts = cleanMsg.split(/\s+/);
   const command = parts[0].toLowerCase();
   const args = parts.slice(1).join(' ').trim();
 

@@ -65,21 +65,29 @@ async function sendMessage(target, message) {
     throw new Error('Nomor tujuan (target) dan isi pesan (message) wajib diisi.');
   }
 
-  // Sanitasi nomor HP: bersihkan spasi, strip, atau tanda plus
-  let cleanTarget = target.toString().trim().replace(/[\s\-\+]/g, '');
+  // Sanitasi nomor HP: jika bukan grup WA (@g.us), bersihkan format
+  let cleanTarget = target.toString().trim();
+  const isGroup = cleanTarget.includes('@g.us');
+  if (!isGroup) {
+    cleanTarget = cleanTarget.replace(/[\s\-\+]/g, '');
+  }
 
   try {
-    const formData = new URLSearchParams();
-    formData.append('target', cleanTarget);
-    formData.append('message', message);
-    formData.append('countryCode', '62');
+    const payload = {
+      target: cleanTarget,
+      message: message
+    };
+    if (!isGroup) {
+      payload.countryCode = '62';
+    }
 
     const res = await fetch(`${FONNTE_API_URL}/send`, {
       method: 'POST',
       headers: {
-        'Authorization': token
+        'Authorization': token,
+        'Content-Type': 'application/json'
       },
-      body: formData
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();

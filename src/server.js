@@ -633,17 +633,27 @@ app.get('/api/whatsapp/webhook', (req, res) => {
 app.post('/api/whatsapp/webhook', async (req, res) => {
   try {
     const payload = req.body || {};
-    // console.log('Incoming WhatsApp Webhook:', payload);
+    
+    // Log ke database Supabase Cloud untuk audit & debug live
+    try {
+      const db = require('./db');
+      await db.query('INSERT INTO webhook_logs (payload) VALUES ($1)', [JSON.stringify(payload)]);
+    } catch (dbErr) {
+      console.warn('Webhook DB log warning:', dbErr.message);
+    }
+
     const reply = await whatsappBotService.handleIncomingMessage(payload);
     if (reply) {
-      // Tentukan target tujuan (ID grup @g.us jika di grup, atau nomor pengirim)
-      const target = (payload.id && payload.id.includes('@g.us')) ? payload.id : (payload.sender || payload.member);
+      // Tentukan target tujuan: Di Fonnte, 'sender' berisi nomor HP atau Group ID (xxx@g.us)
+      const target = payload.sender || payload.member || payload.id;
       
-      // Kirim pesan aktif via API Fonnte untuk kepastian pengiriman 100%
+      // Kirim via Fonnte API dan WAJIB di-AWAIT agar Vercel Serverless tidak mematikan fungsi sebelum request selesai
       if (target) {
-        whatsappService.sendMessage(target, reply).catch(err => {
-          console.warn('Webhook auto-send warning:', err.message);
-        });
+        try {
+          await whatsappService.sendMessage(target, reply);
+        } catch (sendErr) {
+          console.error('Webhook sendMessage error:', sendErr.message);
+        }
       }
 
       // Protokol auto-reply Fonnte: juga return JSON { reply, status: true }
@@ -652,6 +662,21 @@ app.post('/api/whatsapp/webhook', async (req, res) => {
     res.json({ status: true, message: 'Message acknowledged (no command triggered)' });
   } catch (err) {
     console.error('API /api/whatsapp/webhook error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Endpoint debug untuk melihat pesan webhook yang masuk ke server secara live
+app.get('/api/whatsapp/debug', async (req, res) => {
+  try {
+    const db = require('./db');
+    const result = await db.query('SELECT * FROM webhook_logs ORDER BY id DESC LIMIT 15');
+    res.json({
+      success: true,
+      count: result.rows.length,
+      logs: result.rows
+    });
+  } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });
