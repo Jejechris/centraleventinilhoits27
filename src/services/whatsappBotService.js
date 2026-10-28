@@ -1,6 +1,5 @@
 const subEventsConfig = require('./subEventsConfig');
 const sheetsService = require('./sheetsService');
-const stageCheckService = require('./stageCheckService');
 const progressService = require('./progressService');
 const geminiService = require('./geminiService');
 const driveService = require('./driveService');
@@ -39,7 +38,7 @@ async function handleIncomingMessage(payload) {
       return getHelpMessage(senderName);
     }
     // Jika di grup atau chat pribadi ketik kata kunci langsung
-    if (!/^(status|rundown|pos|menu|help|planb|hujan|kpi|ready|delay|database|db|staff|panitia|progress|prog)\b/i.test(cleanMsg)) {
+    if (!/^(status|rundown|menu|help|planb|hujan|kpi|delay|database|db|staff|panitia|progress|prog|tanya|ai)\b/i.test(cleanMsg)) {
       return null;
     }
   }
@@ -66,14 +65,6 @@ async function handleIncomingMessage(payload) {
 
     case 'rundown':
       return await getRundownMessage(args);
-
-    case 'pos':
-    case 'posko':
-      return getStationsMessage(args);
-
-    case 'ready':
-    case 'checkin':
-      return handleStationCheckin(args, senderName);
 
     case 'delay':
       return handleDelayCommand(args, senderName);
@@ -122,17 +113,15 @@ Setiap perintah teknis mendukung parameter *[all/sf/sp/tcp/odl]*:
 • *!status [all/sf/sp/tcp/odl]* : Status kesiapan acara & countdown
 • *!progress [all/sf/sp/tcp/odl]* : Tracker progress & milestone kerja
 • *!rundown [all/sf/sp/tcp/odl]* : Sesi live rundown & jadwal agenda
-• *!pos [all/sf/sp/tcp/odl]* : Checklist kesiapan pos lapangan
 • *!kpi [all/sf/sp/tcp/odl]* : Target peserta & keterlibatan HMD
 • *!planb [all/sf/sp/tcp/odl]* : SOP kontinjensi darurat cuaca hujan
 
-👥 *DATABASE & CHECK-IN LAPANGAN*
+👥 *DATABASE & MANAJEMEN WAKTU*
 • *!database [all/sf/sp/tcp/odl]* : Database personil panitia & LO
-• *!ready [id_pos]* : Check-in pos lapangan (contoh: *!ready dept1* atau *!ready sp_gate*)
 • *!delay [menit]* : Lapor pergeseran rundown (contoh: *!delay 10*)
 
 🧠 *AI COPILOT GEMINI 3.5 FLASH*
-• *!tanya [pertanyaan]* : Tanya apa saja seputar acara & berkas drive
+• *!tanya [pertanyaan]* : Tanya apa saja seputar acara, pimpinan, & berkas drive
 
 ────────────────────────────
 _Ketik perintah di atas di grup atau chat pribadi kapan saja!_`
@@ -160,12 +149,10 @@ _Ini Lho ITS! 2027 • Laporan Komando Pusat_
       const sub = subEventsConfig.getSubEvent(id) || {};
       const dateStatus = sheetsService.getEventDateStatus(id);
       const progress = progressService.getProgress(id) || {};
-      const stations = stageCheckService.getAllStations(id);
-      const readyCount = stations.filter(s => s.ready).length;
 
       text += `${meta.icon} *${meta.name} (${meta.code})*\n`;
       text += `• Pelaksanaan: ${sub.dateStr || meta.dateStr} (H-${dateStatus.daysUntil ?? '--'} Hari)\n`;
-      text += `• Progres: *${progress.percentage || 0}%* | Pos: *${readyCount}/${stations.length} Siap*\n`;
+      text += `• Progres: *${progress.percentage || 0}%*\n`;
       text += `• Target: ${sub.kpi?.targetPeserta || '-'}\n\n`;
     });
 
@@ -180,8 +167,6 @@ _Ini Lho ITS! 2027 • Laporan Komando Pusat_
   const subEvent = subEventsConfig.getSubEvent(targetId);
   const dateStatus = sheetsService.getEventDateStatus(targetId);
   const progress = progressService.getProgress(targetId) || {};
-  const stations = stageCheckService.getAllStations(targetId);
-  const readyCount = stations.filter(s => s.ready).length;
   const delay = sheetsService.getDelay();
   const delayStr = delay > 0 ? `\n⚠️ *Pergeseran Waktu:* +${delay} Menit` : '\n⏱️ *Jadwal:* Sesuai Rundown (0 Menit Delay)';
 
@@ -193,7 +178,6 @@ _Sub-Divisi ${meta.name} (${meta.code}) • Ini Lho ITS! 2027_
 ⏳ *Hitung Mundur:* *H-${dateStatus.daysUntil ?? '--'} Hari* Menuju Hari-H
 📊 *Progress Staff Ahli:* *${progress.percentage || 0}%*
 📝 *Status Lapangan:* ${progress.statusLabel || 'Persiapan konsep & modul'}
-📡 *Kesiapan Pos:* *${readyCount}/${stations.length} Pos Siap*
 👥 *Target Peserta:* ${subEvent.kpi?.targetPeserta || 'Terkondisikan'}
 🏛️ *Keterlibatan:* ${subEvent.kpi?.keterlibatan || 'Panitia & LO'}${delayStr}
 ────────────────────────────
@@ -279,96 +263,11 @@ _Sub-Divisi ${meta.name} (${meta.code}) • Ini Lho ITS! 2027_
     }
 
     output += `────────────────────────────
-💡 Ketik: *!rundown all* | *!rundown sp* | *!rundown tcp* | *!rundown odl*
-Ketik *!pos ${meta.abbr}* untuk cek kesiapan pos lapangan.`;
+💡 Ketik: *!rundown all* | *!rundown sp* | *!rundown tcp* | *!rundown odl*`;
     return output;
   } catch (e) {
     return `❌ Gagal mengambil data rundown: ${e.message}`;
   }
-}
-
-/**
- * Daftar Kesiapan Pos Lapangan (Mendukung 4 Sub-Divisi & All)
- */
-function getStationsMessage(args = '') {
-  const subKey = subEventsConfig.normalizeSubKey(args);
-
-  if (subKey === 'all') {
-    const subs = ['safari', 'startpoint', 'odl', 'technocraft'];
-    let text = 
-`📡 *REKAP KESIAPAN POS 4 SUB-DIVISI*
-_Ini Lho ITS! 2027 • Checklist Seluruh Venue_
-────────────────────────────\n`;
-    subs.forEach(id => {
-      const meta = SUB_META[id];
-      const stations = stageCheckService.getAllStations(id);
-      const readyCount = stations.filter(s => s.ready).length;
-      text += `${meta.icon} *${meta.name} (${meta.code}):* ${readyCount}/${stations.length} Pos Siap\n`;
-    });
-    text += `\n────────────────────────────
-💡 Ketik: *!pos sf* | *!pos sp* | *!pos tcp* | *!pos odl*`;
-    return text;
-  }
-
-  const targetId = subKey || 'safari';
-  const meta = SUB_META[targetId] || SUB_META.safari;
-  const stations = stageCheckService.getAllStations(targetId);
-  const readyCount = stations.filter(s => s.ready).length;
-
-  let listStr = stations.map((s, idx) => {
-    const icon = s.ready ? '✅' : '⏳';
-    return `${idx + 1}. ${icon} *${s.name}* (\`${s.id}\`)\n   PIC: ${s.pic} | Status: ${s.ready ? 'SIAP' : 'Menunggu'}`;
-  }).join('\n');
-
-  return (
-`📡 *CHECKLIST POS: ${meta.name.toUpperCase()}*
-_Sub-Divisi ${meta.name} (${meta.code}) • ${readyCount}/${stations.length} Pos Siap_
-────────────────────────────
-${listStr || '_Belum ada pos terdaftar._'}
-────────────────────────────
-💡 *Check-in Pos (Untuk LO / Penjaga Pos):*
-Ketik: *!ready [id_pos]* (contoh: *!ready ${stations[0]?.id || 'gate'}*)
-
-💡 *Cek Sub-Divisi Lain:*
-Ketik: *!pos all* | *!pos sp* | *!pos tcp* | *!pos odl*`
-  );
-}
-
-/**
- * Check-in Pos oleh LO (Mencakup 4 Sub-Divisi)
- */
-function handleStationCheckin(args, username) {
-  if (!args) {
-    return `⚠️ Harap masukkan ID Pos yang ingin di-check-in.\nContoh: *!ready dept1* atau *!ready sp_gate*\nKetik *!pos sf* atau *!pos sp* untuk melihat daftar ID Pos.`;
-  }
-
-  const parts = args.trim().split(/\s+/);
-  let targetSub = null;
-  let stationArg = args.trim();
-
-  // Jika format: !ready sp sp_gate
-  if (parts.length >= 2 && subEventsConfig.normalizeSubKey(parts[0])) {
-    targetSub = subEventsConfig.normalizeSubKey(parts[0]);
-    stationArg = parts.slice(1).join(' ').trim();
-  }
-
-  const updated = stageCheckService.toggleStationReady(stationArg, username, targetSub);
-
-  if (!updated) {
-    return `❌ Pos dengan ID *"${stationArg}"* tidak ditemukan di sub-divisi manapun.\nKetik *!pos all* untuk melihat daftar pos yang tersedia di 4 sub-acara.`;
-  }
-
-  return (
-`✅ *KONFIRMASI CHECK-IN POS LAPANGAN*
-────────────────────────────
-📌 *Sub-Divisi:* *${updated.subEventName}*
-📍 *Pos:* *${updated.name}* (\`${updated.id}\`)
-📊 *Status Sekarang:* ${updated.ready ? '✅ SIAP & STANDBY' : '⏳ KEMBALI DALAM PERSIAPAN'}
-👤 *Diverifikasi Oleh:* ${username}
-⏰ *Waktu:* ${updated.updatedAt}
-────────────────────────────
-Status otomatis tersinkronisasi realtime ke Master Command Deck!`
-  );
 }
 
 /**
@@ -496,7 +395,7 @@ Ketik: *!kpi all* | *!kpi sp* | *!kpi tcp* | *!kpi odl*`
  */
 async function handleAiQuery(question, username, subId) {
   if (!question) {
-    return `🤖 Mau tanya apa ke AI Copilot?\nContoh: *!tanya bagaimana pembagian 6 kluster fakultas di safari?*`;
+    return `🤖 Mau tanya apa ke AI Copilot?\nContoh: *!tanya siapa saja kasubdiv dan staffli central event?*`;
   }
 
   try {
@@ -507,7 +406,8 @@ async function handleAiQuery(question, username, subId) {
     const answer = await geminiService.askCopilot(question, {
       progress,
       realDriveFiles: driveFiles,
-      dateStatus
+      dateStatus,
+      subEventId: subId
     });
 
     return (
@@ -520,8 +420,8 @@ _${question}_
 ${answer}
 ────────────────────────────
 _Asisten AI Resmi Central Event ILI 2027_`
-  );
-} catch (err) {
+    );
+  } catch (err) {
     return `❌ AI Copilot sedang sibuk: ${err.message}`;
   }
 }

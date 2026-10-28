@@ -248,18 +248,6 @@ const WhatsAppDispatcher = {
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-purple-400">!pos [all/sf/sp/tcp/odl]</div>
-                  <div class="text-slate-300 font-semibold">Checklist Kesiapan Pos Lapangan</div>
-                  <div class="text-[11px] text-slate-500 font-mono">Daftar pos venue, stan departemen, & status standby.</div>
-                </div>
-
-                <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-emerald-300">!ready [id_pos]</div>
-                  <div class="text-slate-300 font-semibold">Check-in Pos Lapangan oleh LO</div>
-                  <div class="text-[11px] text-slate-500 font-mono">Contoh: <code>!ready dept1</code> atau <code>!ready sp_gate</code>.</div>
-                </div>
-
-                <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                   <div class="font-mono font-extrabold text-amber-300">!delay [menit]</div>
                   <div class="text-slate-300 font-semibold">Lapor Pergeseran Waktu Rundown</div>
                   <div class="text-[11px] text-slate-500 font-mono">Contoh: <code>!delay 10</code> (Update otomatis ke seluruh sistem).</div>

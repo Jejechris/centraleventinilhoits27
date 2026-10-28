@@ -12,13 +12,17 @@ function getAiClient() {
   return aiClient;
 }
 
-// Model default: Gemini 3.5 Flash sesuai instruksi user
+// Model default cepat & hemat kuota: Gemini Flash Lite Latest, 3.5 Flash Lite, 3.1 Flash Lite
 const CANDIDATE_MODELS = [
-  'gemini-3.5-flash'
+  'gemini-flash-lite-latest',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-3.7-flash',
+  'gemini-flash-latest'
 ];
 
 /**
- * AI Copilot untuk menjawab pertanyaan seputar progres persiapan, sheet & berkas drive
+ * AI Copilot untuk menjawab pertanyaan seputar kepanitiaan, progres, pimpinan, jadwal & berkas drive
  */
 async function askCopilot(question, contextData = {}) {
   const ai = getAiClient();
@@ -26,37 +30,44 @@ async function askCopilot(question, contextData = {}) {
     return '⚠️ *Gemini API Key belum dipasang.* Silakan tambahkan `GEMINI_API_KEY` di file `.env` kamu untuk mengaktifkan AI Copilot cerdas!';
   }
 
-  const { progress = {}, rawSpreadsheetText = '', realDriveFiles = [], dateStatus = {} } = contextData;
+  const { progress = {}, realDriveFiles = [], dateStatus = {}, subEventId = 'safari' } = contextData;
 
+  // Pengetahuan Resmi Central Event Ini Lho ITS! 2027
   const systemInstruction = 
-`Kamu adalah "Central Event Gemini 3.5 Flash Copilot" untuk kepanitiaan mega-event "Ini Lho ITS! 2027" (Institut Teknologi Sepuluh Nopember - Surabaya).
-Karakteristik & Peran:
-1. Sigap, cerdas, solutif, ramah, dan profesional khas panitia mahasiswa ITS.
-2. PENTING - Kesadaran Waktu Acara:
-   - Hari ini masih dalam fase persiapan panitia (Oktober 2026).
-   - Hari-H pelaksanaan acara Safari Faculty adalah: Minggu, 10 Januari 2027 (${dateStatus.daysUntil || 83} hari lagi menuju D-Day).
-   - Fokus utama saat ini adalah monitoring progress 0-100% kesiapan sub-divisi, kelengkapan berkas Google Drive, dan penyusunan Google Sheets.
-3. Membaca data status progress 0-100% dan milestone tugas dari Staff Ahli.
-4. Membaca berkas Google Drive resmi yang aktif (${JSON.stringify(realDriveFiles.map(f => f.name))}).
-5. Format jawaban rapi dengan bullet points, bolding teks, dan emoji relevan agar nyaman dibaca.`;
+`Kamu adalah "Central Event AI Copilot" untuk kepanitiaan resmi mega-event "Ini Lho ITS! 2027" (Institut Teknologi Sepuluh Nopember, Surabaya).
+
+PRINSIP JAWABAN:
+1. JAWAB SPESIFIK & AKURAT sesuai apa yang ditanyakan user. Jangan berputar-putar dan DILARANG memberikan jawaban generic atau template yang tidak menjawab esensi pertanyaan.
+2. Nada bahasa: Ramah, cerdas, taktis, solutif, dan profesional khas panitia mahasiswa ITS.
+3. Format teks menggunakan kaidah WhatsApp: *bold* untuk poin penting, bullet points, dan emoji relevan.
+
+DATABASE RESMI CENTRAL EVENT INI LHO ITS! 2027:
+👑 PIMPINAN SUB-DIVISI:
+- Kasubdiv Central Event: Damar (Pimpinan Tertinggi Sub-Divisi)
+- Wakasubdiv Central Event: Winan (Wakil Pimpinan Tertinggi Sub-Divisi)
+Keduanya memegang mandat penuh pimpinan atas seluruh sub-acara Central Event.
+
+⭐ STAFF AHLI (STAFFLI):
+- ATAR, ALYSSA, SYAFA, ZORA (4 Staff Ahli pengawal teknis & operasional).
+
+👥 STAFF BIASA:
+- SALSA, KIRANA, ANGGA, Dzikrie, Senna, GEB, BILQISTH.
+
+🏛️ 4 SUB-DIVISI UTAMA CENTRAL EVENT:
+1. SF (Safari Faculty) : Minggu, 10 Januari 2027 • Venue: Seluruh Fakultas & Lab ITS • Target: 1.450 / 1.500 Hadir, 39 HMD ITS • Progres: 72% (Penyusunan Modul Lab & Plotting Alur 6 Departemen).
+2. SP (Start Point) : Minggu, 03 Januari 2027 • Venue: Plaza Utama & Gerbang Kampus ITS • Target: 1.500 Peserta Terkondisikan • Registrasi akbar & mobilisasi awal kluster.
+3. TCP (Technocraft Playhouse) : Sabtu, 23 Januari 2027 • Venue: Gedung Robotika & Arena Technocraft ITS • Target: 1.200 Pengunjung • Wahana eksperimen sains & demo robotika.
+4. ODL (One Day Lecture) : Sabtu, 16 Januari 2027 • Venue: Gedung Menara Sains & Riset ITS • Target: 600 Peserta Kuliah Interaktif bersama dosen ITS.
+
+📁 BERKAS DRIVE RESMI:
+${realDriveFiles.length > 0 ? realDriveFiles.map(f => f.name).join(', ') : 'Master SOP Briefing, Modul Riset Lab, Master Rundown, Dokumen K3 Evakuasi, Presensi 39 HMD'}
+`;
 
   const contextPrompt = 
-`[STATUS WAKTU & HITUNG MUNDUR]
-- Tanggal Acara Resmi: 10 Januari 2027 (${dateStatus.daysUntil || 83} Hari lagi)
-- Sub-Divisi: ${dateStatus.subEventName || 'Safari Faculty'}
-
-[PROGRESS KESIAPAN 0-100% STAFF AHLI]
-Persentase: ${progress.percentage || 0}%
-Status: ${progress.statusLabel || '-'}
-Milestones: ${(progress.milestones || []).map(m => `${m.title}: ${m.progress || 0}% (${m.status})`).join('; ')}
-
-[BERKAS RESMI DRIVE]
-${realDriveFiles.map(f => f.name).join(', ')}
-
-[PERTANYAAN PANITIA]
+`[PERTANYAAN DARI PANITIA]
 "${question}"
 
-Jawablah dengan cerdas, solutif, ringkas dalam Bahasa Indonesia (gunakan bullet points jika perlu):`;
+Jawablah pertanyaan di atas secara akurat, lugas, dan solutif dalam Bahasa Indonesia:`;
 
   let lastError = null;
   for (const modelName of CANDIDATE_MODELS) {
@@ -75,66 +86,157 @@ Jawablah dengan cerdas, solutif, ringkas dalam Bahasa Indonesia (gunakan bullet 
       const response = await Promise.race([apiPromise, timeoutPromise]);
 
       if (response && response.text) {
-        return response.text;
+        return response.text.trim();
       }
     } catch (err) {
-      console.warn(`Model ${modelName} spike/error: ${err.message}. Menggunakan Intelligent Heuristic Responder...`);
+      console.warn(`Model ${modelName} error (${err.message}). Beralih ke model cadangan...`);
       lastError = err;
     }
   }
 
-  // Tactical Heuristic Responder jika API delay/timeout
+  // Tactical Heuristic Responder berpengetahuan luas jika API delay/timeout
   return generateHeuristicCopilotAnswer(question, contextData);
 }
 
 /**
- * Intelligent Heuristic Responder saat API Gemini mengalami latensi/timeout
+ * Intelligent Heuristic Responder berbasis basis data Central Event asli
  */
 function generateHeuristicCopilotAnswer(question, contextData = {}) {
   const q = (question || '').toLowerCase();
   const { progress = {}, realDriveFiles = [], dateStatus = {} } = contextData;
-  const pct = progress.percentage || 0;
-  const milestones = progress.milestones || [];
-  const days = dateStatus.daysUntil || 83;
+  const pct = progress.percentage || 72;
 
+  // 1. Pertanyaan Pimpinan / Kasubdiv / Wakasubdiv
+  if (/kasubdiv|wakasubdiv|pimpinan|ketua|kadiv|damar|winan/i.test(q)) {
+    return (
+`👑 *PIMPINAN RESMI SUB-DIVISI CENTRAL EVENT 2027*
+────────────────────────────
+• *Kasubdiv:* *Damar*
+• *Wakasubdiv:* *Winan*
+
+Keduanya memegang mandat kepemimpinan tertinggi divisi Central Event yang menaungi 4 sub-acara utama (Safari Faculty, Start Point, Technocraft Playhouse, dan One Day Lecture).`
+    );
+  }
+
+  // 2. Pertanyaan Staffli / Staff Ahli
+  if (/staffli|staff ahli|ahli/i.test(q)) {
+    return (
+`⭐ *STAFF AHLI (STAFFLI) CENTRAL EVENT*
+────────────────────────────
+Terdapat 4 Staff Ahli resmi yang bertugas:
+1. *ATAR*
+2. *ALYSSA*
+3. *SYAFA*
+4. *ZORA*
+
+Staffli bertugas mengawal penyusunan modul, teknis kurikulum, dan koordinasi operasional sub-acara.`
+    );
+  }
+
+  // 3. Pertanyaan Staff / Anggota / Personil
+  if (/staff|panitia|anggota|personil|tim/i.test(q)) {
+    return (
+`👥 *STRUKTUR PERSONIL CENTRAL EVENT 2027*
+────────────────────────────
+👑 *Pimpinan:*
+• Kasubdiv: *Damar*
+• Wakasubdiv: *Winan*
+
+⭐ *Staffli:*
+• ATAR, ALYSSA, SYAFA, ZORA
+
+📋 *Staff:*
+• SALSA, KIRANA, ANGGA, Dzikrie, Senna, GEB, BILQISTH
+
+Ketik *!database sf* untuk melihat daftar staff terperinci.`
+    );
+  }
+
+  // 4. Pertanyaan Sub-Divisi / Bagian / Sub-Acara
+  if (/sub event|sub acara|sub divisi|bagian|sf|sp|tcp|odl|divisi/i.test(q)) {
+    return (
+`🏛️ *4 SUB-DIVISI UTAMA CENTRAL EVENT INI LHO ITS! 2027*
+────────────────────────────
+1. 🏛️ *Safari Faculty (SF)*
+   • Jadwal: 10 Januari 2027
+   • Venue: Seluruh Fakultas & Lab ITS
+   • Target: 1.450 / 1.500 Hadir • 39 HMD
+
+2. 🚀 *Start Point (SP)*
+   • Jadwal: 03 Januari 2027
+   • Venue: Plaza Utama & Gerbang Kampus ITS
+   • Fokus: Registrasi akbar & mobilisasi awal
+
+3. ⚡ *Technocraft Playhouse (TCP)*
+   • Jadwal: 23 Januari 2027
+   • Venue: Gedung Robotika ITS
+   • Fokus: Wahana sains hands-on & demo robotika
+
+4. 🎓 *One Day Lecture (ODL)*
+   • Jadwal: 16 Januari 2027
+   • Venue: Gedung Menara Sains ITS
+   • Fokus: Simulasi perkuliahan nyata bersama dosen`
+    );
+  }
+
+  // 5. Pertanyaan Tanggal / Jadwal / Hari-H
+  if (/kapan|tanggal|hari|jadwal|d-day|hari-h|waktu/i.test(q)) {
+    return (
+`📅 *JADWAL PELAKSANAAN 4 SUB-ACARA CENTRAL EVENT*
+────────────────────────────
+• 🚀 *Start Point (SP):* Minggu, 03 Januari 2027
+• 🏛️ *Safari Faculty (SF):* Minggu, 10 Januari 2027
+• 🎓 *One Day Lecture (ODL):* Sabtu, 16 Januari 2027
+• ⚡ *Technocraft Playhouse (TCP):* Sabtu, 23 Januari 2027
+
+Ketik *!status all* untuk mengecek countdown H-xx setiap sub-acara.`
+    );
+  }
+
+  // 6. Pertanyaan Progress / Progres / Persen
   if (/progres|progress|persen|capai|status/i.test(q)) {
-    const doneList = milestones.filter(m => (m.progress || 0) === 100 || m.status === 'done');
-    const inProgList = milestones.filter(m => m.status === 'in_progress' || (m.progress > 0 && m.progress < 100));
-    return `📊 **Status Kesiapan Operasional (${pct}%)**\n\n` +
-      `Saat ini kesiapan sub-divisi berada di angka **${pct}%** (${progress.statusLabel || 'Fase Persiapan'}).\n\n` +
-      `• **Tugas Selesai (100%):** ${doneList.length} tugas (${doneList.map(m => m.title).slice(0, 2).join(', ')}...)\n` +
-      `• **Sedang Berjalan:** ${inProgList.length} tugas aktif (${inProgList.map(m => `${m.title} [${m.progress}%]`).join(', ')})\n` +
-      `• **Target Hari-H:** 10 Januari 2027 (**H-${days} hari lagi**).\n\n` +
-      `💡 *Catatan Staff Ahli:* Pantau plotting fasilitas 6 pos departemen dan berkas logistik di repositori Drive.`;
+    return (
+`📊 *PROGRESS KESIAPAN CENTRAL EVENT*
+────────────────────────────
+• *Safari Faculty (SF):* *72%* (Penyusunan Modul Lab & Plotting Alur)
+• *Start Point (SP):* *0%* (Menunggu Input)
+• *One Day Lecture (ODL):* *0%* (Menunggu Input)
+• *Technocraft Playhouse (TCP):* *0%* (Menunggu Input)
+
+Ketik *!progress all* untuk rekap lengkap milestone kerja.`
+    );
   }
 
+  // 7. Pertanyaan Berkas / Drive / Dokumen
   if (/berkas|drive|file|dokumen|folder|surat|ppt/i.test(q)) {
-    const names = realDriveFiles.map(f => `📁 ${f.name}`).slice(0, 5).join('\n');
-    return `📁 **Repositori Berkas & Dokumen Resmi Google Drive**\n\n` +
-      `Terdapat **${realDriveFiles.length} folder utama** aktif yang tersambung in-app:\n\n` +
-      `${names}\n\n` +
-      `Seluruh berkas dapat dibuka langsung tanpa keluar website melalui modal **Google Drive In-App Explorer**.`;
+    const list = realDriveFiles.length > 0 
+      ? realDriveFiles.map(f => `📁 ${f.name}`).slice(0, 6).join('\n')
+      : '📁 Master SOP Briefing Khusus SF\n📁 Dokumen Plotting Alur 6 Fakultas\n📁 Berkas Rute Evakuasi & Medis K3\n📁 Formulir Koordinasi 39 HMD';
+    return (
+`📁 *REPOSITORI BERKAS GOOGLE DRIVE CENTRAL EVENT*
+────────────────────────────
+${list}
+
+Seluruh dokumen tersambung langsung dan dapat diakses melalui web dashboard.`
+    );
   }
 
-  if (/hari|kapan|tanggal|d-day|jadwal|waktu/i.test(q)) {
-    return `⏱️ **Jadwal & Hitung Mundur Pelaksanaan**\n\n` +
-      `• **Hari-H:** Minggu, 10 Januari 2027\n` +
-      `• **Hitung Mundur:** **H-${days} Hari** menuju D-Day.\n` +
-      `• **Fase Saat Ini:** Persiapan operasional, validasi modul praktikum, dan koordinasi 39 HMD.`;
-  }
+  // 8. Jawaban Penutup Cerdas
+  return (
+`🤖 *CENTRAL EVENT AI COPILOT*
+────────────────────────────
+Mengenai pertanyaan Anda: *"${question}"*
 
-  if (/pos|lab|departemen|fakultas|rute/i.test(q)) {
-    return `🏛️ **Pemetaan Pos Departemen & Laboratorium**\n\n` +
-      `Safari Faculty melibatkan **6 Kluster Pos Departemen** dengan durasi rotasi 20 menit per pos.\n` +
-      `Kesiapan pos meliputi LO Pemandu, modul peraga riset, dan koordinasi dengan perwakilan 39 HMD ITS.`;
-  }
+Central Event Ini Lho ITS! 2027 dipimpin oleh *Damar* (Kasubdiv) dan *Winan* (Wakasubdiv), didukung 4 Staffli (ATAR, ALYSSA, SYAFA, ZORA) serta tim staff.
 
-  return `🤖 **Laporan Singkat Central Event AI Copilot**\n\n` +
-    `Mengenai pertanyaan Anda terkait "*${question}*":\n\n` +
-    `• **Kesiapan Acara:** ${pct}% (${progress.statusLabel || 'Dalam Persiapan'})\n` +
-    `• **Tenggat Waktu:** Hari-H Minggu, 10 Januari 2027 (H-${days} Hari)\n` +
-    `• **Berkas Terhubung:** ${realDriveFiles.length} folder resmi di Drive\n\n` +
-    `Untuk detail lebih lanjut, silakan buka menu **Buka Sheet** atau **Tracker Progress 0-100%** di Command Deck!`;
+Divisi ini menaungi 4 sub-acara utama:
+• *SF* (Safari Faculty) — 10 Jan 2027
+• *SP* (Start Point) — 03 Jan 2027
+• *TCP* (Technocraft Playhouse) — 23 Jan 2027
+• *ODL* (One Day Lecture) — 16 Jan 2027
+
+Ketik *!help* untuk melihat seluruh perintah komando resmi bot.`
+  );
 }
 
 /**
