@@ -12,6 +12,7 @@ const spreadsheetRegistry = require('./services/spreadsheetRegistry');
 const progressService = require('./services/progressService');
 const whatsappService = require('./services/whatsappService');
 const whatsappBotService = require('./services/whatsappBotService');
+const staffService = require('./services/staffService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -631,23 +632,23 @@ app.get('/api/whatsapp/webhook', (req, res) => {
 });
 
 app.post('/api/whatsapp/webhook', async (req, res) => {
+  const startTime = Date.now();
   try {
     const payload = req.body || {};
     
-    // Log ke database Supabase Cloud untuk audit & debug live
+    // Non-blocking log ke database Supabase Cloud (Fire and forget, zero latency penalty!)
     try {
       const db = require('./db');
-      await db.query('INSERT INTO webhook_logs (payload) VALUES ($1)', [JSON.stringify(payload)]);
-    } catch (dbErr) {
-      console.warn('Webhook DB log warning:', dbErr.message);
-    }
+      db.query('INSERT INTO webhook_logs (payload) VALUES ($1)', [JSON.stringify(payload)]).catch(() => {});
+    } catch (_) {}
 
+    // Eksekusi pemrosesan command bot (in-memory < 2ms)
     const reply = await whatsappBotService.handleIncomingMessage(payload);
     if (reply) {
       // Tentukan target tujuan: Di Fonnte, 'sender' berisi nomor HP atau Group ID (xxx@g.us)
-      const target = payload.sender || payload.member || payload.id;
+      const target = (payload.id && payload.id.includes('@g.us')) ? payload.id : (payload.sender || payload.member);
       
-      // Kirim via Fonnte API dan WAJIB di-AWAIT agar Vercel Serverless tidak mematikan fungsi sebelum request selesai
+      // Kirim via Fonnte API dan di-await
       if (target) {
         try {
           await whatsappService.sendMessage(target, reply);
@@ -656,12 +657,33 @@ app.post('/api/whatsapp/webhook', async (req, res) => {
         }
       }
 
+      console.log(`⚡ [FAST DISPATCH] WhatsApp command diproses dalam ${Date.now() - startTime}ms`);
       // Protokol auto-reply Fonnte: juga return JSON { reply, status: true }
       return res.json({ reply, status: true });
     }
     res.json({ status: true, message: 'Message acknowledged (no command triggered)' });
   } catch (err) {
     console.error('API /api/whatsapp/webhook error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 7.2 API Database Staff Central Event (Multi-Event Hub)
+app.get('/api/staff', (req, res) => {
+  try {
+    const subEventId = req.query.subEventId || 'safari';
+    const data = staffService.getStaffBySubEvent(subEventId);
+    res.json({ success: true, subEventId, data });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/staff/all', (req, res) => {
+  try {
+    const data = staffService.getAllStaff();
+    res.json({ success: true, data });
+  } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 });

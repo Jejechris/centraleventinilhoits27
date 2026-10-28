@@ -230,6 +230,12 @@ const WhatsAppDispatcher = {
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                  <div class="font-mono font-extrabold text-cyan-400">!database [sf/odl/sp/tc]</div>
+                  <div class="text-slate-300 font-semibold">Database Personil Panitia & LO</div>
+                  <div class="text-[11px] text-slate-500 font-mono">Contoh: <code>!database sf</code> (Daftar Kadiv, LO & PIC).</div>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                   <div class="font-mono font-extrabold text-amber-400">!rundown</div>
                   <div class="text-slate-300 font-semibold">Sesi Rundown Live & Berikutnya</div>
                   <div class="text-[11px] text-slate-500 font-mono">Membaca jadwal Google Sheets secara real-time.</div>

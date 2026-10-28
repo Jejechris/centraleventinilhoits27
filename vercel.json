@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "regions": ["sin1"],
   "builds": [
     {
       "src": "src/server.js",
@@ -11,8 +12,5 @@
       "src": "/(.*)",
       "dest": "src/server.js"
     }
-  ],
-  "env": {
-    "DATABASE_URL": "postgresql://postgres.qpoceyupnsqayxcqfgdx:GONTnT5MuHPv6oxE@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres"
-  }
+  ]
 }
