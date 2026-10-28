@@ -20,9 +20,28 @@ function getAllStations(subEventId = null) {
 }
 
 function toggleStationReady(id, username = 'Panitia', subEventId = null) {
-  const targetId = subEventId || subEventsConfig.getActiveSubEventId();
-  const list = getAllStations(targetId);
-  const station = list.find(s => String(s.id) === String(id));
+  let targetId = subEventId;
+  let station = null;
+
+  if (targetId) {
+    const list = getAllStations(targetId);
+    station = list.find(s => String(s.id).toLowerCase() === String(id).toLowerCase() || s.name.toLowerCase().includes(String(id).toLowerCase()));
+  }
+
+  // Jika tidak ditemukan di subEventId yang diberikan, cari di seluruh 4 sub-acara
+  if (!station) {
+    const subs = subEventsConfig.SUB_EVENT_LIST || ['safari', 'startpoint', 'odl', 'technocraft'];
+    for (const subId of subs) {
+      const list = getAllStations(subId);
+      const found = list.find(s => String(s.id).toLowerCase() === String(id).toLowerCase() || s.name.toLowerCase().includes(String(id).toLowerCase()));
+      if (found) {
+        station = found;
+        targetId = subId;
+        break;
+      }
+    }
+  }
+
   if (!station) return null;
 
   station.ready = !station.ready;
@@ -33,7 +52,8 @@ function toggleStationReady(id, username = 'Panitia', subEventId = null) {
   const wibM = String(now.getUTCMinutes()).padStart(2, '0');
   station.updatedAt = `${wibH}:${wibM} WIB (${username})`;
 
-  return station;
+  const subEvent = subEventsConfig.getSubEvent(targetId);
+  return { ...station, subEventId: targetId, subEventName: subEvent?.name || targetId };
 }
 
 function saveStation(subEventId, item) {

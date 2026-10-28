@@ -224,39 +224,39 @@ const WhatsAppDispatcher = {
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-blue-400">!status</div>
-                  <div class="text-slate-300 font-semibold">Status Kesiapan & Hitung Mundur</div>
-                  <div class="text-[11px] text-slate-500 font-mono">Menampilkan progress 72%, H-75 hari, dan pos yang siap.</div>
+                  <div class="font-mono font-extrabold text-blue-400">!status [all/sf/sp/tcp/odl]</div>
+                  <div class="text-slate-300 font-semibold">Status Kesiapan & Countdown</div>
+                  <div class="text-[11px] text-slate-500 font-mono">Rekap kesiapan 4 sub-acara atau per sub-event.</div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-teal-400">!progress [all/sf/tcp/odl/sp]</div>
+                  <div class="font-mono font-extrabold text-teal-400">!progress [all/sf/sp/tcp/odl]</div>
                   <div class="text-slate-300 font-semibold">Progress & Milestone Sub-Divisi</div>
                   <div class="text-[11px] text-slate-500 font-mono">Contoh: <code>!progress all</code> atau <code>!progress tcp</code>.</div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-cyan-400">!database [sf/tcp/odl/sp]</div>
+                  <div class="font-mono font-extrabold text-cyan-400">!database [all/sf/sp/tcp/odl]</div>
                   <div class="text-slate-300 font-semibold">Database Personil Panitia & LO</div>
                   <div class="text-[11px] text-slate-500 font-mono">Contoh: <code>!database sf</code> (Daftar Kasubdiv, Staffli & Staff).</div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-amber-400">!rundown</div>
+                  <div class="font-mono font-extrabold text-amber-400">!rundown [all/sf/sp/tcp/odl]</div>
                   <div class="text-slate-300 font-semibold">Sesi Rundown Live & Berikutnya</div>
-                  <div class="text-[11px] text-slate-500 font-mono">Membaca jadwal Google Sheets secara real-time.</div>
+                  <div class="text-[11px] text-slate-500 font-mono">Jadwal sesi live dan ringkasan agenda agenda sub-acara.</div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-purple-400">!pos</div>
-                  <div class="text-slate-300 font-semibold">Cek Kesiapan 9 Pos Lapangan</div>
-                  <div class="text-[11px] text-slate-500 font-mono">Daftar pos lab, stan departemen, & status standby.</div>
+                  <div class="font-mono font-extrabold text-purple-400">!pos [all/sf/sp/tcp/odl]</div>
+                  <div class="text-slate-300 font-semibold">Checklist Kesiapan Pos Lapangan</div>
+                  <div class="text-[11px] text-slate-500 font-mono">Daftar pos venue, stan departemen, & status standby.</div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
                   <div class="font-mono font-extrabold text-emerald-300">!ready [id_pos]</div>
                   <div class="text-slate-300 font-semibold">Check-in Pos Lapangan oleh LO</div>
-                  <div class="text-[11px] text-slate-500 font-mono">Contoh: <code>!ready dept1</code> (Langsung centang hijau di web).</div>
+                  <div class="text-[11px] text-slate-500 font-mono">Contoh: <code>!ready dept1</code> atau <code>!ready sp_gate</code>.</div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
@@ -266,9 +266,15 @@ const WhatsAppDispatcher = {
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
-                  <div class="font-mono font-extrabold text-rose-400">!planb / !hujan</div>
+                  <div class="font-mono font-extrabold text-rose-400">!planb [all/sf/sp/tcp/odl]</div>
                   <div class="text-slate-300 font-semibold">Protokol Cuaca Hujan (Plan B)</div>
                   <div class="text-[11px] text-slate-500 font-mono">Panduan rute selasar beratap & titik evakuasi peserta.</div>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                  <div class="font-mono font-extrabold text-emerald-400">!kpi [all/sf/sp/tcp/odl]</div>
+                  <div class="text-slate-300 font-semibold">Target & KPI Operasional</div>
+                  <div class="text-[11px] text-slate-500 font-mono">Target kehadiran peserta & kepuasan per sub-event.</div>
                 </div>
 
                 <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">

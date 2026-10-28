@@ -6,6 +6,13 @@ const geminiService = require('./geminiService');
 const driveService = require('./driveService');
 const staffService = require('./staffService');
 
+const SUB_META = {
+  safari: { id: 'safari', abbr: 'sf', code: 'SF', name: 'Safari Faculty', icon: '🏛️', dateStr: '10 Januari 2027' },
+  startpoint: { id: 'startpoint', abbr: 'sp', code: 'SP', name: 'Start Point', icon: '🚀', dateStr: '03 Januari 2027' },
+  odl: { id: 'odl', abbr: 'odl', code: 'ODL', name: 'One Day Lecture', icon: '🎓', dateStr: '16 Januari 2027' },
+  technocraft: { id: 'technocraft', abbr: 'tcp', code: 'TCP', name: 'Technocraft Playhouse', icon: '⚡', dateStr: '23 Januari 2027' }
+};
+
 /**
  * Memproses pesan masuk dari WhatsApp (Personal Chat maupun Grup WA)
  * @param {Object} payload - Data webhook dari Fonnte
@@ -31,7 +38,7 @@ async function handleIncomingMessage(payload) {
     if (!isGroup && /^(halo|hai|p|ping|assalamualaikum|siang|pagi|malam|bot)/i.test(cleanMsg)) {
       return getHelpMessage(senderName);
     }
-    // Jika di grup atau chat pribadi ketik kata kunci langsung (misal: status, rundown, pos, menu, help, database, progress)
+    // Jika di grup atau chat pribadi ketik kata kunci langsung
     if (!/^(status|rundown|pos|menu|help|planb|hujan|kpi|ready|delay|database|db|staff|panitia|progress|prog)\b/i.test(cleanMsg)) {
       return null;
     }
@@ -43,7 +50,6 @@ async function handleIncomingMessage(payload) {
   const args = parts.slice(1).join(' ').trim();
 
   const currentSubId = subEventsConfig.getActiveSubEventId();
-  const subEvent = subEventsConfig.getSubEvent(currentSubId);
 
   switch (command) {
     case 'help':
@@ -52,22 +58,22 @@ async function handleIncomingMessage(payload) {
       return getHelpMessage(senderName);
 
     case 'status':
-      return getStatusMessage(currentSubId, subEvent);
+      return getStatusMessage(args);
 
     case 'progress':
     case 'prog':
       return progressService.formatProgressForWhatsApp(args || 'sf');
 
     case 'rundown':
-      return await getRundownMessage(currentSubId, subEvent);
+      return await getRundownMessage(args);
 
     case 'pos':
     case 'posko':
-      return getStationsMessage(currentSubId, subEvent);
+      return getStationsMessage(args);
 
     case 'ready':
     case 'checkin':
-      return handleStationCheckin(currentSubId, args, senderName);
+      return handleStationCheckin(args, senderName);
 
     case 'delay':
       return handleDelayCommand(args, senderName);
@@ -75,10 +81,10 @@ async function handleIncomingMessage(payload) {
     case 'planb':
     case 'hujan':
     case 'darurat':
-      return getContingencyPlanMessage();
+      return getContingencyPlanMessage(args);
 
     case 'kpi':
-      return getKpiMessage(subEvent);
+      return getKpiMessage(args);
 
     case 'database':
     case 'db':
@@ -104,71 +110,134 @@ function getHelpMessage(name) {
 _Ini Lho ITS! 2027 • Komando Acara Pusat_
 ────────────────────────────
 Halo *${name}*! 👋
-Berikut daftar perintah yang dapat digunakan di grup maupun chat pribadi:
+Central Event terbagi menjadi *4 Sub-Divisi Utama*:
+🏛️ *SF*  : Safari Faculty (10 Jan 2027)
+🚀 *SP*  : Start Point (03 Jan 2027)
+⚡ *TCP* : Technocraft Playhouse (23 Jan 2027)
+🎓 *ODL* : One Day Lecture (16 Jan 2027)
 
-📋 *INFORMASI & JADWAL*
-• *!status* : Rekap kesiapan acara, progress & countdown H-75
-• *!progress [all/sf/tcp/odl/sp]* : Tracker progress & milestone per sub-event (Default: SF)
-• *!rundown* : Sesi rundown live yang sedang berlangsung & sesi berikutnya
-• *!pos* : Status kesiapan seluruh pos lab & titik kumpul
-• *!database [sf/tcp/odl/sp]* : Database personil panitia & LO per sub-divisi (Default: SF)
-• *!kpi* : Target peserta 1.450 dan keterlibatan 39 HMD
+Setiap perintah teknis mendukung parameter *[all/sf/sp/tcp/odl]*:
 
-⚡ *OPERASIONAL & LAPANGAN (LO / KORLAP)*
-• *!ready [kode_pos]* : Check-in kesiapan pos (contoh: *!ready dept1*)
+📋 *INFORMASI & OPERASIONAL*
+• *!status [all/sf/sp/tcp/odl]* : Status kesiapan acara & countdown
+• *!progress [all/sf/sp/tcp/odl]* : Tracker progress & milestone kerja
+• *!rundown [all/sf/sp/tcp/odl]* : Sesi live rundown & jadwal agenda
+• *!pos [all/sf/sp/tcp/odl]* : Checklist kesiapan pos lapangan
+• *!kpi [all/sf/sp/tcp/odl]* : Target peserta & keterlibatan HMD
+• *!planb [all/sf/sp/tcp/odl]* : SOP kontinjensi darurat cuaca hujan
+
+👥 *DATABASE & CHECK-IN LAPANGAN*
+• *!database [all/sf/sp/tcp/odl]* : Database personil panitia & LO
+• *!ready [id_pos]* : Check-in pos lapangan (contoh: *!ready dept1* atau *!ready sp_gate*)
 • *!delay [menit]* : Lapor pergeseran rundown (contoh: *!delay 10*)
-• *!planb* : Panduan rute kontinjensi cuaca hujan / rute selasar
 
 🧠 *AI COPILOT GEMINI 3.5 FLASH*
 • *!tanya [pertanyaan]* : Tanya apa saja seputar acara & berkas drive
-  _(Contoh: !tanya berkas apa saja yang ada di drive?)_
 
 ────────────────────────────
-_Ketik perintah di atas di grup ini kapan saja!_`
+_Ketik perintah di atas di grup atau chat pribadi kapan saja!_`
   );
 }
 
 /**
- * Status Ringkas Kesiapan
+ * Status Ringkas Kesiapan (Mendukung 4 Sub-Divisi & All)
  */
-function getStatusMessage(subId, subEvent) {
-  const dateStatus = sheetsService.getEventDateStatus(subId);
-  const progress = progressService.getProgress(subId) || {};
-  const stations = stageCheckService.getAllStations(subId);
+function getStatusMessage(args = '') {
+  const subKey = subEventsConfig.normalizeSubKey(args);
+
+  if (subKey === 'all') {
+    const subs = ['safari', 'startpoint', 'odl', 'technocraft'];
+    const delay = sheetsService.getDelay();
+    const delayStr = delay > 0 ? `+${delay} Menit Delay` : 'Tepat Waktu (0 Delay)';
+
+    let text = 
+`🎯 *STATUS KESIAPAN 4 SUB-DIVISI CENTRAL EVENT*
+_Ini Lho ITS! 2027 • Laporan Komando Pusat_
+────────────────────────────\n`;
+
+    subs.forEach(id => {
+      const meta = SUB_META[id];
+      const sub = subEventsConfig.getSubEvent(id) || {};
+      const dateStatus = sheetsService.getEventDateStatus(id);
+      const progress = progressService.getProgress(id) || {};
+      const stations = stageCheckService.getAllStations(id);
+      const readyCount = stations.filter(s => s.ready).length;
+
+      text += `${meta.icon} *${meta.name} (${meta.code})*\n`;
+      text += `• Pelaksanaan: ${sub.dateStr || meta.dateStr} (H-${dateStatus.daysUntil ?? '--'} Hari)\n`;
+      text += `• Progres: *${progress.percentage || 0}%* | Pos: *${readyCount}/${stations.length} Siap*\n`;
+      text += `• Target: ${sub.kpi?.targetPeserta || '-'}\n\n`;
+    });
+
+    text += `────────────────────────────
+⏱️ *Status Jadwal:* ${delayStr}
+💡 Ketik: *!status sf* | *!status sp* | *!status tcp* | *!status odl*`;
+    return text;
+  }
+
+  const targetId = subKey || 'safari';
+  const meta = SUB_META[targetId] || SUB_META.safari;
+  const subEvent = subEventsConfig.getSubEvent(targetId);
+  const dateStatus = sheetsService.getEventDateStatus(targetId);
+  const progress = progressService.getProgress(targetId) || {};
+  const stations = stageCheckService.getAllStations(targetId);
   const readyCount = stations.filter(s => s.ready).length;
   const delay = sheetsService.getDelay();
-
   const delayStr = delay > 0 ? `\n⚠️ *Pergeseran Waktu:* +${delay} Menit` : '\n⏱️ *Jadwal:* Sesuai Rundown (0 Menit Delay)';
 
   return (
-`🎯 *STATUS KESIAPAN CENTRAL EVENT*
-_Ini Lho ITS! 2027 • Laporan Komando_
+`🎯 *STATUS KESIAPAN: ${meta.name.toUpperCase()}*
+_Sub-Divisi ${meta.name} (${meta.code}) • Ini Lho ITS! 2027_
 ────────────────────────────
-📌 *Sub-Acara:* ${subEvent.icon || '🏛️'} *${subEvent.name}*
-📅 *Hari-H Pelaksanaan:* 10 Januari 2027
-⏳ *Hitung Mundur:* *H-${dateStatus.daysUntil || 75} Hari* Menuju Hari-H
+📅 *Hari-H Pelaksanaan:* ${subEvent.dateStr || meta.dateStr}
+⏳ *Hitung Mundur:* *H-${dateStatus.daysUntil ?? '--'} Hari* Menuju Hari-H
 📊 *Progress Staff Ahli:* *${progress.percentage || 0}%*
-📝 *Status Lapangan:* ${progress.statusLabel || 'Persiapan Modul & Rute'}
+📝 *Status Lapangan:* ${progress.statusLabel || 'Persiapan konsep & modul'}
 📡 *Kesiapan Pos:* *${readyCount}/${stations.length} Pos Siap*
-👥 *Target Peserta:* 1.450 / 1.500 Hadir
-🏛️ *Himpunan:* 39 HMD ITS (100% Aktif)${delayStr}
+👥 *Target Peserta:* ${subEvent.kpi?.targetPeserta || 'Terkondisikan'}
+🏛️ *Keterlibatan:* ${subEvent.kpi?.keterlibatan || 'Panitia & LO'}${delayStr}
 ────────────────────────────
-Ketik *!rundown* untuk mengecek sesi aktif saat ini.`
+💡 *Cek Sub-Divisi Lainnya:*
+Ketik: *!status all* | *!status sp* | *!status tcp* | *!status odl*`
   );
 }
 
 /**
- * Informasi Rundown Terkini
+ * Informasi Rundown Terkini (Mendukung 4 Sub-Divisi & All)
  */
-async function getRundownMessage(subId, subEvent) {
+async function getRundownMessage(args = '') {
   try {
-    const sessionData = await sheetsService.getCurrentAndNextSession(null, subId);
+    const subKey = subEventsConfig.normalizeSubKey(args);
+
+    if (subKey === 'all') {
+      const subs = ['safari', 'startpoint', 'odl', 'technocraft'];
+      let out = 
+`📋 *JADWAL PELAKSANAAN 4 SUB-DIVISI CENTRAL EVENT*
+_Ini Lho ITS! 2027 • Master Agenda_
+────────────────────────────\n`;
+      for (const id of subs) {
+        const meta = SUB_META[id];
+        const sub = subEventsConfig.getSubEvent(id);
+        const rundown = await sheetsService.getRundown(id);
+        out += `${meta.icon} *${meta.name} (${meta.code})* — ${sub.dateStr}\n`;
+        out += `📍 Venue: ${sub.venue}\n`;
+        out += `⏱️ Total Sesi: ${rundown.length} Agenda Terjadwal\n\n`;
+      }
+      out += `────────────────────────────
+💡 Ketik: *!rundown sf* | *!rundown sp* | *!rundown tcp* | *!rundown odl*`;
+      return out;
+    }
+
+    const targetId = subKey || 'safari';
+    const meta = SUB_META[targetId] || SUB_META.safari;
+    const sessionData = await sheetsService.getCurrentAndNextSession(null, targetId);
+    const rundown = await sheetsService.getRundown(targetId);
     const delay = sheetsService.getDelay();
     const simTime = sheetsService.getSimulationTime();
 
     let output = 
-`📋 *MASTER RUNDOWN LIVE*
-_${subEvent.name} • Ini Lho ITS! 2027_
+`📋 *MASTER RUNDOWN: ${meta.name.toUpperCase()}*
+_Sub-Divisi ${meta.name} (${meta.code}) • Ini Lho ITS! 2027_
 ────────────────────────────\n`;
 
     if (simTime) {
@@ -186,7 +255,7 @@ _${subEvent.name} • Ini Lho ITS! 2027_
 • *Waktu:* ${c.adjustedStart || c.start} - ${c.adjustedEnd || c.end} WIB
 • *PIC:* ${c.pic || 'Koordinator Acara'}\n`;
     } else {
-      output += `\nℹ️ *Status:* Belum ada sesi yang aktif pada jam ini (Fase Persiapan Operasional H-75).\n`;
+      output += `\nℹ️ *Status Sesi:* Belum ada sesi berlangsung saat ini.\n`;
     }
 
     if (sessionData.next) {
@@ -198,7 +267,20 @@ _${subEvent.name} • Ini Lho ITS! 2027_
 • *PIC:* ${n.pic || 'Koordinator Acara'}\n`;
     }
 
-    output += `────────────────────────────\nKetik *!pos* untuk cek kesiapan pos lab.`;
+    if (rundown.length > 0) {
+      output += `\n📑 *Ringkasan Agenda (${rundown.length} Sesi):*\n`;
+      const preview = rundown.slice(0, 5);
+      preview.forEach((r, idx) => {
+        output += `${idx + 1}. [${r.adjustedStart || r.start}-${r.adjustedEnd || r.end}] ${r.title}\n`;
+      });
+      if (rundown.length > 5) {
+        output += `_...dan ${rundown.length - 5} sesi lainnya di web dashboard._\n`;
+      }
+    }
+
+    output += `────────────────────────────
+💡 Ketik: *!rundown all* | *!rundown sp* | *!rundown tcp* | *!rundown odl*
+Ketik *!pos ${meta.abbr}* untuk cek kesiapan pos lapangan.`;
     return output;
   } catch (e) {
     return `❌ Gagal mengambil data rundown: ${e.message}`;
@@ -206,56 +288,86 @@ _${subEvent.name} • Ini Lho ITS! 2027_
 }
 
 /**
- * Daftar Kesiapan Pos Lapangan
+ * Daftar Kesiapan Pos Lapangan (Mendukung 4 Sub-Divisi & All)
  */
-function getStationsMessage(subId, subEvent) {
-  const stations = stageCheckService.getAllStations(subId);
+function getStationsMessage(args = '') {
+  const subKey = subEventsConfig.normalizeSubKey(args);
+
+  if (subKey === 'all') {
+    const subs = ['safari', 'startpoint', 'odl', 'technocraft'];
+    let text = 
+`📡 *REKAP KESIAPAN POS 4 SUB-DIVISI*
+_Ini Lho ITS! 2027 • Checklist Seluruh Venue_
+────────────────────────────\n`;
+    subs.forEach(id => {
+      const meta = SUB_META[id];
+      const stations = stageCheckService.getAllStations(id);
+      const readyCount = stations.filter(s => s.ready).length;
+      text += `${meta.icon} *${meta.name} (${meta.code}):* ${readyCount}/${stations.length} Pos Siap\n`;
+    });
+    text += `\n────────────────────────────
+💡 Ketik: *!pos sf* | *!pos sp* | *!pos tcp* | *!pos odl*`;
+    return text;
+  }
+
+  const targetId = subKey || 'safari';
+  const meta = SUB_META[targetId] || SUB_META.safari;
+  const stations = stageCheckService.getAllStations(targetId);
   const readyCount = stations.filter(s => s.ready).length;
 
   let listStr = stations.map((s, idx) => {
     const icon = s.ready ? '✅' : '⏳';
-    return `${idx + 1}. ${icon} *${s.name}* (${s.id})\n   PIC: ${s.pic} | Status: ${s.ready ? 'SIAP' : 'Menunggu'}`;
+    return `${idx + 1}. ${icon} *${s.name}* (\`${s.id}\`)\n   PIC: ${s.pic} | Status: ${s.ready ? 'SIAP' : 'Menunggu'}`;
   }).join('\n');
 
   return (
-`📡 *CHECKLIST KESIAPAN POS LAPANGAN*
-_${subEvent.name} • ${readyCount}/${stations.length} Pos Siap_
+`📡 *CHECKLIST POS: ${meta.name.toUpperCase()}*
+_Sub-Divisi ${meta.name} (${meta.code}) • ${readyCount}/${stations.length} Pos Siap_
 ────────────────────────────
-${listStr}
+${listStr || '_Belum ada pos terdaftar._'}
 ────────────────────────────
-💡 *Cara Check-in Pos (Untuk LO / Penjaga Pos):*
-Ketik: *!ready [id_pos]*
-_Contoh: !ready dept1 atau !ready gate_`
+💡 *Check-in Pos (Untuk LO / Penjaga Pos):*
+Ketik: *!ready [id_pos]* (contoh: *!ready ${stations[0]?.id || 'gate'}*)
+
+💡 *Cek Sub-Divisi Lain:*
+Ketik: *!pos all* | *!pos sp* | *!pos tcp* | *!pos odl*`
   );
 }
 
 /**
- * Check-in Pos oleh LO
+ * Check-in Pos oleh LO (Mencakup 4 Sub-Divisi)
  */
-function handleStationCheckin(subId, stationArg, username) {
-  if (!stationArg) {
-    return `⚠️ Harap masukkan ID Pos yang ingin di-check-in.\nContoh: *!ready dept1* atau *!ready gate*\nKetik *!pos* untuk melihat daftar ID Pos.`;
+function handleStationCheckin(args, username) {
+  if (!args) {
+    return `⚠️ Harap masukkan ID Pos yang ingin di-check-in.\nContoh: *!ready dept1* atau *!ready sp_gate*\nKetik *!pos sf* atau *!pos sp* untuk melihat daftar ID Pos.`;
   }
 
-  const cleanId = stationArg.toLowerCase().trim();
-  const stations = stageCheckService.getAllStations(subId);
-  const found = stations.find(s => s.id.toLowerCase() === cleanId || s.name.toLowerCase().includes(cleanId));
+  const parts = args.trim().split(/\s+/);
+  let targetSub = null;
+  let stationArg = args.trim();
 
-  if (!found) {
-    return `❌ Pos dengan ID *"${stationArg}"* tidak ditemukan.\nKetik *!pos* untuk melihat daftar pos yang tersedia.`;
+  // Jika format: !ready sp sp_gate
+  if (parts.length >= 2 && subEventsConfig.normalizeSubKey(parts[0])) {
+    targetSub = subEventsConfig.normalizeSubKey(parts[0]);
+    stationArg = parts.slice(1).join(' ').trim();
   }
 
-  const updated = stageCheckService.toggleStationReady(found.id, username, subId);
+  const updated = stageCheckService.toggleStationReady(stationArg, username, targetSub);
+
+  if (!updated) {
+    return `❌ Pos dengan ID *"${stationArg}"* tidak ditemukan di sub-divisi manapun.\nKetik *!pos all* untuk melihat daftar pos yang tersedia di 4 sub-acara.`;
+  }
 
   return (
 `✅ *KONFIRMASI CHECK-IN POS LAPANGAN*
 ────────────────────────────
-📍 *Pos:* *${updated.name}* (${updated.id})
+📌 *Sub-Divisi:* *${updated.subEventName}*
+📍 *Pos:* *${updated.name}* (\`${updated.id}\`)
 📊 *Status Sekarang:* ${updated.ready ? '✅ SIAP & STANDBY' : '⏳ KEMBALI DALAM PERSIAPAN'}
 👤 *Diverifikasi Oleh:* ${username}
 ⏰ *Waktu:* ${updated.updatedAt}
 ────────────────────────────
-Status otomatis disinkronkan ke Master Command Dashboard!`
+Status otomatis tersinkronisasi realtime ke Master Command Deck!`
   );
 }
 
@@ -287,40 +399,95 @@ Seluruh durasi sesi di web dashboard otomatis disesuaikan!`
 }
 
 /**
- * SOP Kontinjensi Darurat Cuaca Hujan
+ * SOP Kontinjensi Darurat Cuaca Hujan (Mendukung 4 Sub-Divisi & All)
  */
-function getContingencyPlanMessage() {
-  return (
-`🚨 *SOP KONTINJENSI CUACA HUJAN (PLAN B)*
-_Ini Lho ITS! 2027 • Protokol Evakuasi & Jalur Tertutup_
-────────────────────────────
-🌧️ *Jika Hujan Deras Turun Saat Safari:*
-1. *Rute Selasar:* Seluruh LO kluster wajib mengarahkan rombongan melalui selasar beratap gedung fakultas.
-2. *Titik Evakuasi Kluster:*
-   • Kluster Sains: Selasar Menara Sains & Hall FSAD
-   • Kluster Teknologi Industri: Selasar Departemen Mesin & Elektro FTIRS
-   • Kluster Vokasi & Sipil: Hall Gedung Riset & Selasar FTSPK
-3. *Logistik:* Tim K3 & Perlengkapan siaga di titik persimpangan dengan payung evakuasi.
-4. *Penyesuaian Waktu:* Durasi per pos dipadatkan -5 menit untuk menghindari kepulangan malam.
+function getContingencyPlanMessage(args = '') {
+  const subKey = subEventsConfig.normalizeSubKey(args);
 
-_Command Center standby memantau keselamatan peserta._`
+  if (subKey === 'all' || !args) {
+    const subs = ['safari', 'startpoint', 'odl', 'technocraft'];
+    let text = 
+`🚨 *SOP KONTINJENSI CUACA HUJAN (PLAN B) 4 SUB-DIVISI*
+_Ini Lho ITS! 2027 • Protokol Evakuasi & Jalur Tertutup_
+────────────────────────────\n`;
+
+    subs.forEach(id => {
+      const meta = SUB_META[id];
+      const sub = subEventsConfig.getSubEvent(id) || {};
+      text += `${meta.icon} *${meta.name} (${meta.code}):*\n`;
+      text += `${sub.contingency || 'Mengikuti SOP umum panitia Central Event.'}\n\n`;
+    });
+
+    text += `────────────────────────────
+⚠️ *Instruksi Lapangan:* Seluruh LO Kluster koordinasi via HT Ch 1 & pantau titik persimpangan beratap.
+💡 Ketik: *!planb sf* | *!planb sp* | *!planb tcp* | *!planb odl*`;
+    return text;
+  }
+
+  const targetId = subKey || 'safari';
+  const meta = SUB_META[targetId] || SUB_META.safari;
+  const subEvent = subEventsConfig.getSubEvent(targetId) || {};
+
+  return (
+`🚨 *SOP KONTINJENSI PLAN B: ${meta.name.toUpperCase()}*
+_Sub-Divisi ${meta.name} (${meta.code}) • Protokol Evakuasi_
+────────────────────────────
+🌧️ *Protokol Darurat & Hujan:*
+${subEvent.contingency || 'Mengikuti SOP umum panitia Central Event.'}
+
+📋 *Instruksi Utama:*
+1. *Rute Evakuasi:* Arahkan peserta ke selasar dan hall tertutup terdekat.
+2. *Logistik K3:* Tim Medis & Logistik siaga membawa payung evakuasi & P3K.
+3. *Komunikasi:* Seluruh PIC standby pada jalur komunikasi HT utama.
+────────────────────────────
+💡 *Cek Sub-Divisi Lain:*
+Ketik: *!planb all* | *!planb sp* | *!planb tcp* | *!planb odl*`
   );
 }
 
 /**
- * Target KPI
+ * Target KPI (Mendukung 4 Sub-Divisi & All)
  */
-function getKpiMessage(subEvent) {
+function getKpiMessage(args = '') {
+  const subKey = subEventsConfig.normalizeSubKey(args);
+
+  if (subKey === 'all' || !args) {
+    const subs = ['safari', 'startpoint', 'odl', 'technocraft'];
+    let text = 
+`📊 *TARGET & KPI 4 SUB-DIVISI CENTRAL EVENT*
+_Ini Lho ITS! 2027 • Scorecard Operasional_
+────────────────────────────\n`;
+
+    subs.forEach(id => {
+      const meta = SUB_META[id];
+      const sub = subEventsConfig.getSubEvent(id) || {};
+      const kpi = sub.kpi || {};
+      text += `${meta.icon} *${meta.name} (${meta.code})*\n`;
+      text += `• Target Peserta: ${kpi.targetPeserta || '-'}\n`;
+      text += `• Keterlibatan: ${kpi.keterlibatan || '-'}\n`;
+      text += `• Indeks Kepuasan: ${kpi.kepuasan || '-'}\n\n`;
+    });
+
+    text += `────────────────────────────
+💡 Ketik: *!kpi sf* | *!kpi sp* | *!kpi tcp* | *!kpi odl*`;
+    return text;
+  }
+
+  const targetId = subKey || 'safari';
+  const meta = SUB_META[targetId] || SUB_META.safari;
+  const subEvent = subEventsConfig.getSubEvent(targetId) || {};
   const kpi = subEvent.kpi || {};
+
   return (
-`📊 *TARGET & KPI CENTRAL EVENT*
-_${subEvent.name} • Ini Lho ITS! 2027_
+`📊 *TARGET & KPI: ${meta.name.toUpperCase()}*
+_Sub-Divisi ${meta.name} (${meta.code}) • Ini Lho ITS! 2027_
 ────────────────────────────
-👥 *Target Peserta:* ${kpi.targetPeserta || '1.450 / 1.500 Hadir'}
-🏛️ *Keterlibatan HMD:* ${kpi.keterlibatan || '39 HMD (100%)'}
+👥 *Target Peserta:* ${kpi.targetPeserta || 'Terkondisikan'}
+🏛️ *Keterlibatan:* ${kpi.keterlibatan || 'Panitia & LO'}
 ⭐ *Indeks Kepuasan:* ${kpi.kepuasan || 'Target 0.85 (Sangat Puas)'}
 ────────────────────────────
-Semangat mengawal kesuksesan Central Event!`
+💡 *Cek Sub-Divisi Lain:*
+Ketik: *!kpi all* | *!kpi sp* | *!kpi tcp* | *!kpi odl*`
   );
 }
 
@@ -347,14 +514,14 @@ async function handleAiQuery(question, username, subId) {
 `🤖 *GEMINI 3.5 FLASH COPILOT*
 ────────────────────────────
 💬 *Pertanyaan dari ${username}:*
-_"${question}"_
+_${question}_
 
 💡 *Jawaban:*
 ${answer}
 ────────────────────────────
 _Asisten AI Resmi Central Event ILI 2027_`
-    );
-  } catch (err) {
+  );
+} catch (err) {
     return `❌ AI Copilot sedang sibuk: ${err.message}`;
   }
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id" class="light light-theme">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,7 @@
   <script>
     (function() {
       try {
-        const theme = localStorage.getItem('ce_theme') || 'dark';
+        const migration = 'ce_theme_default_light_v1'; if (!localStorage.getItem(migration)) { localStorage.setItem('ce_theme', 'light'); localStorage.setItem(migration, 'true'); } const theme = localStorage.getItem('ce_theme') || 'light';
         if (theme === 'light') {
           document.documentElement.classList.remove('dark');
           document.documentElement.classList.add('light', 'light-theme');
@@ -27,7 +27,7 @@
   </script>
   
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#07090E">
+  <meta name="theme-color" content="#F0F4F8">
   <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
 
   <script src="https://cdn.tailwindcss.com"></script>

@@ -1,11 +1,18 @@
 /**
  * CENTRAL EVENT 2027 — THEME & AUDIO MODULE
- * Manages Dark/Light mode toggle, Web Audio API sound synthesizer, and UI Toasts.
+ * Manages Light/Dark mode toggle (Default: Light Mode), Web Audio API sound synthesizer, and UI Toasts.
  */
 
+// Auto-migrate default to Light theme on first run
+const CE_THEME_MIGRATION = 'ce_theme_default_light_v1';
+if (typeof localStorage !== 'undefined' && !localStorage.getItem(CE_THEME_MIGRATION)) {
+  localStorage.setItem('ce_theme', 'light');
+  localStorage.setItem(CE_THEME_MIGRATION, 'true');
+}
+
 const ThemeManager = {
-  theme: localStorage.getItem('ce_theme') || 'dark',
-  audioEnabled: localStorage.getItem('ce_audio') !== 'false',
+  theme: (typeof localStorage !== 'undefined' && localStorage.getItem('ce_theme')) || 'light',
+  audioEnabled: typeof localStorage !== 'undefined' ? localStorage.getItem('ce_audio') !== 'false' : true,
 
   init() {
     this.applyTheme(this.theme);
