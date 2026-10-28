@@ -328,8 +328,7 @@ const SUB_EVENT_META = {
  */
 function normalizeSubKey(key = '') {
   const clean = String(key || '').toLowerCase().trim().replace(/[-_]/g, '');
-  if (!clean) return 'sf';
-  if (clean === 'all' || clean === 'semua') return 'all';
+  if (!clean || clean === 'all' || clean === 'semua') return 'all';
   if (clean === 'sf' || clean === 'safari' || clean === 'safarifaculty') return 'safari';
   if (clean === 'sp' || clean === 'startpoint' || clean === 'start') return 'startpoint';
   if (clean === 'odl' || clean === 'onedaylecture') return 'odl';
@@ -353,7 +352,7 @@ function renderProgressBar(percentage) {
  * @param {string} subArg - 'all', 'sf', 'tcp', 'odl', 'sp'
  * @returns {Promise<string>} - Teks terformat siap kirim via WhatsApp
  */
-async function formatProgressForWhatsApp(subArg = 'sf') {
+async function formatProgressForWhatsApp(subArg = 'all') {
   await refreshFromDatabase();
   const normalized = normalizeSubKey(subArg);
 

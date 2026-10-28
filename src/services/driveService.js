@@ -129,7 +129,7 @@ function parseDriveRow(id, rowHtml) {
     size: isFolder ? 'Folder' : (size || 'File'),
     date: date || 'Terbaru',
     previewUrl: isFolder ? null : (type === 'sheet' ? `https://docs.google.com/spreadsheets/d/${id}/htmlembed?widget=true` : `https://drive.google.com/file/d/${id}/preview`),
-    editUrl: type === 'sheet' ? `https://docs.google.com/spreadsheets/d/${id}/edit?embedded=true&rm=minimal` : null,
+    editUrl: type === 'sheet' ? `https://docs.google.com/spreadsheets/d/${id}/edit?embedded=true` : null,
     externalUrl: isFolder ? `https://drive.google.com/drive/folders/${id}` : `https://drive.google.com/file/d/${id}/view`,
     url: isFolder ? `https://drive.google.com/drive/folders/${id}` : `https://drive.google.com/file/d/${id}/view`,
     isLocalUpload: false

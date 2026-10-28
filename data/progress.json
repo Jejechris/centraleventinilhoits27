@@ -4,10 +4,10 @@
     "name": "Safari Faculty",
     "icon": "🏛️",
     "code": "SF-01",
-    "percentage": 7,
+    "percentage": 40,
     "statusLabel": "Penyusunan Modul Lab & Plotting Alur 6 Departemen",
-    "updatedBy": "Staff Ahli (Staff Ahli)",
-    "updatedAt": "2026-10-28T05:27:53.741Z",
+    "updatedBy": "Staff Ahli (Panitia CE)",
+    "updatedAt": "2026-10-28T05:33:02.874Z",
     "milestones": [
       {
         "id": "sf_m1",

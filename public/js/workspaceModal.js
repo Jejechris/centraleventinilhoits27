@@ -947,6 +947,9 @@ const WorkspaceModal = {
     this.activeView = 'viewer';
     this.activeFile = file;
 
+    // Default Full View (Layar Penuh 100vw x 100vh) untuk pratinjau berkas & spreadsheet
+    this.toggleFullscreen(true);
+
     document.getElementById('wsExplorerContainer')?.classList.add('hidden');
     document.getElementById('wsViewerContainer')?.classList.remove('hidden');
 
@@ -981,7 +984,7 @@ const WorkspaceModal = {
       const cleanId = file.sheetId || (file.id && !file.id.startsWith('sheet_') && !file.id.startsWith('local_') ? file.id : null);
       if (cleanId) {
         if (!file.editUrl) {
-          file.editUrl = `https://docs.google.com/spreadsheets/d/${cleanId}/edit?embedded=true&rm=minimal`;
+          file.editUrl = `https://docs.google.com/spreadsheets/d/${cleanId}/edit?embedded=true`;
         }
         if (!file.previewUrl) {
           file.previewUrl = `https://docs.google.com/spreadsheets/d/${cleanId}/htmlembed?widget=true`;
@@ -991,7 +994,7 @@ const WorkspaceModal = {
         // Safari Faculty always has the verified official Google Sheet ID
         const safariId = this.sheetId || '1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0';
         file.sheetId = safariId;
-        file.editUrl = `https://docs.google.com/spreadsheets/d/${safariId}/edit?embedded=true&rm=minimal`;
+        file.editUrl = `https://docs.google.com/spreadsheets/d/${safariId}/edit?embedded=true`;
         file.previewUrl = `https://docs.google.com/spreadsheets/d/${safariId}/htmlembed?widget=true`;
         file.isConfigured = true;
       }
@@ -1109,10 +1112,10 @@ const WorkspaceModal = {
       switches.innerHTML = `
         <div class="bay-recessed p-0.5 border border-white/10 rounded-lg flex items-center">
           <button onclick="WorkspaceModal.setFileSheetMode('edit')" id="wsSheetEditBtn" class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition bg-blue-600 text-white">
-            ✏️ Edit Live
+            ✏️ Full Editor (Menu & Toolbar)
           </button>
           <button onclick="WorkspaceModal.setFileSheetMode('preview')" id="wsSheetPrevBtn" class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition text-slate-400 hover:text-white">
-            👁️ Pratinjau
+            👁️ Pratinjau Grid
           </button>
         </div>
       `;
@@ -1354,7 +1357,7 @@ const WorkspaceModal = {
     if (mode === 'edit') {
       if (editBtn) editBtn.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition bg-blue-600 text-white';
       if (prevBtn) prevBtn.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition text-slate-400 hover:text-white';
-      if (iframe) iframe.src = this.activeFile.editUrl || `https://docs.google.com/spreadsheets/d/${this.activeFile.id}/edit?embedded=true&rm=minimal`;
+      if (iframe) iframe.src = this.activeFile.editUrl || `https://docs.google.com/spreadsheets/d/${this.activeFile.id}/edit?embedded=true`;
     } else {
       if (editBtn) editBtn.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition text-slate-400 hover:text-white';
       if (prevBtn) prevBtn.className = 'px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition bg-blue-600 text-white';
@@ -1440,7 +1443,7 @@ const WorkspaceModal = {
         icon: '🏛️',
         type: 'google',
         isConfigured: true,
-        editUrl: `https://docs.google.com/spreadsheets/d/${safariId}/edit?embedded=true&rm=minimal`,
+        editUrl: `https://docs.google.com/spreadsheets/d/${safariId}/edit?embedded=true`,
         previewUrl: `https://docs.google.com/spreadsheets/d/${safariId}/htmlembed?widget=true`,
         externalUrl: `https://docs.google.com/spreadsheets/d/${safariId}/edit`,
         date: 'Aktif Terhubung',

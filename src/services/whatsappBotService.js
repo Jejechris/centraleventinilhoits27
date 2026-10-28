@@ -57,14 +57,14 @@ async function handleIncomingMessage(payload) {
       return getHelpMessage(senderName);
 
     case 'status':
-      return await getStatusMessage(args);
+      return await getStatusMessage(args || 'all');
 
     case 'progress':
     case 'prog':
-      return await progressService.formatProgressForWhatsApp(args || 'sf');
+      return await progressService.formatProgressForWhatsApp(args || 'all');
 
     case 'rundown':
-      return await getRundownMessage(args);
+      return await getRundownMessage(args || 'all');
 
     case 'delay':
       return handleDelayCommand(args, senderName);
@@ -72,16 +72,16 @@ async function handleIncomingMessage(payload) {
     case 'planb':
     case 'hujan':
     case 'darurat':
-      return getContingencyPlanMessage(args);
+      return getContingencyPlanMessage(args || 'all');
 
     case 'kpi':
-      return getKpiMessage(args);
+      return getKpiMessage(args || 'all');
 
     case 'database':
     case 'db':
     case 'staff':
     case 'panitia':
-      return staffService.formatStaffForWhatsApp(args || 'sf');
+      return staffService.formatStaffForWhatsApp(args || 'all');
 
     case 'tanya':
     case 'ai':

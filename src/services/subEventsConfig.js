@@ -259,11 +259,11 @@ const SUB_EVENT_ABBRS = {
  */
 function normalizeSubKey(key = '') {
   const clean = String(key || '').toLowerCase().trim().replace(/[-_]/g, '');
-  if (!clean || clean === 'sf' || clean === 'safari' || clean === 'safarifaculty') return 'safari';
+  if (!clean || clean === 'all' || clean === 'semua') return 'all';
+  if (clean === 'sf' || clean === 'safari' || clean === 'safarifaculty') return 'safari';
   if (clean === 'sp' || clean === 'startpoint' || clean === 'start') return 'startpoint';
   if (clean === 'odl' || clean === 'onedaylecture') return 'odl';
   if (clean === 'tcp' || clean === 'tc' || clean === 'technocraft' || clean === 'techno' || clean === 'technocraftplayhouse') return 'technocraft';
-  if (clean === 'all' || clean === 'semua') return 'all';
   return null;
 }
 

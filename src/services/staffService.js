@@ -42,12 +42,12 @@ function saveStaffData(data) {
  */
 function normalizeSubEventKey(key = '') {
   const clean = String(key || '').toLowerCase().trim();
-  if (!clean || clean === 'sf' || clean === 'safari') return 'safari';
+  if (!clean || clean === 'all' || clean === 'semua') return 'all';
+  if (clean === 'sf' || clean === 'safari') return 'safari';
   if (clean === 'sp' || clean === 'startpoint' || clean === 'start_point') return 'startpoint';
   if (clean === 'odl' || clean === 'onedaylecture') return 'odl';
   if (clean === 'tcp' || clean === 'tc' || clean === 'technocraft' || clean === 'techno') return 'technocraft';
-  if (clean === 'all' || clean === 'semua') return 'all';
-  return 'safari';
+  return 'all';
 }
 
 function getStaffBySubEvent(subKey) {
@@ -63,7 +63,7 @@ function getAllStaff() {
 /**
  * Format database staff untuk balasan WhatsApp yang estetik, rapi, dan cepat
  */
-function formatStaffForWhatsApp(subKey = 'safari') {
+function formatStaffForWhatsApp(subKey = 'all') {
   const data = loadStaffData();
   const normalized = normalizeSubEventKey(subKey);
 
