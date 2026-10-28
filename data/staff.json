@@ -3,145 +3,83 @@
     "subEventId": "safari",
     "name": "Safari Faculty",
     "code": "SF-01",
-    "tagline": "Eksplorasi Kampus, 6 Kluster Fakultas & 39 Departemen ITS",
     "totalStaff": 14,
-    "leadership": {
-      "kasubdiv": "Damar",
-      "wakasubdiv": "Winan"
-    },
     "staffList": [
       {
         "id": "sf_01",
         "name": "Damar",
         "role": "Kasubdiv",
-        "position": "Kepala Sub-Divisi Safari Faculty (Pimpinan Utama)",
-        "dept": "Central Event ITS 2027",
-        "cluster": "Pimpinan Penuh / Komando Utama",
-        "status": "Aktif",
         "isLeader": true
       },
       {
         "id": "sf_02",
         "name": "Winan",
         "role": "Wakasubdiv",
-        "position": "Wakil Kepala Sub-Divisi Safari Faculty",
-        "dept": "Central Event ITS 2027",
-        "cluster": "Pimpinan Penuh / Komando Lapangan",
-        "status": "Aktif",
         "isLeader": true
       },
       {
         "id": "sf_03",
         "name": "ATAR",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Staff Ahli Safari Faculty (Slot 1)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Supervisi & Konsep",
-        "status": "Aktif",
+        "role": "Staffli",
         "isStaffli": true
       },
       {
         "id": "sf_04",
         "name": "ALYSSA",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Staff Ahli Safari Faculty (Slot 2)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Supervisi & Konsep",
-        "status": "Aktif",
+        "role": "Staffli",
         "isStaffli": true
       },
       {
         "id": "sf_05",
         "name": "SYAFA",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Staff Ahli Safari Faculty (Slot 3)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Supervisi & Konsep",
-        "status": "Aktif",
+        "role": "Staffli",
         "isStaffli": true
       },
       {
         "id": "sf_06",
         "name": "ZORA",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Staff Ahli Safari Faculty (Slot 4)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Supervisi & Konsep",
-        "status": "Aktif",
+        "role": "Staffli",
         "isStaffli": true
       },
       {
         "id": "sf_07",
         "name": "SALSA",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 5)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "status": "Aktif"
+        "role": "Staff"
       },
       {
         "id": "sf_08",
         "name": "KIRANA",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 6)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "status": "Aktif"
+        "role": "Staff"
       },
       {
         "id": "sf_09",
         "name": "ANGGA",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 7)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "status": "Aktif"
+        "role": "Staff"
       },
       {
         "id": "sf_10",
         "name": "Dzikrie",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 8)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "status": "Aktif"
+        "role": "Staff"
       },
       {
         "id": "sf_11",
         "name": "Senna",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 9)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "phone": "6282342815719",
-        "status": "Aktif"
+        "role": "Staff"
       },
       {
         "id": "sf_12",
         "name": "GEB",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 10)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "status": "Aktif"
+        "role": "Staff"
       },
       {
         "id": "sf_13",
         "name": "BILQISTH",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 11)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "status": "Aktif"
+        "role": "Staff"
       },
       {
         "id": "sf_14",
-        "name": "[Staff 8 - Menunggu Konfirmasi]",
-        "role": "Staff",
-        "position": "Staff Pelaksana Safari Faculty (Slot 12)",
-        "dept": "Safari Faculty CE 2027",
-        "cluster": "Operasional Lapangan",
-        "status": "Menunggu Konfirmasi"
+        "name": "[Menunggu Konfirmasi]",
+        "role": "Staff"
       }
     ]
   },
@@ -149,23 +87,18 @@
     "subEventId": "startpoint",
     "name": "Start Point",
     "code": "SP-02",
-    "tagline": "Pusat Registrasi Akbar, Pengondisian Kluster & Mobilisasi Awal",
     "totalStaff": 2,
     "staffList": [
       {
         "id": "sp_01",
         "name": "Damar",
         "role": "Kasubdiv",
-        "position": "Pimpinan Koordinasi Sub-Divisi",
-        "status": "Aktif",
         "isLeader": true
       },
       {
         "id": "sp_02",
         "name": "Winan",
         "role": "Wakasubdiv",
-        "position": "Wakil Pimpinan Koordinasi Sub-Divisi",
-        "status": "Aktif",
         "isLeader": true
       }
     ]
@@ -174,23 +107,18 @@
     "subEventId": "odl",
     "name": "One Day Lecture",
     "code": "ODL-03",
-    "tagline": "Simulasi Perkuliahan Nyata Interaktif Bersama Dosen ITS",
     "totalStaff": 2,
     "staffList": [
       {
         "id": "odl_01",
         "name": "Damar",
         "role": "Kasubdiv",
-        "position": "Pimpinan Koordinasi Sub-Divisi",
-        "status": "Aktif",
         "isLeader": true
       },
       {
         "id": "odl_02",
         "name": "Winan",
         "role": "Wakasubdiv",
-        "position": "Wakil Pimpinan Koordinasi Sub-Divisi",
-        "status": "Aktif",
         "isLeader": true
       }
     ]
@@ -199,23 +127,18 @@
     "subEventId": "technocraft",
     "name": "Technocraft Playhouse",
     "code": "TC-04",
-    "tagline": "Wahana Eksperimen Sains, Robotika & Inovasi Teknologi Kreatif",
     "totalStaff": 2,
     "staffList": [
       {
         "id": "tc_01",
         "name": "Damar",
         "role": "Kasubdiv",
-        "position": "Pimpinan Koordinasi Sub-Divisi",
-        "status": "Aktif",
         "isLeader": true
       },
       {
         "id": "tc_02",
         "name": "Winan",
         "role": "Wakasubdiv",
-        "position": "Wakil Pimpinan Koordinasi Sub-Divisi",
-        "status": "Aktif",
         "isLeader": true
       }
     ]

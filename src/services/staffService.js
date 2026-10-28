@@ -107,47 +107,34 @@ Ketik:
   const regularStaff = staffList.filter(s => !leaders.includes(s) && !staffli.includes(s));
 
   let out = 
-`👥 *DATABASE STAFF: ${subData.name.toUpperCase()} (${subData.code})*
-_Ini Lho ITS! 2027 • Divisi Acara Pusat_
-────────────────────────────
-📌 *Sub-Acara:* ${subData.name}
-👥 *Total Terdata:* ${staffList.length} Personil
-🎯 *Fokus:* ${subData.tagline || '-'}
+`👥 *DATABASE STAFF: ${subData.name.toUpperCase()}*
 ────────────────────────────\n`;
 
   let counter = 1;
 
   if (leaders.length > 0) {
-    out += `👑 *PIMPINAN SUB-DIVISI (PEMEGANG KUASA):*\n`;
+    out += `*Pimpinan Sub-Divisi:*\n`;
     leaders.forEach(s => {
-      const phoneClean = s.phone ? (s.phone.startsWith('62') ? ` • WA: +${s.phone}` : ` • WA: ${s.phone}`) : '';
-      out += `${counter++}. *${s.name}* — *${s.role}* (Pimpinan Tertinggi)\n`;
-      out += `   • Posisi: ${s.position || '-'}${phoneClean} [${s.status || 'Aktif'}]\n\n`;
+      out += `${counter++}. *${s.name}* (${s.role})\n`;
     });
   }
 
   if (staffli.length > 0) {
-    out += `⭐ *STAFF AHLI (STAFFLI - 4 PERSONIL):*\n`;
+    out += `\n*Staffli:*\n`;
     staffli.forEach(s => {
-      const phoneClean = s.phone ? (s.phone.startsWith('62') ? ` • WA: +${s.phone}` : ` • WA: ${s.phone}`) : '';
-      out += `${counter++}. *${s.name}* (${s.role})\n`;
-      out += `   • Posisi: ${s.position || '-'}${phoneClean} [${s.status || 'Aktif'}]\n\n`;
+      out += `${counter++}. *${s.name}*\n`;
     });
   }
 
   if (regularStaff.length > 0) {
-    out += `🛡️ *STAFF PELAKSANA / OPERASIONAL (8 PERSONIL):*\n`;
+    out += `\n*Staff:*\n`;
     regularStaff.forEach(s => {
-      const phoneClean = s.phone ? (s.phone.startsWith('62') ? ` • WA: +${s.phone}` : ` • WA: ${s.phone}`) : '';
-      const statusBadge = s.status === 'Menunggu Konfirmasi' ? '⏳ Menunggu Konfirmasi' : 'Aktif';
-      out += `${counter++}. *${s.name}* (${s.role})\n`;
-      out += `   • Posisi: ${s.position || '-'}${phoneClean} [${statusBadge}]\n\n`;
+      out += `${counter++}. *${s.name}*\n`;
     });
   }
 
   out += `────────────────────────────
-💡 *Akses Cepat Sub-Divisi Lain:*
-Ketik: *!database sf* | *!database sp* | *!database odl* | *!database tc*`;
+💡 Ketik: !database odl | !database sp | !database tc`;
 
   return out;
 }
