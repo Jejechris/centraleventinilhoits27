@@ -4,6 +4,8 @@ const path = require('path');
 const DATA_FILE = path.join(__dirname, '../../data/progress.json');
 
 let progressData = {};
+let lastFetchedFromDb = 0;
+const CACHE_TTL_MS = 2500; // 2.5 detik cache TTL untuk performa tinggi & respons instan
 
 function loadLocal() {
   try {
@@ -20,13 +22,16 @@ function saveLocal() {
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(progressData, null, 2), 'utf8');
   } catch (err) {
-    console.error('Error writing progress.json:', err.message);
+    // Di serverless Vercel filesystem bisa read-only; abaikan error tulis lokal
   }
 }
 
-// Initial load
+// Initial fallback load dari berkas lokal
 loadLocal();
 
+/**
+ * Sinkronisasi data satu sub-divisi ke tabel progress_trackers di Supabase Cloud (UPSERT)
+ */
 async function syncToSupabase(subEventId) {
   try {
     const db = require('../db');
@@ -43,62 +48,103 @@ async function syncToSupabase(subEventId) {
         updated_by = EXCLUDED.updated_by,
         updated_at = NOW();
     `, [
-      item.subEventId,
-      item.percentage || 0,
+      item.subEventId || subEventId,
+      typeof item.percentage === 'number' ? item.percentage : (parseInt(item.percentage, 10) || 0),
       item.statusLabel || '',
       JSON.stringify(item.milestones || []),
       item.updatedBy || 'Staff Ahli'
     ]);
+
+    lastFetchedFromDb = Date.now();
   } catch (err) {
-    console.warn(`Supabase progress sync warning (${subEventId}):`, err.message);
+    console.warn(`⚠️ Supabase progress sync warning (${subEventId}):`, err.message);
   }
 }
 
-async function initFromSupabase() {
+/**
+ * Mengambil status terbaru dari Supabase PostgreSQL secara aktif
+ */
+async function refreshFromDatabase(force = false) {
+  if (!force && lastFetchedFromDb && (Date.now() - lastFetchedFromDb < CACHE_TTL_MS)) {
+    return progressData;
+  }
+
   try {
     const db = require('../db');
     const res = await db.query('SELECT * FROM progress_trackers');
-    if (res.rows && res.rows.length > 0) {
+    if (res && res.rows && res.rows.length > 0) {
       for (const row of res.rows) {
-        if (progressData[row.sub_event_id]) {
-          progressData[row.sub_event_id].percentage = row.percentage;
-          progressData[row.sub_event_id].statusLabel = row.status_label;
-          progressData[row.sub_event_id].updatedBy = row.updated_by;
-          progressData[row.sub_event_id].updatedAt = row.updated_at;
-          if (row.milestones) {
-            progressData[row.sub_event_id].milestones = typeof row.milestones === 'string'
-              ? JSON.parse(row.milestones)
-              : row.milestones;
-          }
+        const subId = row.sub_event_id;
+        if (!progressData[subId]) {
+          const meta = SUB_EVENT_META[subId] || { name: subId, icon: '📊', code: subId.toUpperCase() };
+          progressData[subId] = {
+            subEventId: subId,
+            name: meta.name || subId,
+            icon: meta.icon || '📊',
+            code: meta.code || subId.toUpperCase(),
+            percentage: 0,
+            statusLabel: '',
+            updatedBy: 'Sistem Central Event',
+            updatedAt: new Date().toISOString(),
+            milestones: []
+          };
+        }
+        progressData[subId].percentage = typeof row.percentage === 'number' ? row.percentage : (parseInt(row.percentage, 10) || 0);
+        progressData[subId].statusLabel = row.status_label || '';
+        progressData[subId].updatedBy = row.updated_by || 'Staff Ahli';
+        progressData[subId].updatedAt = row.updated_at || new Date().toISOString();
+        if (row.milestones) {
+          progressData[subId].milestones = typeof row.milestones === 'string'
+            ? JSON.parse(row.milestones)
+            : row.milestones;
         }
       }
+      lastFetchedFromDb = Date.now();
       saveLocal();
     } else {
-      // Seed initial local data into Supabase
+      // Seed awal jika tabel Supabase kosong
       for (const subId of Object.keys(progressData)) {
         await syncToSupabase(subId);
       }
+      lastFetchedFromDb = Date.now();
     }
   } catch (err) {
-    console.warn('Could not sync progress from Supabase on start:', err.message);
+    console.warn('⚠️ Supabase progress fetch warning (menggunakan cache):', err.message);
   }
+
+  return progressData;
 }
 
-function getAllProgress() {
+async function initFromSupabase() {
+  return await refreshFromDatabase(true);
+}
+
+async function getAllProgress() {
+  await refreshFromDatabase();
   return Object.values(progressData);
 }
 
-function getProgress(subEventId) {
+function getAllProgressSync() {
+  return Object.values(progressData);
+}
+
+async function getProgress(subEventId) {
+  await refreshFromDatabase();
   return progressData[subEventId] || progressData['safari'];
 }
 
-function updateProgress(subEventId, { percentage, statusLabel, updatedBy, milestones }) {
+function getProgressSync(subEventId) {
+  return progressData[subEventId] || progressData['safari'];
+}
+
+async function updateProgress(subEventId, { percentage, statusLabel, updatedBy, milestones }) {
   if (!progressData[subEventId]) {
+    const meta = SUB_EVENT_META[subEventId] || { name: subEventId, icon: '📊', code: subEventId.toUpperCase() };
     progressData[subEventId] = {
       subEventId,
-      name: subEventId,
-      icon: '📊',
-      code: subEventId.toUpperCase(),
+      name: meta.name || subEventId,
+      icon: meta.icon || '📊',
+      code: meta.code || subEventId.toUpperCase(),
       percentage: 0,
       statusLabel: '',
       updatedBy: updatedBy || 'Staff Ahli',
@@ -123,11 +169,12 @@ function updateProgress(subEventId, { percentage, statusLabel, updatedBy, milest
   item.updatedAt = new Date().toISOString();
 
   saveLocal();
-  syncToSupabase(subEventId).catch(() => {});
+  await syncToSupabase(subEventId);
   return item;
 }
 
-function updateMilestone(subEventId, milestoneId, { title, category, progress, status, notes } = {}, user = 'Staff Ahli') {
+async function updateMilestone(subEventId, milestoneId, { title, category, progress, status, notes } = {}, user = 'Staff Ahli') {
+  await refreshFromDatabase();
   const item = progressData[subEventId];
   if (!item || !item.milestones) return null;
 
@@ -157,13 +204,14 @@ function updateMilestone(subEventId, milestoneId, { title, category, progress, s
     }
 
     saveLocal();
-    syncToSupabase(subEventId).catch(() => {});
+    await syncToSupabase(subEventId);
     return m;
   }
   return null;
 }
 
-function toggleMilestone(subEventId, milestoneId, status, user = 'Staff Ahli') {
+async function toggleMilestone(subEventId, milestoneId, status, user = 'Staff Ahli') {
+  await refreshFromDatabase();
   const item = progressData[subEventId];
   if (!item || !item.milestones) return null;
 
@@ -177,20 +225,20 @@ function toggleMilestone(subEventId, milestoneId, status, user = 'Staff Ahli') {
     item.updatedBy = user;
     item.updatedAt = new Date().toISOString();
 
-    // Auto-recalculate percentage if all milestones have weight/progress
     if (item.milestones.length > 0) {
       const sum = item.milestones.reduce((acc, curr) => acc + (curr.progress || 0), 0);
       item.percentage = Math.round(sum / item.milestones.length);
     }
 
     saveLocal();
-    syncToSupabase(subEventId).catch(() => {});
+    await syncToSupabase(subEventId);
     return m;
   }
   return null;
 }
 
-function addMilestone(subEventId, milestoneData, user = 'Staff Ahli') {
+async function addMilestone(subEventId, milestoneData, user = 'Staff Ahli') {
+  await refreshFromDatabase();
   const item = progressData[subEventId];
   if (!item) return null;
 
@@ -205,6 +253,7 @@ function addMilestone(subEventId, milestoneData, user = 'Staff Ahli') {
     updatedAt: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
   };
 
+  if (!item.milestones) item.milestones = [];
   item.milestones.push(newMilestone);
   item.updatedBy = user;
   item.updatedAt = new Date().toISOString();
@@ -215,11 +264,12 @@ function addMilestone(subEventId, milestoneData, user = 'Staff Ahli') {
   }
 
   saveLocal();
-  syncToSupabase(subEventId).catch(() => {});
+  await syncToSupabase(subEventId);
   return newMilestone;
 }
 
-function deleteMilestone(subEventId, milestoneId, user = 'Staff Ahli') {
+async function deleteMilestone(subEventId, milestoneId, user = 'Staff Ahli') {
+  await refreshFromDatabase();
   const item = progressData[subEventId];
   if (!item || !item.milestones) return false;
 
@@ -235,7 +285,7 @@ function deleteMilestone(subEventId, milestoneId, user = 'Staff Ahli') {
     }
 
     saveLocal();
-    syncToSupabase(subEventId).catch(() => {});
+    await syncToSupabase(subEventId);
     return true;
   }
   return false;
@@ -301,9 +351,10 @@ function renderProgressBar(percentage) {
 /**
  * Format balasan WhatsApp untuk !progress all maupun per sub-event
  * @param {string} subArg - 'all', 'sf', 'tcp', 'odl', 'sp'
- * @returns {string} - Teks terformat siap kirim via WhatsApp
+ * @returns {Promise<string>} - Teks terformat siap kirim via WhatsApp
  */
-function formatProgressForWhatsApp(subArg = 'sf') {
+async function formatProgressForWhatsApp(subArg = 'sf') {
+  await refreshFromDatabase();
   const normalized = normalizeSubKey(subArg);
 
   if (!normalized) {
@@ -404,7 +455,9 @@ Gunakan singkatan resmi sub-divisi berikut:
 
 module.exports = {
   getAllProgress,
+  getAllProgressSync,
   getProgress,
+  getProgressSync,
   updateProgress,
   updateMilestone,
   toggleMilestone,
@@ -412,6 +465,7 @@ module.exports = {
   deleteMilestone,
   initFromSupabase,
   syncToSupabase,
+  refreshFromDatabase,
   formatProgressForWhatsApp,
   normalizeSubKey,
   renderProgressBar

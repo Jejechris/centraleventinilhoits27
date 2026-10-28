@@ -2,7 +2,8 @@ const { Pool } = require('pg');
 require('dotenv').config();
 
 // Supabase Connection Configuration (Reads from process.env)
-const POOLER_URL = process.env.DATABASE_URL || '';
+const FALLBACK_DATABASE_URL = 'postgresql://postgres.qpoceyupnsqayxcqfgdx:GONTnT5MuHPv6oxE@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres';
+const POOLER_URL = process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
 const DIRECT_URL = process.env.DATABASE_URL_DIRECT || '';
 
 function getConnectionString() {
@@ -227,11 +228,29 @@ async function syncLocalToSupabase() {
   }
 }
 
+let initPromise = null;
+async function ensureDbReady() {
+  if (!initPromise) {
+    initPromise = (async () => {
+      try {
+        await initSchema();
+        return true;
+      } catch (err) {
+        console.warn('Supabase ensureDbReady warning:', err.message);
+        initPromise = null;
+        return false;
+      }
+    })();
+  }
+  return initPromise;
+}
+
 module.exports = {
   getPool,
   query,
   initSchema,
   syncLocalToSupabase,
+  ensureDbReady,
   POOLER_URL,
   DIRECT_URL
 };

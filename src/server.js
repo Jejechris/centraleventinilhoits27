@@ -22,6 +22,19 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
+// Jaminan inisialisasi koneksi & schema Supabase Cloud untuk environment Serverless
+let dbInitStarted = false;
+app.use((req, res, next) => {
+  if (!dbInitStarted) {
+    dbInitStarted = true;
+    try {
+      const db = require('./db');
+      db.ensureDbReady().catch(() => {});
+    } catch (e) {}
+  }
+  next();
+});
+
 // 1. API Status Live untuk Web & PWA Dashboard
 app.get('/api/status', async (req, res) => {
   try {
@@ -33,7 +46,7 @@ app.get('/api/status', async (req, res) => {
     const dateStatus = sheetsService.getEventDateStatus(subEventId);
     const stations = stageCheckService.getAllStations(subEventId);
     const driveFiles = await driveService.fetchRealDriveItems();
-    const progress = progressService.getProgress(subEventId);
+    const progress = await progressService.getProgress(subEventId);
 
     res.json({
       success: true,
@@ -94,7 +107,7 @@ app.get('/api/overview', async (req, res) => {
     }));
 
     const driveFiles = await driveService.fetchRealDriveItems();
-    const progressList = progressService.getAllProgress();
+    const progressList = await progressService.getAllProgress();
     const delayMinutes = sheetsService.getDelay();
     const simulatedTime = sheetsService.getSimulationTime();
 
@@ -365,9 +378,9 @@ app.post('/api/event/reset', (req, res) => {
 // TRACKER PROGRESS 0-100% (KHUSUS STAFF AHLI)
 // ==========================================
 
-app.get('/api/progress', (req, res) => {
+app.get('/api/progress', async (req, res) => {
   try {
-    const list = progressService.getAllProgress();
+    const list = await progressService.getAllProgress();
     res.json({ success: true, progress: list });
   } catch (err) {
     console.error('API /api/progress error:', err);
@@ -375,10 +388,10 @@ app.get('/api/progress', (req, res) => {
   }
 });
 
-app.get('/api/progress/:subEventId', (req, res) => {
+app.get('/api/progress/:subEventId', async (req, res) => {
   try {
     const { subEventId } = req.params;
-    const item = progressService.getProgress(subEventId);
+    const item = await progressService.getProgress(subEventId);
     res.json({ success: true, progress: item });
   } catch (err) {
     console.error(`API /api/progress/${req.params.subEventId} error:`, err);
@@ -387,13 +400,13 @@ app.get('/api/progress/:subEventId', (req, res) => {
 });
 
 // Update Progress (Persentase 0-100% & Status Label - Hanya Staff Ahli)
-app.post('/api/progress/update', (req, res) => {
+app.post('/api/progress/update', async (req, res) => {
   try {
     const { subEventId, percentage, statusLabel, updatedBy, milestones } = req.body;
     if (!subEventId) {
       return res.status(400).json({ success: false, error: 'subEventId wajib diisi' });
     }
-    const updated = progressService.updateProgress(subEventId, {
+    const updated = await progressService.updateProgress(subEventId, {
       percentage,
       statusLabel,
       updatedBy: updatedBy || 'Staff Ahli',
@@ -407,14 +420,14 @@ app.post('/api/progress/update', (req, res) => {
 });
 
 // Toggle / Ubah Status Milestone Tugas
-app.post('/api/progress/toggle-milestone', (req, res) => {
+app.post('/api/progress/toggle-milestone', async (req, res) => {
   try {
     const { subEventId, milestoneId, status, user } = req.body;
     if (!subEventId || !milestoneId) {
       return res.status(400).json({ success: false, error: 'subEventId dan milestoneId wajib diisi' });
     }
-    const toggled = progressService.toggleMilestone(subEventId, milestoneId, status, user || 'Staff Ahli');
-    const current = progressService.getProgress(subEventId);
+    const toggled = await progressService.toggleMilestone(subEventId, milestoneId, status, user || 'Staff Ahli');
+    const current = await progressService.getProgress(subEventId);
     res.json({ success: !!toggled, milestone: toggled, progress: current });
   } catch (err) {
     console.error('API /api/progress/toggle-milestone error:', err);
@@ -423,14 +436,14 @@ app.post('/api/progress/toggle-milestone', (req, res) => {
 });
 
 // Update Detail & Persentase Fleksibel Milestone (0%, 25%, 50%, 75%, 100% atau custom)
-app.post('/api/progress/update-milestone', (req, res) => {
+app.post('/api/progress/update-milestone', async (req, res) => {
   try {
     const { subEventId, milestoneId, data, user } = req.body;
     if (!subEventId || !milestoneId) {
       return res.status(400).json({ success: false, error: 'subEventId dan milestoneId wajib diisi' });
     }
-    const updated = progressService.updateMilestone(subEventId, milestoneId, data || {}, user || 'Staff Ahli');
-    const current = progressService.getProgress(subEventId);
+    const updated = await progressService.updateMilestone(subEventId, milestoneId, data || {}, user || 'Staff Ahli');
+    const current = await progressService.getProgress(subEventId);
     res.json({ success: !!updated, milestone: updated, progress: current });
   } catch (err) {
     console.error('API /api/progress/update-milestone error:', err);
@@ -439,14 +452,14 @@ app.post('/api/progress/update-milestone', (req, res) => {
 });
 
 // Tambah Milestone Tugas Baru
-app.post('/api/progress/add-milestone', (req, res) => {
+app.post('/api/progress/add-milestone', async (req, res) => {
   try {
     const { subEventId, milestone, user } = req.body;
     if (!subEventId || !milestone || !milestone.title) {
       return res.status(400).json({ success: false, error: 'subEventId dan judul milestone wajib diisi' });
     }
-    const added = progressService.addMilestone(subEventId, milestone, user || 'Staff Ahli');
-    const current = progressService.getProgress(subEventId);
+    const added = await progressService.addMilestone(subEventId, milestone, user || 'Staff Ahli');
+    const current = await progressService.getProgress(subEventId);
     res.json({ success: true, milestone: added, progress: current });
   } catch (err) {
     console.error('API /api/progress/add-milestone error:', err);
@@ -455,14 +468,14 @@ app.post('/api/progress/add-milestone', (req, res) => {
 });
 
 // Hapus Milestone Tugas
-app.post('/api/progress/delete-milestone', (req, res) => {
+app.post('/api/progress/delete-milestone', async (req, res) => {
   try {
     const { subEventId, milestoneId, user } = req.body;
     if (!subEventId || !milestoneId) {
       return res.status(400).json({ success: false, error: 'subEventId dan milestoneId wajib diisi' });
     }
-    const deleted = progressService.deleteMilestone(subEventId, milestoneId, user || 'Staff Ahli');
-    const current = progressService.getProgress(subEventId);
+    const deleted = await progressService.deleteMilestone(subEventId, milestoneId, user || 'Staff Ahli');
+    const current = await progressService.getProgress(subEventId);
     res.json({ success: deleted, progress: current });
   } catch (err) {
     console.error('API /api/progress/delete-milestone error:', err);
@@ -479,7 +492,7 @@ app.post('/api/ask-ai', async (req, res) => {
     const targetSub = subEventId || subEventsConfig.getActiveSubEventId();
     const subEvent = subEventsConfig.getSubEvent(targetSub);
 
-    const progress = progressService.getProgress(targetSub);
+    const progress = await progressService.getProgress(targetSub);
     const rawSpreadsheetText = await sheetsService.getRawSpreadsheetText();
     const realDriveFiles = await driveService.fetchRealDriveItems();
     const dateStatus = sheetsService.getEventDateStatus(targetSub);
@@ -517,7 +530,7 @@ app.post('/api/ai/analyze-sheet-tasks', async (req, res) => {
     }
 
     // Ambil daftar milestone saat ini
-    const currentProgress = progressService.getProgress(targetSub) || {};
+    const currentProgress = await progressService.getProgress(targetSub) || {};
     const existingMilestones = currentProgress.milestones || [];
 
     // Ambil metadata spreadsheet jika ada

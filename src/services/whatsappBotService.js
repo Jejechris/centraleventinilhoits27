@@ -57,11 +57,11 @@ async function handleIncomingMessage(payload) {
       return getHelpMessage(senderName);
 
     case 'status':
-      return getStatusMessage(args);
+      return await getStatusMessage(args);
 
     case 'progress':
     case 'prog':
-      return progressService.formatProgressForWhatsApp(args || 'sf');
+      return await progressService.formatProgressForWhatsApp(args || 'sf');
 
     case 'rundown':
       return await getRundownMessage(args);
@@ -131,7 +131,7 @@ _Ketik perintah di atas di grup atau chat pribadi kapan saja!_`
 /**
  * Status Ringkas Kesiapan (Mendukung 4 Sub-Divisi & All)
  */
-function getStatusMessage(args = '') {
+async function getStatusMessage(args = '') {
   const subKey = subEventsConfig.normalizeSubKey(args);
 
   if (subKey === 'all') {
@@ -144,17 +144,17 @@ function getStatusMessage(args = '') {
 _Ini Lho ITS! 2027 • Laporan Komando Pusat_
 ────────────────────────────\n`;
 
-    subs.forEach(id => {
+    for (const id of subs) {
       const meta = SUB_META[id];
       const sub = subEventsConfig.getSubEvent(id) || {};
       const dateStatus = sheetsService.getEventDateStatus(id);
-      const progress = progressService.getProgress(id) || {};
+      const progress = await progressService.getProgress(id) || {};
 
       text += `${meta.icon} *${meta.name} (${meta.code})*\n`;
       text += `• Pelaksanaan: ${sub.dateStr || meta.dateStr} (H-${dateStatus.daysUntil ?? '--'} Hari)\n`;
       text += `• Progres: *${progress.percentage || 0}%*\n`;
       text += `• Target: ${sub.kpi?.targetPeserta || '-'}\n\n`;
-    });
+    }
 
     text += `────────────────────────────
 ⏱️ *Status Jadwal:* ${delayStr}
@@ -166,7 +166,7 @@ _Ini Lho ITS! 2027 • Laporan Komando Pusat_
   const meta = SUB_META[targetId] || SUB_META.safari;
   const subEvent = subEventsConfig.getSubEvent(targetId);
   const dateStatus = sheetsService.getEventDateStatus(targetId);
-  const progress = progressService.getProgress(targetId) || {};
+  const progress = await progressService.getProgress(targetId) || {};
   const delay = sheetsService.getDelay();
   const delayStr = delay > 0 ? `\n⚠️ *Pergeseran Waktu:* +${delay} Menit` : '\n⏱️ *Jadwal:* Sesuai Rundown (0 Menit Delay)';
 
@@ -399,7 +399,7 @@ async function handleAiQuery(question, username, subId) {
   }
 
   try {
-    const progress = progressService.getProgress(subId) || {};
+    const progress = await progressService.getProgress(subId) || {};
     const driveFiles = await driveService.fetchRealDriveItems();
     const dateStatus = sheetsService.getEventDateStatus(subId);
 

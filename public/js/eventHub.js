@@ -22,7 +22,15 @@ const EventHub = {
       if (!document.hidden && !this.isFetching) {
         this.loadStatus();
       }
-    }, 12000);
+    }, 8000);
+
+    // Instant sync saat user kembali ke tab / membuka device
+    window.addEventListener('focus', () => {
+      if (!this.isFetching) this.loadStatus();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden && !this.isFetching) this.loadStatus();
+    });
   },
 
   async loadStatus() {
@@ -101,6 +109,11 @@ const EventHub = {
         sbCount.innerText = milestones.length > 0 ? `${done}/${milestones.length} Tugas` : `${pct}% Total`;
       }
       if (sbBadge && data.dateStatus?.daysUntil !== undefined) sbBadge.innerText = `H-${data.dateStatus.daysUntil} DAYS`;
+
+      // Realtime Bidirectional Synchronization dengan ProgressTracker Cockpit
+      if (typeof ProgressTracker !== 'undefined' && typeof ProgressTracker.syncExternalData === 'function') {
+        ProgressTracker.syncExternalData(prog);
+      }
 
     } catch (err) {
       console.error(`Error loading status for ${this.subEventId}:`, err);

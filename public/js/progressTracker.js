@@ -20,6 +20,7 @@ const ProgressTracker = {
     this.injectDeleteConfirmModal();
     this.injectAiTaskModal();
     await this.fetchAndRender();
+    this.startRealtimePolling();
   },
 
   async fetchAndRender() {
@@ -48,6 +49,63 @@ const ProgressTracker = {
     }
 
     this.render();
+  },
+
+  syncExternalData(incoming) {
+    if (!incoming) return;
+
+    // Jangan overwrite jika sedang membuka modal editing
+    const openModal = document.querySelector('.ce-modal:not(.hidden)');
+    if (openModal) return;
+
+    // Jangan overwrite jika slider sedang difokuskan oleh pengguna
+    const slider = document.getElementById('sliderProgress');
+    if (slider && document.activeElement === slider) return;
+    const labelInput = document.getElementById('inputStatusLabel');
+    if (labelInput && document.activeElement === labelInput) return;
+
+    const incomingPct = typeof incoming.percentage === 'number' ? incoming.percentage : parseInt(incoming.percentage, 10);
+    const currPct = this.progressData ? this.progressData.percentage : null;
+
+    const hasDiff = currPct === null ||
+                    currPct !== incomingPct ||
+                    this.progressData.statusLabel !== incoming.statusLabel ||
+                    JSON.stringify(this.progressData.milestones || []) !== JSON.stringify(incoming.milestones || []);
+
+    if (hasDiff) {
+      this.progressData = incoming;
+      this.render();
+    }
+  },
+
+  startRealtimePolling() {
+    if (this._pollingStarted) return;
+    this._pollingStarted = true;
+
+    // Polling setiap 8 detik jika tab aktif
+    setInterval(() => {
+      if (!document.hidden) {
+        this.fetchAndRenderSilent();
+      }
+    }, 8000);
+
+    // Refresh langsung saat user membuka device / switch kembali ke tab
+    window.addEventListener('focus', () => {
+      this.fetchAndRenderSilent();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) this.fetchAndRenderSilent();
+    });
+  },
+
+  async fetchAndRenderSilent() {
+    try {
+      const res = await fetch(`/api/progress/${this.currentSubEventId}`);
+      const json = await res.json();
+      if (json && json.success && json.progress) {
+        this.syncExternalData(json.progress);
+      }
+    } catch (e) {}
   },
 
   isSupervisor() {
@@ -824,6 +882,9 @@ const ProgressTracker = {
         }
         if (typeof playChimeSound === 'function') {
           playChimeSound('chime');
+          if (typeof EventHub !== 'undefined' && typeof EventHub.loadStatus === 'function') {
+            EventHub.loadStatus();
+          }
         }
       } else {
         if (typeof showToast === 'function') {
@@ -1208,6 +1269,9 @@ const ProgressTracker = {
         }
         if (typeof playChimeSound === 'function') {
           playChimeSound('chime');
+          if (typeof EventHub !== 'undefined' && typeof EventHub.loadStatus === 'function') {
+            EventHub.loadStatus();
+          }
         }
       } else {
         if (typeof showToast === 'function') {
@@ -1434,6 +1498,9 @@ const ProgressTracker = {
         }
         if (typeof playChimeSound === 'function') {
           playChimeSound('chime');
+          if (typeof EventHub !== 'undefined' && typeof EventHub.loadStatus === 'function') {
+            EventHub.loadStatus();
+          }
         }
       } else {
         if (typeof showToast === 'function') {
@@ -1907,6 +1974,9 @@ const ProgressTracker = {
         }
         if (typeof playChimeSound === 'function') {
           playChimeSound('chime');
+          if (typeof EventHub !== 'undefined' && typeof EventHub.loadStatus === 'function') {
+            EventHub.loadStatus();
+          }
         }
       } else {
         alert('Gagal menambah tugas: ' + (json.error || 'Server error'));
