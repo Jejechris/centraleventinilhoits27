@@ -7,9 +7,9 @@ const staffService = require('./staffService');
 
 const SUB_META = {
   safari: { id: 'safari', abbr: 'sf', code: 'SF', name: 'Safari Faculty', icon: '🏛️', dateStr: '10 Januari 2027' },
-  startpoint: { id: 'startpoint', abbr: 'sp', code: 'SP', name: 'Start Point', icon: '🚀', dateStr: '03 Januari 2027' },
-  odl: { id: 'odl', abbr: 'odl', code: 'ODL', name: 'One Day Lecture', icon: '🎓', dateStr: '16 Januari 2027' },
-  technocraft: { id: 'technocraft', abbr: 'tcp', code: 'TCP', name: 'Technocraft Playhouse', icon: '⚡', dateStr: '23 Januari 2027' }
+  startpoint: { id: 'startpoint', abbr: 'sp', code: 'SP', name: 'Start Point', icon: '🚀', dateStr: '08 Januari 2027' },
+  odl: { id: 'odl', abbr: 'odl', code: 'ODL', name: 'One Day Lecture', icon: '🎓', dateStr: '08 Januari 2027' },
+  technocraft: { id: 'technocraft', abbr: 'tcp', code: 'TCP', name: 'Technocraft Playhouse', icon: '⚡', dateStr: '08 Januari 2027' }
 };
 
 /**
@@ -103,9 +103,9 @@ _Ini Lho ITS! 2027 • Komando Acara Pusat_
 Halo *${name}*! 👋
 Central Event terbagi menjadi *4 Sub-Divisi Utama*:
 🏛️ *SF*  : Safari Faculty (10 Jan 2027)
-🚀 *SP*  : Start Point (03 Jan 2027)
-⚡ *TCP* : Technocraft Playhouse (23 Jan 2027)
-🎓 *ODL* : One Day Lecture (16 Jan 2027)
+🚀 *SP*  : Start Point (08 Jan 2027)
+⚡ *TCP* : Technocraft Playhouse (08 Jan 2027)
+🎓 *ODL* : One Day Lecture (08 Jan 2027)
 
 Setiap perintah teknis mendukung parameter *[all/sf/sp/tcp/odl]*:
 

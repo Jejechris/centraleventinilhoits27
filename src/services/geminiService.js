@@ -45,19 +45,20 @@ DATABASE RESMI CENTRAL EVENT INI LHO ITS! 2027:
 👑 PIMPINAN SUB-DIVISI:
 - Kasubdiv Central Event: Damar (Pimpinan Tertinggi Sub-Divisi)
 - Wakasubdiv Central Event: Winan (Wakil Pimpinan Tertinggi Sub-Divisi)
-Keduanya memegang mandat penuh pimpinan atas seluruh sub-acara Central Event.
+- Sekretaris Central Event: Nayo (Sekretaris Sub-Divisi / Pimpinan Administrasi)
+Ketiganya memegang mandat pimpinan atas seluruh sub-acara Central Event.
 
 ⭐ STAFF AHLI (STAFFLI):
 - ATAR, ALYSSA, SYAFA, ZORA (4 Staff Ahli pengawal teknis & operasional).
 
-👥 STAFF BIASA:
-- SALSA, KIRANA, ANGGA, Dzikrie, Senna, GEB, BILQISTH.
+👥 STAFF BIASA (8 Personil):
+- SALSA, KIRANA, ANGGA, Dzikrie, Senna, GEB, BILQISTH, Firdaus (Staff ke-8 adalah Firdaus).
 
-🏛️ 4 SUB-DIVISI UTAMA CENTRAL EVENT:
+🏛️ 4 SUB-DIVISI UTAMA CENTRAL EVENT (TANGGAL RESMI FIX):
 1. SF (Safari Faculty) : Minggu, 10 Januari 2027 • Venue: Seluruh Fakultas & Lab ITS • Target: 1.450 / 1.500 Hadir, 39 HMD ITS • Progres: 72% (Penyusunan Modul Lab & Plotting Alur 6 Departemen).
-2. SP (Start Point) : Minggu, 03 Januari 2027 • Venue: Plaza Utama & Gerbang Kampus ITS • Target: 1.500 Peserta Terkondisikan • Registrasi akbar & mobilisasi awal kluster.
-3. TCP (Technocraft Playhouse) : Sabtu, 23 Januari 2027 • Venue: Gedung Robotika & Arena Technocraft ITS • Target: 1.200 Pengunjung • Wahana eksperimen sains & demo robotika.
-4. ODL (One Day Lecture) : Sabtu, 16 Januari 2027 • Venue: Gedung Menara Sains & Riset ITS • Target: 600 Peserta Kuliah Interaktif bersama dosen ITS.
+2. SP (Start Point) : Jumat, 08 Januari 2027 • Venue: Plaza Utama & Gerbang Kampus ITS • Target: 1.500 Peserta Terkondisikan • Registrasi akbar & mobilisasi awal kluster.
+3. TCP (Technocraft Playhouse) : Jumat, 08 Januari 2027 • Venue: Gedung Robotika & Arena Technocraft ITS • Target: 1.200 Pengunjung • Wahana eksperimen sains & demo robotika.
+4. ODL (One Day Lecture) : Jumat, 08 Januari 2027 • Venue: Gedung Menara Sains & Riset ITS • Target: 600 Peserta Kuliah Interaktif bersama dosen ITS.
 
 📁 BERKAS DRIVE RESMI:
 ${realDriveFiles.length > 0 ? realDriveFiles.map(f => f.name).join(', ') : 'Master SOP Briefing, Modul Riset Lab, Master Rundown, Dokumen K3 Evakuasi, Presensi 39 HMD'}
@@ -106,15 +107,16 @@ function generateHeuristicCopilotAnswer(question, contextData = {}) {
   const { progress = {}, realDriveFiles = [], dateStatus = {} } = contextData;
   const pct = progress.percentage || 72;
 
-  // 1. Pertanyaan Pimpinan / Kasubdiv / Wakasubdiv
-  if (/kasubdiv|wakasubdiv|pimpinan|ketua|kadiv|damar|winan/i.test(q)) {
+  // 1. Pertanyaan Pimpinan / Kasubdiv / Wakasubdiv / Sekretaris
+  if (/kasubdiv|wakasubdiv|sekretaris|pimpinan|ketua|kadiv|damar|winan|nayo/i.test(q)) {
     return (
 `👑 *PIMPINAN RESMI SUB-DIVISI CENTRAL EVENT 2027*
 ────────────────────────────
 • *Kasubdiv:* *Damar*
 • *Wakasubdiv:* *Winan*
+• *Sekretaris:* *Nayo*
 
-Keduanya memegang mandat kepemimpinan tertinggi divisi Central Event yang menaungi 4 sub-acara utama (Safari Faculty, Start Point, Technocraft Playhouse, dan One Day Lecture).`
+Ketiganya memegang mandat kepemimpinan divisi Central Event yang menaungi 4 sub-acara utama (Safari Faculty, Start Point, Technocraft Playhouse, dan One Day Lecture).`
     );
   }
 
@@ -134,19 +136,20 @@ Staffli bertugas mengawal penyusunan modul, teknis kurikulum, dan koordinasi ope
   }
 
   // 3. Pertanyaan Staff / Anggota / Personil
-  if (/staff|panitia|anggota|personil|tim/i.test(q)) {
+  if (/staff|panitia|anggota|personil|tim|firdaus/i.test(q)) {
     return (
 `👥 *STRUKTUR PERSONIL CENTRAL EVENT 2027*
 ────────────────────────────
 👑 *Pimpinan:*
 • Kasubdiv: *Damar*
 • Wakasubdiv: *Winan*
+• Sekretaris: *Nayo*
 
 ⭐ *Staffli:*
 • ATAR, ALYSSA, SYAFA, ZORA
 
-📋 *Staff:*
-• SALSA, KIRANA, ANGGA, Dzikrie, Senna, GEB, BILQISTH
+📋 *Staff (8 Personil):*
+• SALSA, KIRANA, ANGGA, Dzikrie, Senna, GEB, BILQISTH, Firdaus
 
 Ketik *!database sf* untuk melihat daftar staff terperinci.`
     );
@@ -163,17 +166,17 @@ Ketik *!database sf* untuk melihat daftar staff terperinci.`
    • Target: 1.450 / 1.500 Hadir • 39 HMD
 
 2. 🚀 *Start Point (SP)*
-   • Jadwal: 03 Januari 2027
+   • Jadwal: 08 Januari 2027
    • Venue: Plaza Utama & Gerbang Kampus ITS
    • Fokus: Registrasi akbar & mobilisasi awal
 
 3. ⚡ *Technocraft Playhouse (TCP)*
-   • Jadwal: 23 Januari 2027
+   • Jadwal: 08 Januari 2027
    • Venue: Gedung Robotika ITS
    • Fokus: Wahana sains hands-on & demo robotika
 
 4. 🎓 *One Day Lecture (ODL)*
-   • Jadwal: 16 Januari 2027
+   • Jadwal: 08 Januari 2027
    • Venue: Gedung Menara Sains ITS
    • Fokus: Simulasi perkuliahan nyata bersama dosen`
     );
@@ -184,10 +187,10 @@ Ketik *!database sf* untuk melihat daftar staff terperinci.`
     return (
 `📅 *JADWAL PELAKSANAAN 4 SUB-ACARA CENTRAL EVENT*
 ────────────────────────────
-• 🚀 *Start Point (SP):* Minggu, 03 Januari 2027
+• 🚀 *Start Point (SP):* Jumat, 08 Januari 2027
+• 🎓 *One Day Lecture (ODL):* Jumat, 08 Januari 2027
+• ⚡ *Technocraft Playhouse (TCP):* Jumat, 08 Januari 2027
 • 🏛️ *Safari Faculty (SF):* Minggu, 10 Januari 2027
-• 🎓 *One Day Lecture (ODL):* Sabtu, 16 Januari 2027
-• ⚡ *Technocraft Playhouse (TCP):* Sabtu, 23 Januari 2027
 
 Ketik *!status all* untuk mengecek countdown H-xx setiap sub-acara.`
     );

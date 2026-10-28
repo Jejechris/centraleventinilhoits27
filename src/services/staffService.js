@@ -102,7 +102,7 @@ Ketik:
   }
 
   const staffList = subData.staffList || [];
-  const leaders = staffList.filter(s => s.isLeader || s.role === 'Kasubdiv' || s.role === 'Wakasubdiv');
+  const leaders = staffList.filter(s => s.isLeader || s.role === 'Kasubdiv' || s.role === 'Wakasubdiv' || s.role === 'Sekretaris');
   const staffli = staffList.filter(s => !leaders.includes(s) && (s.isStaffli || s.role.includes('Staff Ahli')));
   const regularStaff = staffList.filter(s => !leaders.includes(s) && !staffli.includes(s));
 

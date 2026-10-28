@@ -3,7 +3,7 @@
     "subEventId": "safari",
     "name": "Safari Faculty",
     "code": "SF-01",
-    "totalStaff": 14,
+    "totalStaff": 15,
     "staffList": [
       {
         "id": "sf_01",
@@ -19,66 +19,72 @@
       },
       {
         "id": "sf_03",
+        "name": "Nayo",
+        "role": "Sekretaris",
+        "isLeader": true
+      },
+      {
+        "id": "sf_04",
         "name": "ATAR",
         "role": "Staffli",
         "isStaffli": true
       },
       {
-        "id": "sf_04",
+        "id": "sf_05",
         "name": "ALYSSA",
         "role": "Staffli",
         "isStaffli": true
       },
       {
-        "id": "sf_05",
+        "id": "sf_06",
         "name": "SYAFA",
         "role": "Staffli",
         "isStaffli": true
       },
       {
-        "id": "sf_06",
+        "id": "sf_07",
         "name": "ZORA",
         "role": "Staffli",
         "isStaffli": true
       },
       {
-        "id": "sf_07",
+        "id": "sf_08",
         "name": "SALSA",
         "role": "Staff"
       },
       {
-        "id": "sf_08",
+        "id": "sf_09",
         "name": "KIRANA",
         "role": "Staff"
       },
       {
-        "id": "sf_09",
+        "id": "sf_10",
         "name": "ANGGA",
         "role": "Staff"
       },
       {
-        "id": "sf_10",
+        "id": "sf_11",
         "name": "Dzikrie",
         "role": "Staff"
       },
       {
-        "id": "sf_11",
+        "id": "sf_12",
         "name": "Senna",
         "role": "Staff"
       },
       {
-        "id": "sf_12",
+        "id": "sf_13",
         "name": "GEB",
         "role": "Staff"
       },
       {
-        "id": "sf_13",
+        "id": "sf_14",
         "name": "BILQISTH",
         "role": "Staff"
       },
       {
-        "id": "sf_14",
-        "name": "[Menunggu Konfirmasi]",
+        "id": "sf_15",
+        "name": "Firdaus",
         "role": "Staff"
       }
     ]
@@ -87,7 +93,7 @@
     "subEventId": "startpoint",
     "name": "Start Point",
     "code": "SP-02",
-    "totalStaff": 2,
+    "totalStaff": 3,
     "staffList": [
       {
         "id": "sp_01",
@@ -100,6 +106,12 @@
         "name": "Winan",
         "role": "Wakasubdiv",
         "isLeader": true
+      },
+      {
+        "id": "sp_03",
+        "name": "Nayo",
+        "role": "Sekretaris",
+        "isLeader": true
       }
     ]
   },
@@ -107,7 +119,7 @@
     "subEventId": "odl",
     "name": "One Day Lecture",
     "code": "ODL-03",
-    "totalStaff": 2,
+    "totalStaff": 3,
     "staffList": [
       {
         "id": "odl_01",
@@ -120,6 +132,12 @@
         "name": "Winan",
         "role": "Wakasubdiv",
         "isLeader": true
+      },
+      {
+        "id": "odl_03",
+        "name": "Nayo",
+        "role": "Sekretaris",
+        "isLeader": true
       }
     ]
   },
@@ -127,7 +145,7 @@
     "subEventId": "technocraft",
     "name": "Technocraft Playhouse",
     "code": "TC-04",
-    "totalStaff": 2,
+    "totalStaff": 3,
     "staffList": [
       {
         "id": "tc_01",
@@ -139,6 +157,12 @@
         "id": "tc_02",
         "name": "Winan",
         "role": "Wakasubdiv",
+        "isLeader": true
+      },
+      {
+        "id": "tc_03",
+        "name": "Nayo",
+        "role": "Sekretaris",
         "isLeader": true
       }
     ]
