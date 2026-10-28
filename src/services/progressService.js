@@ -241,6 +241,167 @@ function deleteMilestone(subEventId, milestoneId, user = 'Staff Ahli') {
   return false;
 }
 
+const SUB_EVENT_META = {
+  safari: {
+    id: 'safari',
+    abbr: 'sf',
+    code: 'SF',
+    name: 'Safari Faculty',
+    icon: '🏛️'
+  },
+  startpoint: {
+    id: 'startpoint',
+    abbr: 'sp',
+    code: 'SP',
+    name: 'Start Point',
+    icon: '🚀'
+  },
+  odl: {
+    id: 'odl',
+    abbr: 'odl',
+    code: 'ODL',
+    name: 'One Day Lecture',
+    icon: '🎓'
+  },
+  technocraft: {
+    id: 'technocraft',
+    abbr: 'tcp',
+    code: 'TCP',
+    name: 'Technocraft Playhouse',
+    icon: '⚡'
+  }
+};
+
+/**
+ * Normalisasi kode sub-event untuk perintah !progress
+ * Mendukung singkatan resmi: sf, tcp, odl, sp, all
+ */
+function normalizeSubKey(key = '') {
+  const clean = String(key || '').toLowerCase().trim().replace(/[-_]/g, '');
+  if (!clean) return 'sf';
+  if (clean === 'all' || clean === 'semua') return 'all';
+  if (clean === 'sf' || clean === 'safari' || clean === 'safarifaculty') return 'safari';
+  if (clean === 'sp' || clean === 'startpoint' || clean === 'start') return 'startpoint';
+  if (clean === 'odl' || clean === 'onedaylecture') return 'odl';
+  if (clean === 'tcp' || clean === 'tc' || clean === 'technocraft' || clean === 'techno' || clean === 'technocraftplayhouse') return 'technocraft';
+  return null;
+}
+
+/**
+ * Render visual progress bar 10 karakter (contoh: [███████░░░])
+ */
+function renderProgressBar(percentage) {
+  const safePct = Math.max(0, Math.min(100, Math.round(percentage || 0)));
+  const totalBlocks = 10;
+  const filledBlocks = Math.round((safePct / 100) * totalBlocks);
+  const emptyBlocks = totalBlocks - filledBlocks;
+  return '█'.repeat(filledBlocks) + '░'.repeat(emptyBlocks);
+}
+
+/**
+ * Format balasan WhatsApp untuk !progress all maupun per sub-event
+ * @param {string} subArg - 'all', 'sf', 'tcp', 'odl', 'sp'
+ * @returns {string} - Teks terformat siap kirim via WhatsApp
+ */
+function formatProgressForWhatsApp(subArg = 'sf') {
+  const normalized = normalizeSubKey(subArg);
+
+  if (!normalized) {
+    return (
+`⚠️ Sub-event *"${subArg}"* tidak ditemukan.
+
+Gunakan singkatan resmi sub-divisi berikut:
+• *!progress all* : Rekapitulasi seluruh sub-acara
+• *!progress sf* : Safari Faculty
+• *!progress tcp* : Technocraft Playhouse
+• *!progress odl* : One Day Lecture
+• *!progress sp* : Start Point`
+    );
+  }
+
+  if (normalized === 'all') {
+    const subOrder = ['safari', 'startpoint', 'odl', 'technocraft'];
+    let totalPct = 0;
+    const lines = [];
+
+    lines.push('📊 *PROGRESS SUB-DIVISI CENTRAL EVENT*');
+    lines.push('_Ini Lho ITS! 2027 • Rekapitulasi Progres_');
+    lines.push('────────────────────────────');
+
+    subOrder.forEach(subId => {
+      const meta = SUB_EVENT_META[subId];
+      const item = progressData[subId] || { percentage: 0, statusLabel: 'Belum Dikonfigurasi' };
+      const pct = item.percentage || 0;
+      totalPct += pct;
+      const bar = renderProgressBar(pct);
+      const label = item.statusLabel || 'Persiapan konsep & modul';
+
+      lines.push(`${meta.icon} *${meta.name} (${meta.code})*`);
+      lines.push(`[${bar}] *${pct}%*`);
+      lines.push(`Status: ${label}\n`);
+    });
+
+    const avgPct = Math.round(totalPct / subOrder.length);
+    lines.push('────────────────────────────');
+    lines.push(`📈 *Rata-rata Kesiapan:* *${avgPct}%*`);
+    lines.push('💡 _Ketik *!progress sf* atau *!progress tcp* untuk rincian milestone._');
+
+    return lines.join('\n');
+  }
+
+  // Single sub-event details
+  const meta = SUB_EVENT_META[normalized] || SUB_EVENT_META.safari;
+  const item = progressData[normalized] || {
+    percentage: 0,
+    statusLabel: 'Belum Dikonfigurasi (Menunggu Input Staff Ahli)',
+    updatedBy: 'Sistem Central Event',
+    milestones: []
+  };
+
+  const pct = item.percentage || 0;
+  const bar = renderProgressBar(pct);
+  const milestones = item.milestones || [];
+  const completedCount = milestones.filter(m => m.status === 'done' || (m.progress || 0) >= 100).length;
+
+  const lines = [];
+  lines.push(`📊 *PROGRESS PROYEK: ${meta.name.toUpperCase()}*`);
+  lines.push(`_Sub-Divisi ${meta.name} (${meta.code}) • Ini Lho ITS! 2027_`);
+  lines.push('────────────────────────────');
+  lines.push(`🎯 *Total Progres:* [${bar}] *${pct}%*`);
+  lines.push(`📝 *Status Terkini:*`);
+  lines.push(`${item.statusLabel || 'Menunggu pembaruan status'}`);
+  lines.push(`👤 *PIC/Update:* ${item.updatedBy || 'Staff Ahli'}`);
+  lines.push('');
+
+  if (milestones.length === 0) {
+    lines.push('📋 *Rincian Milestone:*');
+    lines.push('_Belum ada milestone yang ditambahkan._');
+  } else {
+    lines.push(`📋 *Rincian Milestone (${completedCount}/${milestones.length} Selesai):*`);
+    milestones.forEach(m => {
+      let icon = '⏳';
+      const mProg = m.progress !== undefined ? m.progress : (m.status === 'done' ? 100 : (m.status === 'in_progress' ? 50 : 0));
+      if (m.status === 'done' || mProg >= 100) {
+        icon = '✅';
+      } else if (m.status === 'in_progress' || mProg > 0) {
+        icon = '🔄';
+      }
+      lines.push(`${icon} ${m.title} (${mProg}%)`);
+    });
+  }
+
+  const otherSubList = ['all', 'sf', 'tcp', 'odl', 'sp']
+    .filter(k => k !== meta.abbr)
+    .map(k => `!progress ${k}`)
+    .join(' | ');
+
+  lines.push('────────────────────────────');
+  lines.push('💡 *Perintah Lainnya:*');
+  lines.push(`Ketik: ${otherSubList}`);
+
+  return lines.join('\n');
+}
+
 module.exports = {
   getAllProgress,
   getProgress,
@@ -250,5 +411,8 @@ module.exports = {
   addMilestone,
   deleteMilestone,
   initFromSupabase,
-  syncToSupabase
+  syncToSupabase,
+  formatProgressForWhatsApp,
+  normalizeSubKey,
+  renderProgressBar
 };

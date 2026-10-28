@@ -45,7 +45,7 @@ function normalizeSubEventKey(key = '') {
   if (!clean || clean === 'sf' || clean === 'safari') return 'safari';
   if (clean === 'sp' || clean === 'startpoint' || clean === 'start_point') return 'startpoint';
   if (clean === 'odl' || clean === 'onedaylecture') return 'odl';
-  if (clean === 'tc' || clean === 'technocraft' || clean === 'techno') return 'technocraft';
+  if (clean === 'tcp' || clean === 'tc' || clean === 'technocraft' || clean === 'techno') return 'technocraft';
   if (clean === 'all' || clean === 'semua') return 'all';
   return 'safari';
 }
@@ -91,7 +91,7 @@ Ketik:
 • *!database sf* : Detail Staff Safari Faculty
 • *!database sp* : Detail Staff Start Point
 • *!database odl* : Detail Staff One Day Lecture
-• *!database tc* : Detail Staff Technocraft`;
+• *!database tcp* : Detail Staff Technocraft Playhouse`;
 
     return summaryText;
   }
@@ -134,7 +134,7 @@ Ketik:
   }
 
   out += `────────────────────────────
-💡 Ketik: !database odl | !database sp | !database tc`;
+💡 Ketik: !database odl | !database sp | !database tcp`;
 
   return out;
 }

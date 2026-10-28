@@ -31,8 +31,8 @@ async function handleIncomingMessage(payload) {
     if (!isGroup && /^(halo|hai|p|ping|assalamualaikum|siang|pagi|malam|bot)/i.test(cleanMsg)) {
       return getHelpMessage(senderName);
     }
-    // Jika di grup atau chat pribadi ketik kata kunci langsung (misal: status, rundown, pos, menu, help, database)
-    if (!/^(status|rundown|pos|menu|help|planb|hujan|kpi|ready|delay|database|db|staff|panitia)\b/i.test(cleanMsg)) {
+    // Jika di grup atau chat pribadi ketik kata kunci langsung (misal: status, rundown, pos, menu, help, database, progress)
+    if (!/^(status|rundown|pos|menu|help|planb|hujan|kpi|ready|delay|database|db|staff|panitia|progress|prog)\b/i.test(cleanMsg)) {
       return null;
     }
   }
@@ -53,6 +53,10 @@ async function handleIncomingMessage(payload) {
 
     case 'status':
       return getStatusMessage(currentSubId, subEvent);
+
+    case 'progress':
+    case 'prog':
+      return progressService.formatProgressForWhatsApp(args || 'sf');
 
     case 'rundown':
       return await getRundownMessage(currentSubId, subEvent);
@@ -104,9 +108,10 @@ Berikut daftar perintah yang dapat digunakan di grup maupun chat pribadi:
 
 📋 *INFORMASI & JADWAL*
 • *!status* : Rekap kesiapan acara, progress & countdown H-75
+• *!progress [all/sf/tcp/odl/sp]* : Tracker progress & milestone per sub-event (Default: SF)
 • *!rundown* : Sesi rundown live yang sedang berlangsung & sesi berikutnya
 • *!pos* : Status kesiapan seluruh pos lab & titik kumpul
-• *!database [sf/odl/sp/tc]* : Database personil panitia & LO per sub-divisi (Default: SF)
+• *!database [sf/tcp/odl/sp]* : Database personil panitia & LO per sub-divisi (Default: SF)
 • *!kpi* : Target peserta 1.450 dan keterlibatan 39 HMD
 
 ⚡ *OPERASIONAL & LAPANGAN (LO / KORLAP)*
