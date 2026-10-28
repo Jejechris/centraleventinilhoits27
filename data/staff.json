@@ -4,117 +4,144 @@
     "name": "Safari Faculty",
     "code": "SF-01",
     "tagline": "Eksplorasi Kampus, 6 Kluster Fakultas & 39 Departemen ITS",
-    "totalStaff": 11,
+    "totalStaff": 14,
+    "leadership": {
+      "kasubdiv": "Damar",
+      "wakasubdiv": "Winan"
+    },
     "staffList": [
       {
         "id": "sf_01",
+        "name": "Damar",
+        "role": "Kasubdiv",
+        "position": "Kepala Sub-Divisi Safari Faculty (Pimpinan Utama)",
+        "dept": "Central Event ITS 2027",
+        "cluster": "Pimpinan Penuh / Komando Utama",
+        "status": "Aktif",
+        "isLeader": true
+      },
+      {
+        "id": "sf_02",
+        "name": "Winan",
+        "role": "Wakasubdiv",
+        "position": "Wakil Kepala Sub-Divisi Safari Faculty",
+        "dept": "Central Event ITS 2027",
+        "cluster": "Pimpinan Penuh / Komando Lapangan",
+        "status": "Aktif",
+        "isLeader": true
+      },
+      {
+        "id": "sf_03",
+        "name": "ATAR",
+        "role": "Staff Ahli (Staffli)",
+        "position": "Staff Ahli Safari Faculty (Slot 1)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Supervisi & Konsep",
+        "status": "Aktif",
+        "isStaffli": true
+      },
+      {
+        "id": "sf_04",
+        "name": "ALYSSA",
+        "role": "Staff Ahli (Staffli)",
+        "position": "Staff Ahli Safari Faculty (Slot 2)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Supervisi & Konsep",
+        "status": "Aktif",
+        "isStaffli": true
+      },
+      {
+        "id": "sf_05",
+        "name": "SYAFA",
+        "role": "Staff Ahli (Staffli)",
+        "position": "Staff Ahli Safari Faculty (Slot 3)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Supervisi & Konsep",
+        "status": "Aktif",
+        "isStaffli": true
+      },
+      {
+        "id": "sf_06",
+        "name": "ZORA",
+        "role": "Staff Ahli (Staffli)",
+        "position": "Staff Ahli Safari Faculty (Slot 4)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Supervisi & Konsep",
+        "status": "Aktif",
+        "isStaffli": true
+      },
+      {
+        "id": "sf_07",
+        "name": "SALSA",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 5)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
+        "status": "Aktif"
+      },
+      {
+        "id": "sf_08",
+        "name": "KIRANA",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 6)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
+        "status": "Aktif"
+      },
+      {
+        "id": "sf_09",
+        "name": "ANGGA",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 7)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
+        "status": "Aktif"
+      },
+      {
+        "id": "sf_10",
+        "name": "Dzikrie",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 8)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
+        "status": "Aktif"
+      },
+      {
+        "id": "sf_11",
         "name": "Senna",
-        "role": "Kadiv Central Event",
-        "position": "Penanggung Jawab Umum",
-        "dept": "S1 Teknik Informatika (FTEIC)",
-        "cluster": "Komando Utama",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 9)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
         "phone": "6282342815719",
         "status": "Aktif"
       },
       {
-        "id": "sf_02",
-        "name": "Chris",
-        "role": "Wakadiv Central Event",
-        "position": "Koordinator Lapangan & Alur",
-        "dept": "S1 Sistem Informasi (FTEIC)",
-        "cluster": "Komando Lapangan",
-        "phone": "6281558267645",
+        "id": "sf_12",
+        "name": "GEB",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 10)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
         "status": "Aktif"
       },
       {
-        "id": "sf_03",
-        "name": "Farhan",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Koordinator Kluster & LO",
-        "dept": "S1 Teknik Elektro (FTEIC)",
-        "cluster": "Supervisi 6 Kluster",
-        "phone": "6281234567801",
+        "id": "sf_13",
+        "name": "BILQISTH",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 11)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
         "status": "Aktif"
       },
       {
-        "id": "sf_04",
-        "name": "Nabila",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Penyusunan Modul & Materi Lab",
-        "dept": "S1 Teknik Kimia (FTIRS)",
-        "cluster": "Akademik & Modul",
-        "phone": "6281234567802",
-        "status": "Aktif"
-      },
-      {
-        "id": "sf_05",
-        "name": "Budi Santoso",
-        "role": "Staff LO",
-        "position": "LO Kluster 1 (Sains FSAD)",
-        "dept": "S1 Fisika (FSAD)",
-        "cluster": "Kluster FSAD",
-        "phone": "6281234567803",
-        "status": "Standby"
-      },
-      {
-        "id": "sf_06",
-        "name": "Amanda Putri",
-        "role": "Staff LO",
-        "position": "LO Kluster 2 (Industri FTIRS)",
-        "dept": "S1 Teknik Mesin (FTIRS)",
-        "cluster": "Kluster FTIRS",
-        "phone": "6281234567804",
-        "status": "Standby"
-      },
-      {
-        "id": "sf_07",
-        "name": "Kevin Aditya",
-        "role": "Staff LO",
-        "position": "LO Kluster 3 (Elektro & IT FTEIC)",
-        "dept": "S1 Teknik Komputer (FTEIC)",
-        "cluster": "Kluster FTEIC",
-        "phone": "6281234567805",
-        "status": "Standby"
-      },
-      {
-        "id": "sf_08",
-        "name": "Dinda Kirana",
-        "role": "Staff LO",
-        "position": "LO Kluster 4 (Maritim FTK)",
-        "dept": "S1 Teknik Perkapalan (FTK)",
-        "cluster": "Kluster FTK",
-        "phone": "6281234567806",
-        "status": "Standby"
-      },
-      {
-        "id": "sf_09",
-        "name": "Rizky Ramadhan",
-        "role": "Staff LO",
-        "position": "LO Kluster 5 (Sipil FTSPK)",
-        "dept": "S1 Teknik Sipil (FTSPK)",
-        "cluster": "Kluster FTSPK",
-        "phone": "6281234567807",
-        "status": "Standby"
-      },
-      {
-        "id": "sf_10",
-        "name": "Siti Aisyah",
-        "role": "Staff LO",
-        "position": "LO Kluster 6 (Vokasi Terapan FV)",
-        "dept": "D4 TRKK (FV)",
-        "cluster": "Kluster FV",
-        "phone": "6281234567808",
-        "status": "Standby"
-      },
-      {
-        "id": "sf_11",
-        "name": "Dimas Prakoso",
-        "role": "Staff Pelaksana",
-        "position": "PIC Open Gate & Crowd Control",
-        "dept": "S1 Statistika Bisnis (FSAD)",
-        "cluster": "Gerbang & Registrasi",
-        "phone": "6281234567809",
-        "status": "Standby"
+        "id": "sf_14",
+        "name": "[Staff 8 - Menunggu Konfirmasi]",
+        "role": "Staff",
+        "position": "Staff Pelaksana Safari Faculty (Slot 12)",
+        "dept": "Safari Faculty CE 2027",
+        "cluster": "Operasional Lapangan",
+        "status": "Menunggu Konfirmasi"
       }
     ]
   },
@@ -123,47 +150,23 @@
     "name": "Start Point",
     "code": "SP-02",
     "tagline": "Pusat Registrasi Akbar, Pengondisian Kluster & Mobilisasi Awal",
-    "totalStaff": 4,
+    "totalStaff": 2,
     "staffList": [
       {
         "id": "sp_01",
-        "name": "Senna",
-        "role": "Kadiv Central Event",
-        "position": "Penanggung Jawab Umum",
-        "dept": "S1 Teknik Informatika (FTEIC)",
-        "cluster": "Komando Utama",
-        "phone": "6282342815719",
-        "status": "Aktif"
+        "name": "Damar",
+        "role": "Kasubdiv",
+        "position": "Pimpinan Koordinasi Sub-Divisi",
+        "status": "Aktif",
+        "isLeader": true
       },
       {
         "id": "sp_02",
-        "name": "Chris",
-        "role": "Wakadiv Central Event",
-        "position": "Pengondisian Massa Awal",
-        "dept": "S1 Sistem Informasi (FTEIC)",
-        "cluster": "Komando Lapangan",
-        "phone": "6281558267645",
-        "status": "Aktif"
-      },
-      {
-        "id": "sp_03",
-        "name": "Fajar Nugroho",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Koordinator Gate & Crowd Control",
-        "dept": "S1 Teknik Kelautan (FTK)",
-        "cluster": "Crowd Control",
-        "phone": "6281234567810",
-        "status": "Persiapan"
-      },
-      {
-        "id": "sp_04",
-        "name": "Dr. Rian",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Koordinator Pos Medis K3",
-        "dept": "S1 Teknik Biomedik (FTEIC)",
-        "cluster": "Medis & Evakuasi",
-        "phone": "6281234567811",
-        "status": "Persiapan"
+        "name": "Winan",
+        "role": "Wakasubdiv",
+        "position": "Wakil Pimpinan Koordinasi Sub-Divisi",
+        "status": "Aktif",
+        "isLeader": true
       }
     ]
   },
@@ -171,38 +174,24 @@
     "subEventId": "odl",
     "name": "One Day Lecture",
     "code": "ODL-03",
-    "tagline": "Simulasi Perkuliahan Nyata Interaktif Bersama Guru Besar & Dosen ITS",
-    "totalStaff": 3,
+    "tagline": "Simulasi Perkuliahan Nyata Interaktif Bersama Dosen ITS",
+    "totalStaff": 2,
     "staffList": [
       {
         "id": "odl_01",
-        "name": "Senna",
-        "role": "Kadiv Central Event",
-        "position": "Penanggung Jawab Umum",
-        "dept": "S1 Teknik Informatika (FTEIC)",
-        "cluster": "Komando Utama",
-        "phone": "6282342815719",
-        "status": "Aktif"
+        "name": "Damar",
+        "role": "Kasubdiv",
+        "position": "Pimpinan Koordinasi Sub-Divisi",
+        "status": "Aktif",
+        "isLeader": true
       },
       {
         "id": "odl_02",
-        "name": "Wikan",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Koordinator Kurikulum & Dosen Tamu",
-        "dept": "S1 Manajemen Bisnis (FSAD)",
-        "cluster": "Akademik ODL",
-        "phone": "6281234567812",
-        "status": "Persiapan"
-      },
-      {
-        "id": "odl_03",
-        "name": "Gita",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Koordinator Auditorium & Audio Visual",
-        "dept": "S1 Desain Komunikasi Visual (FDKBD)",
-        "cluster": "Venue & AV",
-        "phone": "6281234567813",
-        "status": "Persiapan"
+        "name": "Winan",
+        "role": "Wakasubdiv",
+        "position": "Wakil Pimpinan Koordinasi Sub-Divisi",
+        "status": "Aktif",
+        "isLeader": true
       }
     ]
   },
@@ -211,37 +200,23 @@
     "name": "Technocraft Playhouse",
     "code": "TC-04",
     "tagline": "Wahana Eksperimen Sains, Robotika & Inovasi Teknologi Kreatif",
-    "totalStaff": 3,
+    "totalStaff": 2,
     "staffList": [
       {
         "id": "tc_01",
-        "name": "Senna",
-        "role": "Kadiv Central Event",
-        "position": "Penanggung Jawab Umum",
-        "dept": "S1 Teknik Informatika (FTEIC)",
-        "cluster": "Komando Utama",
-        "phone": "6282342815719",
-        "status": "Aktif"
+        "name": "Damar",
+        "role": "Kasubdiv",
+        "position": "Pimpinan Koordinasi Sub-Divisi",
+        "status": "Aktif",
+        "isLeader": true
       },
       {
         "id": "tc_02",
-        "name": "Yoga",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Koordinator Robotika & Wahana Expo",
-        "dept": "S1 Teknik Elektro (FTEIC)",
-        "cluster": "Wahana Teknologi",
-        "phone": "6281234567814",
-        "status": "Persiapan"
-      },
-      {
-        "id": "tc_03",
-        "name": "Rani",
-        "role": "Staff Ahli (Staffli)",
-        "position": "Koordinator Stand Karya Mahasiswa",
-        "dept": "S1 Teknik Industri (FTIRS)",
-        "cluster": "Expo Mahasiswa",
-        "phone": "6281234567815",
-        "status": "Persiapan"
+        "name": "Winan",
+        "role": "Wakasubdiv",
+        "position": "Wakil Pimpinan Koordinasi Sub-Divisi",
+        "status": "Aktif",
+        "isLeader": true
       }
     ]
   }

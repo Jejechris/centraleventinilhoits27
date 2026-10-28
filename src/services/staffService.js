@@ -102,9 +102,9 @@ Ketik:
   }
 
   const staffList = subData.staffList || [];
-  const coreStaff = staffList.filter(s => s.role.includes('Kadiv') || s.role.includes('Wakadiv') || s.role.includes('Staff Ahli'));
-  const loStaff = staffList.filter(s => s.role.includes('LO'));
-  const fieldStaff = staffList.filter(s => !coreStaff.includes(s) && !loStaff.includes(s));
+  const leaders = staffList.filter(s => s.isLeader || s.role === 'Kasubdiv' || s.role === 'Wakasubdiv');
+  const staffli = staffList.filter(s => !leaders.includes(s) && (s.isStaffli || s.role.includes('Staff Ahli')));
+  const regularStaff = staffList.filter(s => !leaders.includes(s) && !staffli.includes(s));
 
   let out = 
 `👥 *DATABASE STAFF: ${subData.name.toUpperCase()} (${subData.code})*
@@ -117,32 +117,31 @@ _Ini Lho ITS! 2027 • Divisi Acara Pusat_
 
   let counter = 1;
 
-  if (coreStaff.length > 0) {
-    out += `⭐ *PIMPINAN & STAFF AHLI:*\n`;
-    coreStaff.forEach(s => {
-      const phoneClean = s.phone ? (s.phone.startsWith('62') ? `+${s.phone}` : s.phone) : '-';
-      out += `${counter++}. *${s.name}* (${s.role})\n`;
-      out += `   • Posisi: ${s.position || '-'}\n`;
-      out += `   • Asal: ${s.dept || '-'}\n`;
-      out += `   • Kontak: ${phoneClean} [${s.status || 'Aktif'}]\n\n`;
+  if (leaders.length > 0) {
+    out += `👑 *PIMPINAN SUB-DIVISI (PEMEGANG KUASA):*\n`;
+    leaders.forEach(s => {
+      const phoneClean = s.phone ? (s.phone.startsWith('62') ? ` • WA: +${s.phone}` : ` • WA: ${s.phone}`) : '';
+      out += `${counter++}. *${s.name}* — *${s.role}* (Pimpinan Tertinggi)\n`;
+      out += `   • Posisi: ${s.position || '-'}${phoneClean} [${s.status || 'Aktif'}]\n\n`;
     });
   }
 
-  if (loStaff.length > 0) {
-    out += `🧭 *TIM LO PENDAMPING KLUSTER:*\n`;
-    loStaff.forEach(s => {
-      out += `${counter++}. *${s.name}* — ${s.position}\n`;
-      out += `   • Asal: ${s.dept || '-'}\n`;
-      out += `   • Kluster: ${s.cluster || '-'}\n\n`;
+  if (staffli.length > 0) {
+    out += `⭐ *STAFF AHLI (STAFFLI - 4 PERSONIL):*\n`;
+    staffli.forEach(s => {
+      const phoneClean = s.phone ? (s.phone.startsWith('62') ? ` • WA: +${s.phone}` : ` • WA: ${s.phone}`) : '';
+      out += `${counter++}. *${s.name}* (${s.role})\n`;
+      out += `   • Posisi: ${s.position || '-'}${phoneClean} [${s.status || 'Aktif'}]\n\n`;
     });
   }
 
-  if (fieldStaff.length > 0) {
-    out += `🛡️ *TIM OPERASIONAL & LAPANGAN:*\n`;
-    fieldStaff.forEach(s => {
+  if (regularStaff.length > 0) {
+    out += `🛡️ *STAFF PELAKSANA / OPERASIONAL (8 PERSONIL):*\n`;
+    regularStaff.forEach(s => {
+      const phoneClean = s.phone ? (s.phone.startsWith('62') ? ` • WA: +${s.phone}` : ` • WA: ${s.phone}`) : '';
+      const statusBadge = s.status === 'Menunggu Konfirmasi' ? '⏳ Menunggu Konfirmasi' : 'Aktif';
       out += `${counter++}. *${s.name}* (${s.role})\n`;
-      out += `   • Posisi: ${s.position || '-'}\n`;
-      out += `   • Asal: ${s.dept || '-'}\n\n`;
+      out += `   • Posisi: ${s.position || '-'}${phoneClean} [${statusBadge}]\n\n`;
     });
   }
 
