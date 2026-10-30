@@ -55,6 +55,14 @@ const SpreadsheetHub = {
     await this.fetchAndRender();
   },
 
+  async switchTab(tab) {
+    this.activeTab = tab;
+    this.renderOnPageWidget();
+    if (this.isExplorerOpen()) {
+      this.renderExplorerContent();
+    }
+  },
+
   async fetchAndRender() {
     // 1. Fetch Spreadsheets
     try {
@@ -87,7 +95,8 @@ const SpreadsheetHub = {
   /**
    * ================================================================
    * ON-PAGE WIDGET (Inside #sharedSpreadsheetMount)
-   * Menggantikan kotak kecil yang sesak dengan Launcher Explorer Elegan
+   * Menggantikan kotak kecil yang sesak & tombol berulang-ulang
+   * dengan daftar operasional riil + SATU tombol launcher explorer
    * ================================================================
    */
   renderOnPageWidget() {
@@ -98,119 +107,153 @@ const SpreadsheetHub = {
     const sheetCount = (this.sheets || []).length;
     const canvaCount = (this.canvaLinks || []).length;
 
+    // Filter items according to the active tab
+    const isSheets = this.activeTab === 'sheets';
+    const items = isSheets ? this.sheets : this.canvaLinks;
+
     container.innerHTML = `
-      <div class="chassis-core flex flex-col justify-between h-full space-y-4">
+      <div class="chassis-core flex flex-col justify-between h-full space-y-3">
         
-        <!-- Header -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-white/5 gap-2.5">
+        <!-- Header (Clean, Non-repetitive: Hanya 1 tombol explorer) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-200 dark:border-white/5 gap-2.5 flex-shrink-0">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="eyebrow-pill emerald text-[9px] font-mono font-bold">● CLOUD LIVE REPO</span>
+              <span class="eyebrow-pill emerald text-[9px] font-mono font-bold">● CLOUD SYNC</span>
               <span class="eyebrow-pill cobalt text-[9px] font-mono font-bold">${subInfo.code} REPOSITORI</span>
             </div>
-            <h3 class="text-sm font-extrabold text-white font-display flex items-center gap-2">
-              <span>📊</span> Bank Lembar Kerja & <span>🎨</span> Desain Canva
+            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white font-display flex items-center gap-2">
+              <span>📁</span> Bank Lembar Kerja & Desain Visual
             </h3>
-            <p class="text-[11px] font-mono text-slate-300">
-              Akses cepat lembar kerja operasional & aset visual resmi ${subInfo.name}
+            <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+              Pusat lembar kerja operasional & materi grafis resmi ${subInfo.name}
             </p>
           </div>
 
-          <!-- Fast Add & Pop-up Explorer Buttons -->
-          <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-            <button 
-              onclick="SpreadsheetHub.openExplorer('sheets')" 
-              class="btn-tactical py-1.5 px-3 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
-            >
-              <span>📊 BUKA BANK SHEET</span>
-              <span class="text-[10px]">↗</span>
-            </button>
-            <button 
-              onclick="SpreadsheetHub.openExplorer('canva')" 
-              class="btn-ghost py-1.5 px-3 text-xs font-bold text-blue-400 border-blue-500/30 hover:border-blue-400 flex items-center gap-1.5"
-            >
-              <span>🎨 BUKA CANVA</span>
-              <span class="text-[10px]">↗</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 2 Grand Interactive Hub Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          
-          <!-- Card 1: Bank Spreadsheet Hub -->
-          <div 
-            onclick="SpreadsheetHub.openExplorer('sheets')" 
-            class="bay-recessed p-4 rounded-2xl border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition cursor-pointer flex flex-col justify-between group space-y-3"
+          <!-- SATU Tombol Utama (Buka Explorer) -->
+          <button 
+            onclick="SpreadsheetHub.openExplorer('${this.activeTab}', '${this.currentSubEventId}')" 
+            class="btn-tactical py-1.5 px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-sm self-start sm:self-auto"
+            title="Buka Repositori Lengkap di Layar Luas"
           >
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono font-bold flex items-center justify-center text-lg group-hover:scale-105 transition">
-                  📊
-                </div>
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
-                  ${sheetCount} LEMBAR KERJA
-                </span>
-              </div>
-              <h4 class="text-sm font-extrabold text-white font-display group-hover:text-emerald-300 transition">
-                Bank Spreadsheet Operasional
-              </h4>
-              <p class="text-[11px] font-mono text-slate-400 mt-1 line-clamp-2">
-                Master Rundown, Plotting Rute, Logistik, Presensi, dan inventaris tim Central Event.
-              </p>
-            </div>
-
-            <!-- Quick Pill Peek -->
-            <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono">
-              <span class="text-[10px] text-slate-500 font-bold">MODE POP-UP & SORTIR</span>
-              <span class="text-emerald-400 group-hover:underline font-bold flex items-center gap-1">
-                Eksplorasi Sheet <span>→</span>
-              </span>
-            </div>
-          </div>
-
-          <!-- Card 2: Bank Desain Canva Hub -->
-          <div 
-            onclick="SpreadsheetHub.openExplorer('canva')" 
-            class="bay-recessed p-4 rounded-2xl border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/5 transition cursor-pointer flex flex-col justify-between group space-y-3"
-          >
-            <div>
-              <div class="flex items-center justify-between gap-2 mb-2">
-                <div class="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 font-mono font-bold flex items-center justify-center text-lg group-hover:scale-105 transition">
-                  🎨
-                </div>
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-blue-400/20 text-blue-300 border border-blue-400/30">
-                  ${canvaCount} ASET DESAIN
-                </span>
-              </div>
-              <h4 class="text-sm font-extrabold text-white font-display group-hover:text-blue-300 transition">
-                Bank Desain Canva Resmi
-              </h4>
-              <p class="text-[11px] font-mono text-slate-400 mt-1 line-clamp-2">
-                ID Card Panitia, Banner Gate, Cue Card MC, PPT Deck, Signage, dan materi publikasi.
-              </p>
-            </div>
-
-            <!-- Quick Pill Peek -->
-            <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono">
-              <span class="text-[10px] text-slate-500 font-bold">MODE POP-UP & SORTIR</span>
-              <span class="text-blue-400 group-hover:underline font-bold flex items-center gap-1">
-                Eksplorasi Canva <span>→</span>
-              </span>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Telemetry Bottom Strip -->
-        <div class="bay-recessed p-2.5 rounded-xl border border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-400">
-          <span class="flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Tersinkronisasi Otomatis Supabase Cloud & Multi-Device
-          </span>
-          <button onclick="SpreadsheetHub.openExplorer()" class="text-blue-400 hover:text-blue-300 font-bold hover:underline">
-            Buka Explorer Penuh ⛶
+            <span>⛶ Buka Bank Explorer</span>
+            <div class="btn-icon-bay">↗</div>
           </button>
+        </div>
+
+        <!-- Mode Tabs Switcher (Segmented Control) -->
+        <div class="flex items-center gap-1 p-1 bay-recessed rounded-xl border border-slate-200 dark:border-white/5 flex-shrink-0">
+          <button 
+            onclick="SpreadsheetHub.switchTab('sheets')" 
+            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 ${isSheets ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}"
+          >
+            <span>📊 Bank Sheet</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[9px] ${isSheets ? 'bg-black/30 text-emerald-200' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}">${sheetCount}</span>
+          </button>
+
+          <button 
+            onclick="SpreadsheetHub.switchTab('canva')" 
+            class="flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-2 ${!isSheets ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}"
+          >
+            <span>🎨 Bank Canva</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[9px] ${!isSheets ? 'bg-black/30 text-blue-200' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}">${canvaCount}</span>
+          </button>
+        </div>
+
+        <!-- Body: Real Operational Item List (No empty fake cards!) -->
+        <div class="space-y-2 overflow-y-auto custom-scrollbar flex-1 max-h-[280px] pr-1">
+          ${items.length === 0 ? `
+            <div class="p-6 rounded-xl bay-recessed border border-dashed border-slate-300 dark:border-white/10 text-center space-y-2">
+              <div class="text-2xl">${isSheets ? '📊' : '🎨'}</div>
+              <div class="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">Belum Ada ${isSheets ? 'Spreadsheet' : 'Desain'}</div>
+              <button 
+                onclick="${isSheets ? 'SpreadsheetHub.openAddModal()' : 'SpreadsheetHub.openAddCanvaModal()'}" 
+                class="btn-ghost py-1 px-3 text-xs text-blue-600 dark:text-blue-400 border-blue-500/30 hover:border-blue-400 font-bold mt-1"
+              >
+                + Tambah Baru
+              </button>
+            </div>
+          ` : items.map(item => {
+            const cleanSheetId = item.sheetId || (item.id && !item.id.startsWith('sheet_') ? item.id : null);
+            const externalUrl = item.externalUrl || item.url || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit` : '#');
+
+            return `
+              <div class="bay-recessed p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-blue-500/30 transition flex items-center justify-between gap-2.5 group">
+                
+                <!-- Left: Icon & Meta -->
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div class="w-8 h-8 rounded-lg ${isSheets ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-blue-400'} flex items-center justify-center text-sm flex-shrink-0">
+                    ${item.icon || (isSheets ? '📊' : '🎨')}
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+                      <span class="text-xs font-extrabold text-slate-900 dark:text-white truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition leading-snug">
+                        ${item.name}
+                      </span>
+                      ${!isSheets && item.category ? `
+                        <span class="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20">
+                          ${item.category}
+                        </span>
+                      ` : `
+                        <span class="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20">
+                          ONLINE
+                        </span>
+                      `}
+                    </div>
+                    <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate">
+                      ${isSheets ? (item.date || 'Tersambung Cloud') : (item.description || 'Aset desain resmi tim.')}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Actions: Edit, Salin, Buka -->
+                <div class="flex items-center gap-1 flex-shrink-0">
+                  <button 
+                    onclick="${isSheets ? `SpreadsheetHub.openEditSheetModal('${item.id}')` : `SpreadsheetHub.openEditCanvaModal('${item.id}')`}" 
+                    class="btn-ghost py-1 px-2 text-[10px] text-amber-600 dark:text-amber-400 hover:text-amber-500 border border-amber-500/20"
+                    title="Edit Nama / Ganti Tautan"
+                  >
+                    ✏️
+                  </button>
+                  <button 
+                    onclick="SpreadsheetHub.copyLink('${externalUrl}')" 
+                    class="btn-ghost py-1 px-2 text-[10px] text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white border border-slate-200 dark:border-white/10"
+                    title="Salin Tautan"
+                  >
+                    📋
+                  </button>
+                  ${isSheets ? `
+                    <button 
+                      onclick="SpreadsheetHub.openInApp('${cleanSheetId || item.id}')" 
+                      class="btn-tactical py-1 px-2.5 text-xs font-bold flex items-center gap-1 shadow-sm"
+                    >
+                      <span>Buka</span>
+                      <span class="text-[9px]">↗</span>
+                    </button>
+                  ` : `
+                    <button 
+                      onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" 
+                      class="btn-tactical py-1 px-2.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1 shadow-sm"
+                    >
+                      <span>Buka</span>
+                      <span class="text-[9px]">↗</span>
+                    </button>
+                  `}
+                </div>
+
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Footer Strip (No redundant buttons!) -->
+        <div class="pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400 flex-shrink-0">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Supabase Cloud PostgreSQL Synchronized
+          </span>
+          <span class="text-slate-400 dark:text-slate-500 font-medium">
+            ${items.length} ${isSheets ? 'Lembar Kerja Aktif' : 'Aset Desain Aktif'}
+          </span>
         </div>
 
       </div>
@@ -219,7 +262,7 @@ const SpreadsheetHub = {
 
   /**
    * ================================================================
-   * POP-UP UI/UX EXPLORER (Mirip Drive In-App Explorer)
+   * POP-UP UI/UX EXPLORER (Menggunakan Standard WorkspaceModal Theme)
    * Menyediakan Sortir Lengkap, Filter Kategori, Grid/Table View, Edit/Rename
    * ================================================================
    */
@@ -246,7 +289,6 @@ const SpreadsheetHub = {
     }
   },
 
-  // Alias for backward compatibility
   openFullCatalog(type, subEventId) {
     return this.openExplorer(type, subEventId);
   },
@@ -298,9 +340,6 @@ const SpreadsheetHub = {
     this.renderExplorerContent();
   },
 
-  /**
-   * Filter and Sort Data
-   */
   getSortedAndFilteredItems() {
     const isSheets = this.activeTab === 'sheets';
     let items = isSheets ? [...this.sheets] : [...this.canvaLinks];
@@ -355,7 +394,7 @@ const SpreadsheetHub = {
     const isSheets = this.activeTab === 'sheets';
     const items = this.getSortedAndFilteredItems();
 
-    // 1. Update Top Title & Eyebrow
+    // 1. Top Ribbon Meta
     const titleEl = document.getElementById('hubExplorerTitle');
     const badgeEl = document.getElementById('hubExplorerStatusBadge');
     const iconEl = document.getElementById('hubExplorerIconBadge');
@@ -375,42 +414,42 @@ const SpreadsheetHub = {
     if (iconEl) {
       iconEl.innerText = isSheets ? '📊' : '🎨';
       iconEl.className = isSheets
-        ? 'w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0'
-        : 'w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0';
+        ? 'w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0'
+        : 'w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0';
     }
     if (counterEl) {
       counterEl.innerText = `${items.length} ${isSheets ? 'Lembar Kerja' : 'Aset Desain'}`;
     }
 
-    // 2. Render Toolbar (Breadcrumbs/Tabs, Search, Sort Dropdown, Layout Switcher)
+    // 2. Toolbar Rendering (Menyesuaikan ws-surface classes agar serasi Light/Dark)
     const toolbarEl = document.getElementById('hubExplorerToolbar');
     if (toolbarEl) {
       toolbarEl.innerHTML = `
-        <!-- Sub-Ribbon Row 1: Mode Tabs & Sub-Divisi Switcher -->
-        <div class="px-4 sm:px-6 py-2.5 border-b border-white/5 ws-surface-primary flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+        <!-- Row 1: Mode Segmented Switcher & Sub-Divisi Filters -->
+        <div class="px-4 sm:px-6 py-2.5 border-b border-slate-200 dark:border-white/10 ws-surface-primary flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
           
-          <!-- Mode Tabs (Bank Sheet vs Bank Canva) -->
-          <div class="flex items-center gap-1.5 bay-recessed p-1 rounded-xl border border-white/10">
+          <!-- Segmented Tab Switch -->
+          <div class="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
             <button 
               onclick="SpreadsheetHub.switchExplorerTab('sheets')" 
-              class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-1.5 ${isSheets ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}"
+              class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-1.5 ${isSheets ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}"
             >
               <span>📊 Bank Sheet</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-black/40 text-emerald-200">${this.sheets.length}</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[9px] ${isSheets ? 'bg-black/30 text-emerald-200' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}">${this.sheets.length}</span>
             </button>
             <button 
               onclick="SpreadsheetHub.switchExplorerTab('canva')" 
-              class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-1.5 ${!isSheets ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}"
+              class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-1.5 ${!isSheets ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}"
             >
               <span>🎨 Bank Canva</span>
-              <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-black/40 text-blue-200">${this.canvaLinks.length}</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[9px] ${!isSheets ? 'bg-black/30 text-blue-200' : 'bg-slate-200 dark:bg-white/10 text-slate-600 dark:text-slate-400'}">${this.canvaLinks.length}</span>
             </button>
           </div>
 
           <!-- Sub-Divisi Filter Pills -->
-          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-xs font-mono">
+          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-xs font-mono py-1">
             ${[
-              { id: 'all', label: '🌐 Semua', code: 'ALL' },
+              { id: 'all', label: '🌐 Semua Sub', code: 'ALL' },
               { id: 'safari', label: '🏛️ SF', code: 'SF' },
               { id: 'startpoint', label: '🚀 SP', code: 'SP' },
               { id: 'odl', label: '🎓 ODL', code: 'ODL' },
@@ -420,7 +459,7 @@ const SpreadsheetHub = {
               return `
                 <button 
                   onclick="SpreadsheetHub.setSubEventFilter('${s.id}')" 
-                  class="px-2.5 py-1 rounded-lg transition font-bold whitespace-nowrap ${active ? 'bg-white/15 text-white border border-white/30 shadow-sm' : 'bay-recessed text-slate-400 hover:text-white border border-white/5'}"
+                  class="px-2.5 py-1 rounded-lg transition font-bold whitespace-nowrap text-xs ${active ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10'}"
                 >
                   ${s.label}
                 </button>
@@ -429,46 +468,44 @@ const SpreadsheetHub = {
           </div>
 
           <!-- Add Trigger -->
-          <div class="flex items-center gap-2">
+          <div>
             ${isSheets ? `
-              <button onclick="SpreadsheetHub.openAddModal()" class="btn-tactical py-1.5 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+              <button onclick="SpreadsheetHub.openAddModal()" class="btn-tactical py-1.5 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 font-bold flex items-center gap-1.5 shadow-sm">
                 <span>➕</span>
-                <span class="hidden sm:inline">Tambah Sheet</span>
+                <span>Tambah Sheet Baru</span>
               </button>
             ` : `
-              <button onclick="SpreadsheetHub.openAddCanvaModal()" class="btn-tactical py-1.5 px-3 text-xs bg-blue-600 hover:bg-blue-500 font-bold flex items-center gap-1.5 shadow-md shadow-blue-600/20">
+              <button onclick="SpreadsheetHub.openAddCanvaModal()" class="btn-tactical py-1.5 px-3 text-xs bg-blue-600 hover:bg-blue-500 font-bold flex items-center gap-1.5 shadow-sm">
                 <span>➕</span>
-                <span class="hidden sm:inline">Tambah Canva</span>
+                <span>Tambah Desain Baru</span>
               </button>
             `}
           </div>
 
         </div>
 
-        <!-- Sub-Ribbon Row 2: Search, Sorting Dropdown, Layout Mode -->
-        <div class="px-4 sm:px-6 py-2 border-b border-white/5 bg-black/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono flex-shrink-0">
+        <!-- Row 2: Search Input, Sortir Dropdown, Layout Mode Toggle -->
+        <div class="px-4 sm:px-6 py-2.5 border-b border-slate-200 dark:border-white/10 ws-surface-secondary flex flex-wrap items-center justify-between gap-3 text-xs font-mono flex-shrink-0">
           
-          <div class="flex items-center gap-2.5 flex-1 max-w-md">
-            <!-- Search Input -->
-            <div class="relative w-full">
-              <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
-              <input 
-                type="text" 
-                value="${this.searchQuery}" 
-                oninput="SpreadsheetHub.onSearch(this.value)"
-                placeholder="Tapis & cari ${isSheets ? 'spreadsheet...' : 'desain Canva...'}" 
-                class="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bay-recessed border border-white/10 focus:outline-none focus:border-blue-500 text-white placeholder:text-slate-500"
-              />
-            </div>
+          <!-- Search Input -->
+          <div class="relative flex-1 max-w-md">
+            <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+            <input 
+              type="text" 
+              value="${this.searchQuery}" 
+              oninput="SpreadsheetHub.onSearch(this.value)"
+              placeholder="Tapis berkas & desain..." 
+              class="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bg-white dark:bg-[#0c101c] border border-slate-300 dark:border-white/10 focus:outline-none focus:border-blue-500 text-slate-800 dark:text-white placeholder:text-slate-400"
+            />
           </div>
 
           <div class="flex items-center gap-2 flex-wrap">
             <!-- Sort Dropdown ("lebih enak buat sortir") -->
-            <div class="flex items-center gap-1.5 bay-recessed px-2.5 py-1 rounded-lg border border-white/10 text-slate-300">
-              <span class="text-[10px] text-slate-400 font-bold">⇅ SORTIR:</span>
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#0c101c] border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300">
+              <span class="text-[10px] text-slate-400 font-bold uppercase">⇅ SORTIR:</span>
               <select 
                 onchange="SpreadsheetHub.setSortBy(this.value)" 
-                class="bg-transparent text-xs text-white focus:outline-none cursor-pointer font-bold"
+                class="bg-transparent text-xs text-slate-800 dark:text-white focus:outline-none cursor-pointer font-bold"
               >
                 <option value="sub_asc" ${this.sortBy === 'sub_asc' ? 'selected' : ''}>🏛️ Sub-Divisi</option>
                 <option value="name_asc" ${this.sortBy === 'name_asc' ? 'selected' : ''}>🔤 Nama (A - Z)</option>
@@ -478,19 +515,19 @@ const SpreadsheetHub = {
               </select>
             </div>
 
-            <!-- Layout Mode Switcher (Grid vs Table) -->
-            <div class="flex items-center bay-recessed p-0.5 border border-white/10 rounded-lg">
+            <!-- Layout Mode Toggle (Grid vs Table) -->
+            <div class="flex items-center p-0.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
               <button 
                 onclick="SpreadsheetHub.setLayoutMode('grid')" 
-                title="Tampilan Kotak / Kartu" 
-                class="px-2.5 py-1 rounded text-xs transition ${this.layoutMode === 'grid' ? (isSheets ? 'bg-emerald-600 text-white font-bold' : 'bg-blue-600 text-white font-bold') : 'text-slate-400 hover:text-white'}"
+                title="Tampilan Kotak" 
+                class="px-2.5 py-1 rounded text-xs transition ${this.layoutMode === 'grid' ? 'bg-blue-600 text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
               >
                 ▦ Kotak
               </button>
               <button 
                 onclick="SpreadsheetHub.setLayoutMode('table')" 
-                title="Tampilan Tabel Data" 
-                class="px-2.5 py-1 rounded text-xs transition ${this.layoutMode === 'table' ? (isSheets ? 'bg-emerald-600 text-white font-bold' : 'bg-blue-600 text-white font-bold') : 'text-slate-400 hover:text-white'}"
+                title="Tampilan Tabel" 
+                class="px-2.5 py-1 rounded text-xs transition ${this.layoutMode === 'table' ? 'bg-blue-600 text-white font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'}"
               >
                 ☰ Tabel
               </button>
@@ -499,17 +536,17 @@ const SpreadsheetHub = {
 
         </div>
 
-        <!-- Canva Category Chips Ribbon (Only in Canva Tab) -->
+        <!-- Canva Category Chips (Only in Canva Tab) -->
         ${!isSheets ? `
-          <div class="px-4 sm:px-6 py-1.5 border-b border-white/5 bg-[#080b14] flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-[10px] font-mono flex-shrink-0">
-            <span class="text-slate-400 font-bold mr-1">🏷️ KATEGORI:</span>
+          <div class="px-4 sm:px-6 py-2 border-b border-slate-200 dark:border-white/10 ws-surface-primary flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-[10px] font-mono flex-shrink-0">
+            <span class="text-slate-500 font-bold mr-1">🏷️ KATEGORI:</span>
             ${this.canvaCategories.map(cat => {
               const active = this.canvaCategoryFilter === cat;
               const label = cat === 'all' ? 'Semua Kategori' : cat;
               return `
                 <button 
                   onclick="SpreadsheetHub.setCanvaCategoryFilter('${cat}')" 
-                  class="px-2.5 py-0.5 rounded-full border transition whitespace-nowrap ${active ? 'bg-blue-600 text-white font-bold border-blue-500' : 'bay-recessed text-slate-400 hover:text-white border-white/5'}"
+                  class="px-2.5 py-0.5 rounded-full border transition whitespace-nowrap ${active ? 'bg-blue-600 text-white font-bold border-blue-500 shadow-sm' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border-slate-200 dark:border-white/10'}"
                 >
                   ${label}
                 </button>
@@ -520,19 +557,19 @@ const SpreadsheetHub = {
       `;
     }
 
-    // 3. Render Items Canvas (Grid or Table)
+    // 3. Canvas Content (Using ws-surface-secondary for crisp light/dark support)
     const canvasEl = document.getElementById('hubExplorerCanvas');
     if (!canvasEl) return;
 
     if (items.length === 0) {
       canvasEl.innerHTML = `
-        <div class="p-12 rounded-2xl bay-recessed border border-dashed border-white/10 text-center space-y-3">
+        <div class="p-12 rounded-2xl ws-surface-card border border-dashed border-slate-300 dark:border-white/10 text-center space-y-3">
           <div class="text-4xl">${isSheets ? '📊' : '🎨'}</div>
-          <div class="text-base font-extrabold text-white font-display">Tidak Ada Data Ditemukan</div>
-          <p class="text-xs font-mono text-slate-400 max-w-md mx-auto">
-            Tidak ada item yang sesuai dengan kata kunci atau filter yang Anda pilih.
+          <div class="text-base font-extrabold ws-text-title font-display">Tidak Ada Berkas Ditemukan</div>
+          <p class="text-xs font-mono ws-text-muted max-w-md mx-auto">
+            Tidak ada item yang sesuai dengan kata kunci pencarian atau filter sub-divisi yang dipilih.
           </p>
-          <button onclick="SpreadsheetHub.onSearch(''); SpreadsheetHub.setSubEventFilter('all'); SpreadsheetHub.setCanvaCategoryFilter('all');" class="btn-ghost py-1.5 px-4 text-xs text-blue-400 border-blue-500/30 hover:border-blue-400 font-bold mt-2">
+          <button onclick="SpreadsheetHub.onSearch(''); SpreadsheetHub.setSubEventFilter('all'); SpreadsheetHub.setCanvaCategoryFilter('all');" class="btn-ghost py-1.5 px-4 text-xs text-blue-600 dark:text-blue-400 border border-blue-500/30 hover:border-blue-400 font-bold mt-2">
             Reset Filter
           </button>
         </div>
@@ -541,16 +578,14 @@ const SpreadsheetHub = {
     }
 
     if (this.layoutMode === 'table') {
-      // TABLE VIEW (☰)
       canvasEl.innerHTML = this.renderTableView(items, isSheets);
     } else {
-      // GRID CARDS VIEW (▦)
       canvasEl.innerHTML = this.renderGridView(items, isSheets);
     }
   },
 
   /**
-   * Render Grid View (▦)
+   * Render Grid View (▦) - Menggunakan ws-surface-card & ws-text-title
    */
   renderGridView(items, isSheets) {
     return `
@@ -561,18 +596,18 @@ const SpreadsheetHub = {
           const externalUrl = item.externalUrl || item.url || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit` : '#');
 
           return `
-            <div class="chassis p-4 rounded-2xl border border-white/10 ${isSheets ? 'hover:border-emerald-500/40 hover:shadow-emerald-500/10' : 'hover:border-blue-500/40 hover:shadow-blue-500/10'} hover:shadow-xl transition-all duration-200 flex flex-col justify-between space-y-3.5 group bg-[#0c101c]/80">
+            <div class="ws-surface-card p-4 rounded-2xl border border-slate-200 dark:border-white/10 transition-all duration-200 flex flex-col justify-between space-y-3.5 group shadow-sm hover:shadow-md">
               
               <div>
                 <!-- Card Header -->
-                <div class="flex items-center justify-between pb-2 border-b border-white/5 gap-2">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10 gap-2">
                   <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-extrabold ${isSheets ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-blue-500/15 text-blue-300 border border-blue-500/30'} flex items-center gap-1">
+                    <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-extrabold ${isSheets ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30' : 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-500/30'} flex items-center gap-1">
                       <span>${sub.icon}</span>
                       <span>${sub.code} • ${sub.name}</span>
                     </span>
                     ${!isSheets ? `
-                      <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                      <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
                         ${item.category || 'Desain'}
                       </span>
                     ` : ''}
@@ -581,7 +616,7 @@ const SpreadsheetHub = {
                   <div class="flex items-center gap-1">
                     <button 
                       onclick="${isSheets ? `SpreadsheetHub.openEditSheetModal('${item.id}')` : `SpreadsheetHub.openEditCanvaModal('${item.id}')`}" 
-                      class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/10 text-amber-300 hover:bg-amber-500 hover:text-black border border-amber-500/30 transition flex items-center gap-1"
+                      class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500 hover:text-black border border-amber-500/30 transition flex items-center gap-1"
                       title="Edit / Rename & Ganti Link"
                     >
                       <span>✏️</span>
@@ -589,7 +624,7 @@ const SpreadsheetHub = {
                     </button>
                     <button 
                       onclick="${isSheets ? `SpreadsheetHub.deleteSheet('${item.id}')` : `SpreadsheetHub.deleteCanva('${item.id}')`}" 
-                      class="text-slate-500 hover:text-rose-400 p-1 text-xs transition"
+                      class="text-slate-400 hover:text-rose-600 p-1 text-xs transition"
                       title="Hapus"
                     >
                       🗑️
@@ -599,22 +634,22 @@ const SpreadsheetHub = {
 
                 <!-- Card Body -->
                 <div class="pt-2 space-y-1">
-                  <h4 class="text-sm font-extrabold text-white font-display leading-snug ${isSheets ? 'group-hover:text-emerald-300' : 'group-hover:text-blue-300'} transition line-clamp-2">
+                  <h4 class="text-sm font-extrabold ws-text-title font-display leading-snug ${isSheets ? 'group-hover:text-emerald-600 dark:group-hover:text-emerald-400' : 'group-hover:text-blue-600 dark:group-hover:text-blue-400'} transition line-clamp-2">
                     ${item.name}
                   </h4>
-                  <p class="text-[11px] font-mono text-slate-400 leading-relaxed line-clamp-2">
+                  <p class="text-[11px] font-mono ws-text-muted leading-relaxed line-clamp-2">
                     ${item.description || (isSheets ? 'Lembar kerja operasional resmi Central Event.' : 'Aset visual Canva resmi.')}
                   </p>
                 </div>
               </div>
 
               <!-- Card Action Tray -->
-              <div class="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+              <div class="pt-2 border-t border-slate-200 dark:border-white/10 flex items-center justify-between gap-2">
                 <div class="flex items-center gap-1.5">
-                  <button onclick="SpreadsheetHub.copyLink('${externalUrl}')" class="btn-ghost py-1 px-2.5 text-[11px] font-mono text-slate-400 hover:text-white" title="Salin Tautan">
+                  <button onclick="SpreadsheetHub.copyLink('${externalUrl}')" class="btn-ghost py-1 px-2.5 text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10" title="Salin Tautan">
                     📋 Salin
                   </button>
-                  <a href="${externalUrl}" target="_blank" class="btn-ghost py-1 px-2 text-[11px] font-mono text-slate-400 hover:text-white" title="Buka Tab Baru">
+                  <a href="${externalUrl}" target="_blank" class="btn-ghost py-1 px-2 text-[11px] font-mono text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-white/10" title="Buka Tab Baru">
                     ↗
                   </a>
                 </div>
@@ -640,13 +675,13 @@ const SpreadsheetHub = {
   },
 
   /**
-   * Render Table View (☰) - Format data tabular yang rapi
+   * Render Table View (☰)
    */
   renderTableView(items, isSheets) {
     return `
-      <div class="overflow-x-auto custom-scrollbar rounded-2xl border border-white/10 bg-[#0c101c]/90">
+      <div class="overflow-x-auto custom-scrollbar rounded-2xl border border-slate-200 dark:border-white/10 ws-surface-card">
         <table class="w-full text-left text-xs font-mono">
-          <thead class="bg-white/5 border-b border-white/10 text-slate-400 uppercase text-[10px] tracking-wider">
+          <thead class="bg-slate-100 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 uppercase text-[10px] tracking-wider">
             <tr>
               <th class="py-3 px-4">Nama Item</th>
               <th class="py-3 px-3">Sub-Divisi</th>
@@ -655,38 +690,37 @@ const SpreadsheetHub = {
               <th class="py-3 px-4 text-right">Aksi</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-white/5">
+          <tbody class="divide-y divide-slate-200 dark:divide-white/5">
             ${items.map(item => {
               const sub = this.subEventMap[item.subEventId] || { name: item.subEventName || item.subEventId, code: 'SUB', icon: isSheets ? '📊' : '🎨' };
               const cleanSheetId = item.sheetId || (item.id && !item.id.startsWith('sheet_') ? item.id : null);
               const externalUrl = item.externalUrl || item.url || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit` : '#');
 
               return `
-                <tr class="hover:bg-white/5 transition group">
-                  
+                <tr class="hover:bg-slate-50 dark:hover:bg-white/5 transition">
                   <!-- Nama -->
-                  <td class="py-3 px-4 font-bold text-white group-hover:text-blue-300">
+                  <td class="py-3 px-4 font-bold ws-text-title">
                     <div class="flex items-center gap-2">
-                      <span>${item.icon || (isSheets ? '📊' : '🎨')}</span>
-                      <span class="max-w-xs sm:max-w-md truncate">${item.name}</span>
+                      <span>${isSheets ? '📊' : '🎨'}</span>
+                      <span class="truncate max-w-xs sm:max-w-md">${item.name}</span>
                     </div>
                   </td>
 
                   <!-- Sub-Divisi -->
                   <td class="py-3 px-3 whitespace-nowrap">
-                    <span class="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/10 text-slate-300">
+                    <span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300">
                       ${sub.icon} ${sub.code}
                     </span>
                   </td>
 
                   <!-- Kategori / Tipe -->
-                  <td class="py-3 px-3 whitespace-nowrap text-slate-400">
+                  <td class="py-3 px-3 whitespace-nowrap ws-text-muted">
                     ${!isSheets ? (item.category || 'Desain') : 'Google Sheets'}
                   </td>
 
-                  <!-- Tanggal / Status -->
-                  <td class="py-3 px-3 whitespace-nowrap text-slate-500 text-[11px]">
-                    ${item.date || 'Aktif'}
+                  <!-- Tanggal / Info -->
+                  <td class="py-3 px-3 whitespace-nowrap text-slate-400 dark:text-slate-500 text-[11px]">
+                    ${item.created_at ? new Date(item.created_at).toLocaleDateString('id-ID') : (item.date || 'Aktif')}
                   </td>
 
                   <!-- Aksi -->
@@ -694,14 +728,14 @@ const SpreadsheetHub = {
                     <div class="flex items-center justify-end gap-1.5">
                       <button 
                         onclick="${isSheets ? `SpreadsheetHub.openEditSheetModal('${item.id}')` : `SpreadsheetHub.openEditCanvaModal('${item.id}')`}" 
-                        class="px-2 py-1 rounded text-[10px] bg-amber-500/10 text-amber-300 hover:bg-amber-500 hover:text-black transition font-bold"
+                        class="px-2 py-1 rounded text-[10px] bg-amber-500/15 text-amber-700 dark:text-amber-300 hover:bg-amber-500 hover:text-black transition font-bold"
                         title="Edit / Rename"
                       >
                         ✏️ Edit
                       </button>
                       <button 
                         onclick="SpreadsheetHub.copyLink('${externalUrl}')" 
-                        class="px-2 py-1 rounded text-[10px] bg-white/5 text-slate-400 hover:text-white transition"
+                        class="px-2 py-1 rounded text-[10px] bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition border border-slate-200 dark:border-white/10"
                         title="Salin Link"
                       >
                         📋 Salin
@@ -709,21 +743,21 @@ const SpreadsheetHub = {
                       ${isSheets ? `
                         <button 
                           onclick="SpreadsheetHub.openInApp('${cleanSheetId || item.id}')" 
-                          class="px-2.5 py-1 rounded text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow-sm"
+                          class="px-2.5 py-1 rounded text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition"
                         >
                           Buka In-App ↗
                         </button>
                       ` : `
                         <button 
                           onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" 
-                          class="px-2.5 py-1 rounded text-[10px] bg-blue-600 hover:bg-blue-500 text-white font-bold transition shadow-sm"
+                          class="px-2.5 py-1 rounded text-[10px] bg-blue-600 hover:bg-blue-500 text-white font-bold transition"
                         >
                           Buka Canva ↗
                         </button>
                       `}
                       <button 
                         onclick="${isSheets ? `SpreadsheetHub.deleteSheet('${item.id}')` : `SpreadsheetHub.deleteCanva('${item.id}')`}" 
-                        class="text-slate-500 hover:text-rose-400 p-1 text-xs transition"
+                        class="text-slate-400 hover:text-rose-600 p-1 text-xs transition"
                         title="Hapus"
                       >
                         🗑️
@@ -802,7 +836,7 @@ const SpreadsheetHub = {
 
   /**
    * ================================================================
-   * MODAL INJECTION SYSTEM
+   * MODAL INJECTION SYSTEM (All using ws-surface & ws-text theme tokens)
    * ================================================================
    */
   injectAllModals() {
@@ -817,17 +851,17 @@ const SpreadsheetHub = {
     if (document.getElementById('hubExplorerModal')) return;
 
     const modalHtml = `
-      <div id="hubExplorerModal" class="fixed inset-0 z-[140] bg-[#05070c]/90 backdrop-blur-2xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
+      <div id="hubExplorerModal" class="fixed inset-0 z-[140] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
         
-        <div id="hubExplorerCard" class="chassis w-full max-w-6xl h-[92vh] flex flex-col transition-all duration-300 transform scale-[0.98] overflow-hidden rounded-2xl shadow-2xl relative border border-white/10">
-          <div class="chassis-core flex flex-col h-full !p-0 overflow-hidden ws-surface-primary bg-[#080b14]">
+        <div id="hubExplorerCard" class="chassis w-full max-w-6xl h-[92vh] flex flex-col transition-all duration-300 transform scale-[0.98] overflow-hidden rounded-2xl shadow-2xl relative ws-surface-primary border border-slate-300 dark:border-white/10">
+          <div class="chassis-core flex flex-col h-full !p-0 overflow-hidden ws-surface-primary">
             
-            <!-- 1. MODAL COMMAND BAR (Menyerupai Workspace Drive Ribbon) -->
-            <div class="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between gap-3 ws-surface-primary flex-shrink-0 z-20 bg-[#090d18]">
+            <!-- 1. MODAL COMMAND BAR -->
+            <div class="px-4 sm:px-6 py-3 border-b border-slate-200 dark:border-white/10 flex items-center justify-between gap-3 ws-surface-primary flex-shrink-0 z-20">
               
               <!-- Left: Title, Icon & Status -->
               <div class="flex items-center gap-3 min-w-0">
-                <div id="hubExplorerIconBadge" class="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0">
+                <div id="hubExplorerIconBadge" class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0">
                   📊
                 </div>
                 <div class="min-w-0">
@@ -835,7 +869,7 @@ const SpreadsheetHub = {
                     <span id="hubExplorerStatusBadge" class="eyebrow-pill emerald text-[9px] font-mono">SPREADSHEET IN-APP EXPLORER</span>
                     <span id="hubExplorerCounter" class="eyebrow-pill cobalt text-[9px] font-mono hidden sm:inline">0 Items</span>
                   </div>
-                  <h3 id="hubExplorerTitle" class="text-sm sm:text-base font-extrabold text-white ws-text-title font-display truncate leading-snug mt-0.5">
+                  <h3 id="hubExplorerTitle" class="text-sm sm:text-base font-extrabold ws-text-title font-display truncate leading-snug mt-0.5">
                     Bank Spreadsheet Operasional Central Event 2027
                   </h3>
                 </div>
@@ -843,7 +877,7 @@ const SpreadsheetHub = {
 
               <!-- Right: Close Button -->
               <div class="flex items-center gap-2 flex-shrink-0">
-                <button onclick="SpreadsheetHub.closeExplorer()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition text-sm font-bold border border-white/10">
+                <button onclick="SpreadsheetHub.closeExplorer()" class="btn-ghost py-1.5 px-3 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border border-slate-300 dark:border-white/10 font-mono font-bold flex items-center gap-1.5 rounded-xl">
                   ✕ Tutup
                 </button>
               </div>
@@ -856,17 +890,17 @@ const SpreadsheetHub = {
             </div>
 
             <!-- 3. SCROLLABLE ITEM CANVAS -->
-            <div id="hubExplorerCanvas" class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 bg-[#060810]/60">
+            <div id="hubExplorerCanvas" class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 ws-surface-secondary">
               <!-- Injected by renderExplorerContent() -->
             </div>
 
             <!-- 4. BOTTOM TELEMETRY FOOTER -->
-            <div class="px-4 sm:px-6 py-2.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400 flex-shrink-0 bg-[#090d18]">
+            <div class="px-4 sm:px-6 py-2.5 border-t border-slate-200 dark:border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 flex-shrink-0 ws-surface-primary">
               <span class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Pusat Kendali Lembar Kerja & Aset Visual Central Event 2027
               </span>
-              <span class="text-blue-400 font-bold hidden sm:inline">
+              <span class="text-blue-600 dark:text-blue-400 font-bold hidden sm:inline">
                 Supabase Cloud PostgreSQL Synchronized
               </span>
             </div>
@@ -884,52 +918,49 @@ const SpreadsheetHub = {
     if (document.getElementById('addSpreadsheetHubModal')) return;
 
     const modalHtml = `
-      <div id="addSpreadsheetHubModal" class="fixed inset-0 z-[160] bg-[#07090E]/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
-        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border-emerald-500/40" id="addSpreadsheetHubCard">
-          <div class="chassis-core p-5 sm:p-7 space-y-4">
+      <div id="addSpreadsheetHubModal" class="fixed inset-0 z-[160] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border border-emerald-500/40 ws-surface-primary" id="addSpreadsheetHubCard">
+          <div class="chassis-core p-5 sm:p-7 space-y-4 ws-surface-primary">
             
-            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
               <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono font-bold flex items-center justify-center text-lg">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 font-mono font-bold flex items-center justify-center text-lg">
                   📊
                 </div>
                 <div>
                   <span class="eyebrow-pill emerald text-[9px] font-mono">SPREADSHEET REPOSITORY</span>
-                  <h3 class="text-base font-extrabold text-white font-display">Tautkan Spreadsheet Baru</h3>
+                  <h3 class="text-base font-extrabold ws-text-title font-display">Tautkan Spreadsheet Baru</h3>
                 </div>
               </div>
-              <button onclick="SpreadsheetHub.closeAddModal()" class="text-slate-400 hover:text-white p-1.5 text-sm">
+              <button onclick="SpreadsheetHub.closeAddModal()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white p-1.5 text-sm">
                 ✕
               </button>
             </div>
 
             <div class="space-y-3.5">
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Judul Lembar Kerja</label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Judul Lembar Kerja</label>
                 <input 
                   type="text" 
                   id="inputNewSheetName" 
                   placeholder="Misal: Checklist Perlengkapan & Logistik..." 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-emerald-500 font-mono"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-emerald-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Tautan Google Sheet / Sheet ID <span class="text-emerald-400">*</span></label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Tautan Google Sheet / Sheet ID <span class="text-emerald-500">*</span></label>
                 <input 
                   type="text" 
                   id="inputNewSheetUrl" 
-                  placeholder="https://docs.google.com/spreadsheets/d/1abc.../edit" 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-emerald-500 font-mono"
+                  placeholder="https://docs.google.com/spreadsheets/d/.../edit" 
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-emerald-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
-                <p class="text-[10px] font-mono text-slate-400 mt-1">
-                  💡 Tempel tautan utuh atau ID sheet Google Docs Anda.
-                </p>
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Alokasi Sub-Divisi</label>
-                <select id="selectNewSheetSubEvent" class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-emerald-500 font-mono">
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Alokasi Sub-Divisi</label>
+                <select id="selectNewSheetSubEvent" class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-emerald-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white">
                   <option value="safari">🏛️ Safari Faculty (SF-01)</option>
                   <option value="startpoint">🚀 Start Point (SP-02)</option>
                   <option value="odl">🎓 One Day Lecture (ODL-03)</option>
@@ -939,11 +970,11 @@ const SpreadsheetHub = {
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-white/10">
-              <button onclick="SpreadsheetHub.closeAddModal()" class="btn-ghost py-2 px-4 text-xs text-slate-400 hover:text-white">
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-white/10">
+              <button onclick="SpreadsheetHub.closeAddModal()" class="btn-ghost py-2 px-4 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                 Batal
               </button>
-              <button onclick="SpreadsheetHub.submitAddSpreadsheet()" id="btnSubmitNewSheet" class="btn-tactical py-2 px-4 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/30">
+              <button onclick="SpreadsheetHub.submitAddSpreadsheet()" id="btnSubmitNewSheet" class="btn-tactical py-2 px-4 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md">
                 💾 Tautkan & Simpan
               </button>
             </div>
@@ -960,39 +991,39 @@ const SpreadsheetHub = {
     if (document.getElementById('addCanvaHubModal')) return;
 
     const modalHtml = `
-      <div id="addCanvaHubModal" class="fixed inset-0 z-[160] bg-[#07090E]/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
-        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border-blue-500/40" id="addCanvaHubCard">
-          <div class="chassis-core p-5 sm:p-7 space-y-4">
+      <div id="addCanvaHubModal" class="fixed inset-0 z-[160] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border border-blue-500/40 ws-surface-primary" id="addCanvaHubCard">
+          <div class="chassis-core p-5 sm:p-7 space-y-4 ws-surface-primary">
             
-            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
               <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-400 font-mono font-bold flex items-center justify-center text-lg">
+                <div class="w-9 h-9 rounded-xl bg-blue-500/20 border border-blue-500/40 text-blue-600 dark:text-blue-400 font-mono font-bold flex items-center justify-center text-lg">
                   🎨
                 </div>
                 <div>
                   <span class="eyebrow-pill cobalt text-[9px] font-mono">CANVA DESIGN BANK</span>
-                  <h3 class="text-base font-extrabold text-white font-display">Tambah Tautan Desain Canva</h3>
+                  <h3 class="text-base font-extrabold ws-text-title font-display">Tambah Tautan Desain Canva</h3>
                 </div>
               </div>
-              <button onclick="SpreadsheetHub.closeAddCanvaModal()" class="text-slate-400 hover:text-white p-1.5 text-sm">
+              <button onclick="SpreadsheetHub.closeAddCanvaModal()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white p-1.5 text-sm">
                 ✕
               </button>
             </div>
 
             <div class="space-y-3.5">
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Nama / Judul Desain <span class="text-blue-400">*</span></label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Nama / Judul Desain <span class="text-blue-500">*</span></label>
                 <input 
                   type="text" 
                   id="inputNewCanvaName" 
                   placeholder="Misal: Banner Gate Kedatangan, ID Card LO..." 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-blue-500 font-mono"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-blue-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Kategori Desain</label>
-                <select id="selectNewCanvaCategory" class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-blue-500 font-mono">
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Kategori Desain</label>
+                <select id="selectNewCanvaCategory" class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-blue-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white">
                   <option value="ID Card & Tanda Pengenal">🪪 ID Card & Tanda Pengenal</option>
                   <option value="Banner & Backdrop">🎨 Banner & Backdrop</option>
                   <option value="Cue Card & Rundown Visual">📑 Cue Card & Rundown Visual</option>
@@ -1006,18 +1037,18 @@ const SpreadsheetHub = {
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Tautan / URL Canva <span class="text-blue-400">*</span></label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Tautan / URL Canva <span class="text-blue-500">*</span></label>
                 <input 
                   type="text" 
                   id="inputNewCanvaUrl" 
                   placeholder="https://www.canva.com/design/DAF.../view" 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-blue-500 font-mono"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-blue-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Sub-Divisi Pemilik</label>
-                <select id="selectNewCanvaSubEvent" class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-blue-500 font-mono">
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Sub-Divisi Pemilik</label>
+                <select id="selectNewCanvaSubEvent" class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-blue-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white">
                   <option value="safari">🏛️ Safari Faculty (SF-01)</option>
                   <option value="startpoint">🚀 Start Point (SP-02)</option>
                   <option value="odl">🎓 One Day Lecture (ODL-03)</option>
@@ -1027,21 +1058,21 @@ const SpreadsheetHub = {
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Deskripsi Singkat / Catatan Cetak</label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Deskripsi Singkat / Catatan Cetak</label>
                 <textarea 
                   id="inputNewCanvaDesc" 
                   rows="2" 
                   placeholder="Misal: Ukuran 3x2 meter, bahan flexi korea 440gr..." 
-                  class="w-full bay-recessed px-3.5 py-2 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-blue-500 font-mono"
+                  class="w-full px-3.5 py-2 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-blue-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 ></textarea>
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-white/10">
-              <button onclick="SpreadsheetHub.closeAddCanvaModal()" class="btn-ghost py-2 px-4 text-xs text-slate-400 hover:text-white">
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-white/10">
+              <button onclick="SpreadsheetHub.closeAddCanvaModal()" class="btn-ghost py-2 px-4 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                 Batal
               </button>
-              <button onclick="SpreadsheetHub.submitAddCanva()" id="btnSubmitNewCanva" class="btn-tactical py-2 px-4 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30">
+              <button onclick="SpreadsheetHub.submitAddCanva()" id="btnSubmitNewCanva" class="btn-tactical py-2 px-4 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white shadow-md">
                 💾 Simpan ke Bank Canva
               </button>
             </div>
@@ -1058,21 +1089,21 @@ const SpreadsheetHub = {
     if (document.getElementById('editSpreadsheetHubModal')) return;
 
     const modalHtml = `
-      <div id="editSpreadsheetHubModal" class="fixed inset-0 z-[170] bg-[#07090E]/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
-        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border-amber-500/40" id="editSpreadsheetHubCard">
-          <div class="chassis-core p-5 sm:p-7 space-y-4">
+      <div id="editSpreadsheetHubModal" class="fixed inset-0 z-[170] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border border-amber-500/40 ws-surface-primary" id="editSpreadsheetHubCard">
+          <div class="chassis-core p-5 sm:p-7 space-y-4 ws-surface-primary">
             
-            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
               <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 font-mono font-bold flex items-center justify-center text-lg">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-600 dark:text-amber-400 font-mono font-bold flex items-center justify-center text-lg">
                   ✏️
                 </div>
                 <div>
                   <span class="eyebrow-pill amber text-[9px] font-mono">RENAME & GANTI TAUTAN</span>
-                  <h3 class="text-base font-extrabold text-white font-display">Edit Spreadsheet</h3>
+                  <h3 class="text-base font-extrabold ws-text-title font-display">Edit Spreadsheet</h3>
                 </div>
               </div>
-              <button onclick="SpreadsheetHub.closeEditSheetModal()" class="text-slate-400 hover:text-white p-1.5 text-sm">
+              <button onclick="SpreadsheetHub.closeEditSheetModal()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white p-1.5 text-sm">
                 ✕
               </button>
             </div>
@@ -1081,29 +1112,29 @@ const SpreadsheetHub = {
 
             <div class="space-y-3.5">
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Nama / Judul Lembar Kerja <span class="text-amber-400">*</span></label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Nama / Judul Lembar Kerja <span class="text-amber-500">*</span></label>
                 <input 
                   type="text" 
                   id="inputEditSheetName" 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Tautan Google Sheet / ID</label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Tautan Google Sheet / ID</label>
                 <input 
                   type="text" 
                   id="inputEditSheetUrl" 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
-                <p class="text-[10px] font-mono text-slate-400 mt-1">
+                <p class="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1">
                   💡 Ganti URL jika tautan sheet dipindahkan atau diperbarui.
                 </p>
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Alokasi Sub-Divisi</label>
-                <select id="selectEditSheetSubEvent" class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono">
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Alokasi Sub-Divisi</label>
+                <select id="selectEditSheetSubEvent" class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white">
                   <option value="safari">🏛️ Safari Faculty (SF-01)</option>
                   <option value="startpoint">🚀 Start Point (SP-02)</option>
                   <option value="odl">🎓 One Day Lecture (ODL-03)</option>
@@ -1113,11 +1144,11 @@ const SpreadsheetHub = {
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-white/10">
-              <button onclick="SpreadsheetHub.closeEditSheetModal()" class="btn-ghost py-2 px-4 text-xs text-slate-400 hover:text-white">
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-white/10">
+              <button onclick="SpreadsheetHub.closeEditSheetModal()" class="btn-ghost py-2 px-4 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                 Batal
               </button>
-              <button onclick="SpreadsheetHub.submitEditSheet()" id="btnSubmitEditSheet" class="btn-tactical py-2 px-4 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20">
+              <button onclick="SpreadsheetHub.submitEditSheet()" id="btnSubmitEditSheet" class="btn-tactical py-2 px-4 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-md">
                 💾 Simpan Perubahan
               </button>
             </div>
@@ -1134,21 +1165,21 @@ const SpreadsheetHub = {
     if (document.getElementById('editCanvaHubModal')) return;
 
     const modalHtml = `
-      <div id="editCanvaHubModal" class="fixed inset-0 z-[170] bg-[#07090E]/90 backdrop-blur-xl flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
-        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border-amber-500/40" id="editCanvaHubCard">
-          <div class="chassis-core p-5 sm:p-7 space-y-4">
+      <div id="editCanvaHubModal" class="fixed inset-0 z-[170] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="chassis max-w-lg w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border border-amber-500/40 ws-surface-primary" id="editCanvaHubCard">
+          <div class="chassis-core p-5 sm:p-7 space-y-4 ws-surface-primary">
             
-            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
               <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 font-mono font-bold flex items-center justify-center text-lg">
+                <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-600 dark:text-amber-400 font-mono font-bold flex items-center justify-center text-lg">
                   ✏️
                 </div>
                 <div>
                   <span class="eyebrow-pill amber text-[9px] font-mono">RENAME & GANTI TAUTAN</span>
-                  <h3 class="text-base font-extrabold text-white font-display">Edit Desain Canva</h3>
+                  <h3 class="text-base font-extrabold ws-text-title font-display">Edit Desain Canva</h3>
                 </div>
               </div>
-              <button onclick="SpreadsheetHub.closeEditCanvaModal()" class="text-slate-400 hover:text-white p-1.5 text-sm">
+              <button onclick="SpreadsheetHub.closeEditCanvaModal()" class="text-slate-400 hover:text-slate-800 dark:hover:text-white p-1.5 text-sm">
                 ✕
               </button>
             </div>
@@ -1157,26 +1188,26 @@ const SpreadsheetHub = {
 
             <div class="space-y-3.5">
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Nama / Judul Desain <span class="text-amber-400">*</span></label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Nama / Judul Desain <span class="text-amber-500">*</span></label>
                 <input 
                   type="text" 
                   id="inputEditCanvaName" 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Tautan / URL Canva <span class="text-amber-400">*</span></label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Tautan / URL Canva <span class="text-amber-500">*</span></label>
                 <input 
                   type="text" 
                   id="inputEditCanvaUrl" 
-                  class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono"
+                  class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 />
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Kategori Desain</label>
-                <select id="selectEditCanvaCategory" class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono">
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Kategori Desain</label>
+                <select id="selectEditCanvaCategory" class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white">
                   <option value="ID Card & Tanda Pengenal">🪪 ID Card & Tanda Pengenal</option>
                   <option value="Banner & Backdrop">🎨 Banner & Backdrop</option>
                   <option value="Cue Card & Rundown Visual">📑 Cue Card & Rundown Visual</option>
@@ -1190,8 +1221,8 @@ const SpreadsheetHub = {
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Sub-Divisi Pemilik</label>
-                <select id="selectEditCanvaSubEvent" class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono">
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Sub-Divisi Pemilik</label>
+                <select id="selectEditCanvaSubEvent" class="w-full px-3.5 py-2.5 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white">
                   <option value="safari">🏛️ Safari Faculty (SF-01)</option>
                   <option value="startpoint">🚀 Start Point (SP-02)</option>
                   <option value="odl">🎓 One Day Lecture (ODL-03)</option>
@@ -1201,20 +1232,20 @@ const SpreadsheetHub = {
               </div>
 
               <div>
-                <label class="block text-[11px] font-mono text-slate-300 mb-1 font-bold">Deskripsi Singkat / Catatan</label>
+                <label class="block text-[11px] font-mono text-slate-700 dark:text-slate-300 mb-1 font-bold">Deskripsi Singkat / Catatan</label>
                 <textarea 
                   id="inputEditCanvaDesc" 
                   rows="2" 
-                  class="w-full bay-recessed px-3.5 py-2 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-amber-500 font-mono"
+                  class="w-full px-3.5 py-2 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-amber-500 font-mono bg-white dark:bg-[#0c101c] text-slate-800 dark:text-white"
                 ></textarea>
               </div>
             </div>
 
-            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-white/10">
-              <button onclick="SpreadsheetHub.closeEditCanvaModal()" class="btn-ghost py-2 px-4 text-xs text-slate-400 hover:text-white">
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-200 dark:border-white/10">
+              <button onclick="SpreadsheetHub.closeEditCanvaModal()" class="btn-ghost py-2 px-4 text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
                 Batal
               </button>
-              <button onclick="SpreadsheetHub.submitEditCanva()" id="btnSubmitEditCanva" class="btn-tactical py-2 px-4 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-lg shadow-amber-500/20">
+              <button onclick="SpreadsheetHub.submitEditCanva()" id="btnSubmitEditCanva" class="btn-tactical py-2 px-4 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black shadow-md">
                 💾 Simpan Perubahan
               </button>
             </div>

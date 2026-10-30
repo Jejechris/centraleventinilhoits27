@@ -813,14 +813,58 @@ html.light-theme .ws-text-muted {
 html.light-theme .ws-text-dim {
   color: #64748B !important;
 }
-html.light-theme #workspaceModal input {
+html.light-theme #workspaceModal input,
+html.light-theme #hubExplorerModal input,
+html.light-theme #hubExplorerModal select,
+html.light-theme #addSpreadsheetHubModal input,
+html.light-theme #addSpreadsheetHubModal select,
+html.light-theme #addCanvaHubModal input,
+html.light-theme #addCanvaHubModal select,
+html.light-theme #addCanvaHubModal textarea,
+html.light-theme #editSpreadsheetHubModal input,
+html.light-theme #editSpreadsheetHubModal select,
+html.light-theme #editCanvaHubModal input,
+html.light-theme #editCanvaHubModal select,
+html.light-theme #editCanvaHubModal textarea {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #CBD5E1 !important;
 }
-html.light-theme #workspaceModal input:focus {
+html.light-theme #workspaceModal input:focus,
+html.light-theme #hubExplorerModal input:focus,
+html.light-theme #hubExplorerModal select:focus,
+html.light-theme #addSpreadsheetHubModal input:focus,
+html.light-theme #addSpreadsheetHubModal select:focus,
+html.light-theme #addCanvaHubModal input:focus,
+html.light-theme #addCanvaHubModal select:focus,
+html.light-theme #addCanvaHubModal textarea:focus,
+html.light-theme #editSpreadsheetHubModal input:focus,
+html.light-theme #editSpreadsheetHubModal select:focus,
+html.light-theme #editCanvaHubModal input:focus,
+html.light-theme #editCanvaHubModal select:focus,
+html.light-theme #editCanvaHubModal textarea:focus {
   border-color: #2563EB !important;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Light Theme Overrides for Hub Explorer Modal */
+html.light-theme #hubExplorerModal .ws-surface-primary {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+}
+html.light-theme #hubExplorerModal .ws-surface-secondary {
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
+}
+html.light-theme #hubExplorerModal .ws-surface-card {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+html.light-theme #hubExplorerModal .ws-surface-card:hover {
+  background-color: #F8FAFC !important;
+  border-color: #94A3B8 !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
 }
 html.light-theme #workspaceModal iframe {
   background-color: #FFFFFF !important;
