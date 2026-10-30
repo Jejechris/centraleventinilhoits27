@@ -2,7 +2,8 @@
  * CENTRAL EVENT 2027 — SPREADSHEET & CANVA DESIGN BANK HUB
  * Menghadirkan Pop-up UI/UX Explorer Terpadu (layaknya Drive In-App Explorer)
  * lengkap dengan Sortir Fleksibel (A-Z, Tanggal, Sub-Divisi, Kategori), Tampilan Grid/Tabel,
- * Fitur Edit & Rename Judul/Tautan, dan Sinkronisasi Real-Time Supabase Cloud.
+ * Fitur Edit & Rename Judul/Tautan, Dialog Konfirmasi Hapus Kustom (Anti Browser Alert),
+ * dan Sinkronisasi Real-Time Supabase Cloud.
  */
 
 const SpreadsheetHub = {
@@ -19,7 +20,7 @@ const SpreadsheetHub = {
 
   sheets: [],
   canvaLinks: [],
-  activeEditItem: null,
+  pendingDeleteItem: null, // { type: 'sheets'|'canva', id: string, name: string }
 
   subEventMap: {
     safari: { name: 'Safari Faculty', code: 'SF-01', icon: '🏛️', color: 'emerald' },
@@ -95,8 +96,7 @@ const SpreadsheetHub = {
   /**
    * ================================================================
    * ON-PAGE WIDGET (Inside #sharedSpreadsheetMount)
-   * Menggantikan kotak kecil yang sesak & tombol berulang-ulang
-   * dengan daftar operasional riil + SATU tombol launcher explorer
+   * Non-repetitive launcher & operational items list
    * ================================================================
    */
   renderOnPageWidget() {
@@ -107,7 +107,6 @@ const SpreadsheetHub = {
     const sheetCount = (this.sheets || []).length;
     const canvaCount = (this.canvaLinks || []).length;
 
-    // Filter items according to the active tab
     const isSheets = this.activeTab === 'sheets';
     const items = isSheets ? this.sheets : this.canvaLinks;
 
@@ -159,7 +158,7 @@ const SpreadsheetHub = {
           </button>
         </div>
 
-        <!-- Body: Real Operational Item List (No empty fake cards!) -->
+        <!-- Body: Real Operational Item List -->
         <div class="space-y-2 overflow-y-auto custom-scrollbar flex-1 max-h-[280px] pr-1">
           ${items.length === 0 ? `
             <div class="p-6 rounded-xl bay-recessed border border-dashed border-slate-300 dark:border-white/10 text-center space-y-2">
@@ -223,7 +222,7 @@ const SpreadsheetHub = {
                   </button>
                   ${isSheets ? `
                     <button 
-                      onclick="SpreadsheetHub.openInApp('${cleanSheetId || item.id}')" 
+                      onclick="SpreadsheetHub.openInApp('${item.id}')" 
                       class="btn-tactical py-1 px-2.5 text-xs font-bold flex items-center gap-1 shadow-sm"
                     >
                       <span>Buka</span>
@@ -231,7 +230,7 @@ const SpreadsheetHub = {
                     </button>
                   ` : `
                     <button 
-                      onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" 
+                      onclick="SpreadsheetHub.openCanvaInApp('${item.url}', '${item.id}')" 
                       class="btn-tactical py-1 px-2.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1 shadow-sm"
                     >
                       <span>Buka</span>
@@ -245,7 +244,7 @@ const SpreadsheetHub = {
           }).join('')}
         </div>
 
-        <!-- Footer Strip (No redundant buttons!) -->
+        <!-- Footer Strip -->
         <div class="pt-2 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400 flex-shrink-0">
           <span class="flex items-center gap-1.5">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -262,8 +261,7 @@ const SpreadsheetHub = {
 
   /**
    * ================================================================
-   * POP-UP UI/UX EXPLORER (Menggunakan Standard WorkspaceModal Theme)
-   * Menyediakan Sortir Lengkap, Filter Kategori, Grid/Table View, Edit/Rename
+   * POP-UP UI/UX EXPLORER
    * ================================================================
    */
   async openExplorer(type = 'sheets', subEventId = null) {
@@ -366,7 +364,7 @@ const SpreadsheetHub = {
       });
     }
 
-    // 4. Sort Items ("lebih enak buat sortir")
+    // 4. Sort Items
     switch (this.sortBy) {
       case 'name_asc':
         items.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -421,7 +419,7 @@ const SpreadsheetHub = {
       counterEl.innerText = `${items.length} ${isSheets ? 'Lembar Kerja' : 'Aset Desain'}`;
     }
 
-    // 2. Toolbar Rendering (Menyesuaikan ws-surface classes agar serasi Light/Dark)
+    // 2. Toolbar Rendering
     const toolbarEl = document.getElementById('hubExplorerToolbar');
     if (toolbarEl) {
       toolbarEl.innerHTML = `
@@ -500,7 +498,7 @@ const SpreadsheetHub = {
           </div>
 
           <div class="flex items-center gap-2 flex-wrap">
-            <!-- Sort Dropdown ("lebih enak buat sortir") -->
+            <!-- Sort Dropdown -->
             <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-[#0c101c] border border-slate-300 dark:border-white/10 text-slate-700 dark:text-slate-300">
               <span class="text-[10px] text-slate-400 font-bold uppercase">⇅ SORTIR:</span>
               <select 
@@ -557,7 +555,7 @@ const SpreadsheetHub = {
       `;
     }
 
-    // 3. Canvas Content (Using ws-surface-secondary for crisp light/dark support)
+    // 3. Canvas Content
     const canvasEl = document.getElementById('hubExplorerCanvas');
     if (!canvasEl) return;
 
@@ -585,7 +583,7 @@ const SpreadsheetHub = {
   },
 
   /**
-   * Render Grid View (▦) - Menggunakan ws-surface-card & ws-text-title
+   * Render Grid View (▦)
    */
   renderGridView(items, isSheets) {
     return `
@@ -622,10 +620,11 @@ const SpreadsheetHub = {
                       <span>✏️</span>
                       <span>Edit</span>
                     </button>
+                    <!-- Custom Modal Delete Trigger (Anti Browser Confirm) -->
                     <button 
-                      onclick="${isSheets ? `SpreadsheetHub.deleteSheet('${item.id}')` : `SpreadsheetHub.deleteCanva('${item.id}')`}" 
+                      onclick="SpreadsheetHub.requestDelete('${isSheets ? 'sheets' : 'canva'}', '${item.id}')" 
                       class="text-slate-400 hover:text-rose-600 p-1 text-xs transition"
-                      title="Hapus"
+                      title="Hapus dari Repositori"
                     >
                       🗑️
                     </button>
@@ -655,12 +654,12 @@ const SpreadsheetHub = {
                 </div>
 
                 ${isSheets ? `
-                  <button onclick="SpreadsheetHub.openInApp('${cleanSheetId || item.id}')" class="btn-tactical py-1.5 px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                  <button onclick="SpreadsheetHub.openInApp('${item.id}')" class="btn-tactical py-1.5 px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-sm">
                     <span>📊 Buka In-App</span>
                     <span class="text-[10px]">↗</span>
                   </button>
                 ` : `
-                  <button onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" class="btn-tactical py-1.5 px-3.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 shadow-sm">
+                  <button onclick="SpreadsheetHub.openCanvaInApp('${item.url}', '${item.id}')" class="btn-tactical py-1.5 px-3.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 shadow-sm">
                     <span>🎨 Buka Desain</span>
                     <span class="text-[10px]">↗</span>
                   </button>
@@ -742,23 +741,24 @@ const SpreadsheetHub = {
                       </button>
                       ${isSheets ? `
                         <button 
-                          onclick="SpreadsheetHub.openInApp('${cleanSheetId || item.id}')" 
+                          onclick="SpreadsheetHub.openInApp('${item.id}')" 
                           class="px-2.5 py-1 rounded text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition"
                         >
                           Buka In-App ↗
                         </button>
                       ` : `
                         <button 
-                          onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" 
+                          onclick="SpreadsheetHub.openCanvaInApp('${item.url}', '${item.id}')" 
                           class="px-2.5 py-1 rounded text-[10px] bg-blue-600 hover:bg-blue-500 text-white font-bold transition"
                         >
                           Buka Canva ↗
                         </button>
                       `}
+                      <!-- Custom Modal Delete Trigger -->
                       <button 
-                        onclick="${isSheets ? `SpreadsheetHub.deleteSheet('${item.id}')` : `SpreadsheetHub.deleteCanva('${item.id}')`}" 
+                        onclick="SpreadsheetHub.requestDelete('${isSheets ? 'sheets' : 'canva'}', '${item.id}')" 
                         class="text-slate-400 hover:text-rose-600 p-1 text-xs transition"
-                        title="Hapus"
+                        title="Hapus dari Repositori"
                       >
                         🗑️
                       </button>
@@ -774,18 +774,58 @@ const SpreadsheetHub = {
     `;
   },
 
-  openInApp(sheetId) {
-    if (typeof WorkspaceModal !== 'undefined' && typeof WorkspaceModal.openSheet === 'function') {
-      WorkspaceModal.openSheet(sheetId, 'edit');
+  /**
+   * Open Spreadsheet in Full In-App Workspace
+   * Automatically closes bank explorer, passes verified file, and opens live Google Sheet editor!
+   */
+  openInApp(itemId) {
+    // 1. Immediately close the bank explorer modal so there is NO overlap/hidden UI!
+    this.closeExplorer();
+
+    // 2. Find sheet
+    const sheet = (this.sheets || []).find(s => s.id === itemId || s.sheetId === itemId) || { id: itemId };
+    const cleanSheetId = sheet.sheetId || (sheet.id && !sheet.id.startsWith('sheet_') && !sheet.id.startsWith('local_') ? sheet.id : null) || (itemId && !itemId.startsWith('sheet_') ? itemId : '1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0');
+    const subEventId = sheet.subEventId || this.currentSubEventId || 'safari';
+    const subInfo = this.subEventMap[subEventId] || { name: 'Central Event', code: 'CE' };
+
+    const editUrl = sheet.editUrl || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit?embedded=true` : undefined);
+    const previewUrl = sheet.previewUrl || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/htmlembed?widget=true` : undefined);
+    const extUrl = sheet.externalUrl || sheet.url || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit` : '#');
+
+    if (typeof WorkspaceModal !== 'undefined' && typeof WorkspaceModal.openFilePreview === 'function') {
+      WorkspaceModal.injectModal();
+      WorkspaceModal.activeView = 'sheet';
+      WorkspaceModal.sheetMode = 'edit';
+      WorkspaceModal.activeSubEventId = subEventId;
+      WorkspaceModal.showModal();
+      WorkspaceModal.openFilePreview({
+        id: sheet.id || cleanSheetId,
+        sheetId: cleanSheetId,
+        name: sheet.name || 'Master Spreadsheet Operasional',
+        subEventId: subEventId,
+        subEventName: subInfo.name,
+        type: 'sheet',
+        icon: sheet.icon || '📊',
+        editUrl: editUrl,
+        previewUrl: previewUrl,
+        externalUrl: extUrl,
+        isConfigured: true
+      });
+    } else if (typeof WorkspaceModal !== 'undefined' && typeof WorkspaceModal.openSheet === 'function') {
+      WorkspaceModal.openSheet(subEventId, 'edit');
     } else {
-      window.open(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`, '_blank');
+      window.open(extUrl, '_blank');
     }
   },
 
-  openCanvaInApp(url) {
-    if (!url) return;
+  /**
+   * Open Canva Design in Workspace Modal
+   */
+  openCanvaInApp(url, itemId) {
+    this.closeExplorer();
+    const canva = (this.canvaLinks || []).find(c => c.id === itemId || c.url === url) || { url };
     if (typeof WorkspaceModal !== 'undefined' && typeof WorkspaceModal.openCanva === 'function') {
-      WorkspaceModal.openCanva(url);
+      WorkspaceModal.openCanva(canva.url || url, canva.name);
     } else {
       window.open(url, '_blank');
     }
@@ -793,50 +833,122 @@ const SpreadsheetHub = {
 
   copyLink(url) {
     if (!url) {
-      alert('Tautan tidak tersedia');
+      if (typeof showToast === 'function') showToast('Tautan tidak tersedia untuk disalin', 'error');
       return;
     }
     navigator.clipboard.writeText(url)
       .then(() => {
         if (typeof showToast === 'function') showToast('Tautan berhasil disalin ke clipboard!', 'success');
-        else alert('Tautan tersalin ke clipboard!');
       })
-      .catch(() => alert('Tautan: ' + url));
+      .catch(() => {
+        if (typeof showToast === 'function') showToast('Gagal menyalin otomatis', 'error');
+      });
   },
 
-  async deleteSheet(id) {
-    if (!confirm('Hapus lembar kerja ini dari repositori?')) return;
-    try {
-      const res = await CE_API.deleteSpreadsheet(id);
-      if (res && res.success) {
-        if (typeof showToast === 'function') showToast('Spreadsheet berhasil dihapus!', 'info');
-        await this.fetchAndRender();
-      } else {
-        throw new Error(res?.error || 'Gagal menghapus');
-      }
-    } catch (e) {
-      alert('Gagal menghapus spreadsheet: ' + e.message);
+  /**
+   * ================================================================
+   * DEDICATED DELETE CONFIRMATION MODAL (Anti Browser Confirm/Alert)
+   * ================================================================
+   */
+  requestDelete(type, id) {
+    this.injectDeleteConfirmModal();
+
+    const isSheets = type === 'sheets';
+    const list = isSheets ? this.sheets : this.canvaLinks;
+    const item = (list || []).find(it => it.id === id) || { id, name: isSheets ? 'Spreadsheet' : 'Desain Canva' };
+    const sub = this.subEventMap[item.subEventId] || { name: 'Umum', code: 'ALL' };
+
+    this.pendingDeleteItem = { type, id, item };
+
+    // Fill Modal Data
+    const iconEl = document.getElementById('ceDeleteModalIcon');
+    const nameEl = document.getElementById('ceDeleteModalName');
+    const subEl = document.getElementById('ceDeleteModalSub');
+    const typeEl = document.getElementById('ceDeleteModalType');
+
+    if (iconEl) iconEl.innerText = item.icon || (isSheets ? '📊' : '🎨');
+    if (nameEl) nameEl.innerText = item.name;
+    if (subEl) subEl.innerText = `${sub.code} • ${sub.name}`;
+    if (typeEl) typeEl.innerText = isSheets ? 'Google Sheets Operasional' : (item.category || 'Aset Visual Canva');
+
+    const modal = document.getElementById('ceDeleteConfirmModal');
+    const card = document.getElementById('ceDeleteConfirmCard');
+    if (modal && card) {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
+      card.classList.remove('scale-95');
+      card.classList.add('scale-100');
     }
   },
 
-  async deleteCanva(id) {
-    if (!confirm('Hapus tautan Canva ini dari daftar?')) return;
+  closeDeleteModal() {
+    const modal = document.getElementById('ceDeleteConfirmModal');
+    const card = document.getElementById('ceDeleteConfirmCard');
+    if (modal && card) {
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      card.classList.remove('scale-100');
+      card.classList.add('scale-95');
+    }
+    this.pendingDeleteItem = null;
+  },
+
+  async executeDelete() {
+    if (!this.pendingDeleteItem) return;
+    const { type, id, item } = this.pendingDeleteItem;
+    const btn = document.getElementById('ceDeleteModalConfirmBtn');
+
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span>Menghapus...</span>';
+    }
+
     try {
-      const res = await CE_API.deleteCanvaLink(id);
+      const isSheets = type === 'sheets';
+      const res = isSheets 
+        ? await CE_API.deleteSpreadsheet(id)
+        : await CE_API.deleteCanvaLink(id);
+
       if (res && res.success) {
-        if (typeof showToast === 'function') showToast('Tautan Canva berhasil dihapus!', 'info');
+        // 1. Immediately remove from local memory state for 0ms visual feedback
+        if (isSheets) {
+          this.sheets = this.sheets.filter(s => s.id !== id);
+        } else {
+          this.canvaLinks = this.canvaLinks.filter(c => c.id !== id);
+        }
+
+        this.closeDeleteModal();
+
+        // 2. Render UI right away
+        this.renderOnPageWidget();
+        if (this.isExplorerOpen()) {
+          this.renderExplorerContent();
+        }
+
+        if (typeof showToast === 'function') {
+          showToast(`"${item.name}" berhasil dihapus permanen dari Cloud!`, 'success');
+        }
+
+        // 3. Background re-fetch to confirm Supabase state
         await this.fetchAndRender();
       } else {
-        throw new Error(res?.error || 'Gagal menghapus');
+        throw new Error(res?.error || 'Gagal menghapus data dari server');
       }
     } catch (e) {
-      alert('Gagal menghapus tautan Canva: ' + e.message);
+      if (typeof showToast === 'function') {
+        showToast('Gagal menghapus: ' + e.message, 'error');
+      }
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🗑️ Hapus Sekarang</span>';
+      }
     }
   },
 
   /**
    * ================================================================
-   * MODAL INJECTION SYSTEM (All using ws-surface & ws-text theme tokens)
+   * MODAL INJECTION SYSTEM
    * ================================================================
    */
   injectAllModals() {
@@ -845,6 +957,68 @@ const SpreadsheetHub = {
     this.injectAddCanvaModal();
     this.injectEditSpreadsheetModal();
     this.injectEditCanvaModal();
+    this.injectDeleteConfirmModal();
+  },
+
+  injectDeleteConfirmModal() {
+    if (document.getElementById('ceDeleteConfirmModal')) return;
+
+    const modalHtml = `
+      <div id="ceDeleteConfirmModal" class="fixed inset-0 z-[180] bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
+        <div id="ceDeleteConfirmCard" class="chassis max-w-md w-full rounded-2xl shadow-2xl relative transform transition-all duration-300 scale-95 border border-rose-500/40 ws-surface-primary overflow-hidden">
+          <div class="chassis-core p-5 sm:p-6 space-y-4 ws-surface-primary">
+            
+            <!-- Header -->
+            <div class="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-white/10">
+              <div class="w-10 h-10 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-600 dark:text-rose-400 font-mono font-bold flex items-center justify-center text-xl flex-shrink-0 animate-pulse">
+                ⚠️
+              </div>
+              <div class="min-w-0 flex-1">
+                <span class="eyebrow-pill rose text-[9px] font-mono font-bold">HAPUS PERMANEN</span>
+                <h3 class="text-sm sm:text-base font-extrabold ws-text-title font-display truncate">
+                  Hapus Berkas dari Repositori?
+                </h3>
+              </div>
+              <button onclick="SpreadsheetHub.closeDeleteModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 text-sm">
+                ✕
+              </button>
+            </div>
+
+            <!-- Item Preview Card -->
+            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <span id="ceDeleteModalIcon" class="text-base">📊</span>
+                <span id="ceDeleteModalName" class="text-xs font-extrabold ws-text-title font-display truncate">
+                  Nama Berkas
+                </span>
+              </div>
+              <div class="flex items-center gap-2 text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                <span id="ceDeleteModalSub" class="px-1.5 py-0.2 rounded bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-bold">SF-01</span>
+                <span id="ceDeleteModalType">Google Sheets</span>
+              </div>
+            </div>
+
+            <!-- Warning Text -->
+            <p class="text-xs font-mono text-slate-600 dark:text-slate-400 leading-relaxed">
+              Tautan berkas ini akan dihapus secara permanen dari Supabase Cloud dan database operasional.
+            </p>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-200 dark:border-white/10">
+              <button onclick="SpreadsheetHub.closeDeleteModal()" class="btn-ghost py-2 px-4 text-xs font-mono text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold rounded-xl border border-slate-300 dark:border-white/10">
+                Batal
+              </button>
+              <button id="ceDeleteModalConfirmBtn" onclick="SpreadsheetHub.executeDelete()" class="btn-tactical py-2 px-4 text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white rounded-xl shadow-md flex items-center gap-1.5">
+                <span>🗑️ Hapus Sekarang</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
   },
 
   injectExplorerModal() {
@@ -1262,7 +1436,7 @@ const SpreadsheetHub = {
     this.injectEditSpreadsheetModal();
     const sheet = (this.sheets || []).find(s => s.id === sheetId);
     if (!sheet) {
-      alert('Spreadsheet tidak ditemukan.');
+      if (typeof showToast === 'function') showToast('Spreadsheet tidak ditemukan', 'error');
       return;
     }
 
@@ -1311,7 +1485,7 @@ const SpreadsheetHub = {
 
     if (!id) return;
     if (!name) {
-      alert('Nama lembar kerja wajib diisi.');
+      if (typeof showToast === 'function') showToast('Nama lembar kerja wajib diisi', 'error');
       nameInput?.focus();
       return;
     }
@@ -1335,10 +1509,10 @@ const SpreadsheetHub = {
         this.closeEditSheetModal();
         await this.fetchAndRender();
       } else {
-        alert('Gagal: ' + (res?.error || 'Periksa format data'));
+        if (typeof showToast === 'function') showToast('Gagal: ' + (res?.error || 'Periksa format data'), 'error');
       }
     } catch (e) {
-      alert('Error koneksi: ' + e.message);
+      if (typeof showToast === 'function') showToast('Error koneksi: ' + e.message, 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -1351,7 +1525,7 @@ const SpreadsheetHub = {
     this.injectEditCanvaModal();
     const item = (this.canvaLinks || []).find(c => c.id === canvaId);
     if (!item) {
-      alert('Tautan Canva tidak ditemukan.');
+      if (typeof showToast === 'function') showToast('Tautan Canva tidak ditemukan', 'error');
       return;
     }
 
@@ -1408,12 +1582,12 @@ const SpreadsheetHub = {
 
     if (!id) return;
     if (!name) {
-      alert('Nama desain Canva wajib diisi.');
+      if (typeof showToast === 'function') showToast('Nama desain Canva wajib diisi', 'error');
       nameInput?.focus();
       return;
     }
     if (!url) {
-      alert('Tautan Canva wajib diisi.');
+      if (typeof showToast === 'function') showToast('Tautan Canva wajib diisi', 'error');
       urlInput?.focus();
       return;
     }
@@ -1439,10 +1613,10 @@ const SpreadsheetHub = {
         this.closeEditCanvaModal();
         await this.fetchAndRender();
       } else {
-        alert('Gagal: ' + (res?.error || 'Periksa format data'));
+        if (typeof showToast === 'function') showToast('Gagal: ' + (res?.error || 'Periksa format data'), 'error');
       }
     } catch (e) {
-      alert('Error koneksi: ' + e.message);
+      if (typeof showToast === 'function') showToast('Error koneksi: ' + e.message, 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -1514,7 +1688,7 @@ const SpreadsheetHub = {
     const subEventId = subSelect ? subSelect.value : this.currentSubEventId;
 
     if (!sheetIdOrUrl) {
-      alert('Tautan atau ID Google Sheet wajib diisi.');
+      if (typeof showToast === 'function') showToast('Tautan atau ID Google Sheet wajib diisi', 'error');
       urlInput?.focus();
       return;
     }
@@ -1539,10 +1713,10 @@ const SpreadsheetHub = {
         this.closeAddModal();
         await this.fetchAndRender();
       } else {
-        alert('Gagal: ' + (res?.error || 'Periksa format tautan spreadsheet.'));
+        if (typeof showToast === 'function') showToast('Gagal: ' + (res?.error || 'Periksa format tautan spreadsheet.'), 'error');
       }
     } catch (e) {
-      alert('Error koneksi: ' + e.message);
+      if (typeof showToast === 'function') showToast('Error koneksi: ' + e.message, 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -1566,7 +1740,7 @@ const SpreadsheetHub = {
     const description = descInput ? descInput.value.trim() : '';
 
     if (!url) {
-      alert('Tautan / Link Canva wajib diisi.');
+      if (typeof showToast === 'function') showToast('Tautan / Link Canva wajib diisi', 'error');
       urlInput?.focus();
       return;
     }
@@ -1593,10 +1767,10 @@ const SpreadsheetHub = {
         this.activeTab = 'canva';
         await this.fetchAndRender();
       } else {
-        alert('Gagal: ' + (res?.error || 'Periksa tautan Canva.'));
+        if (typeof showToast === 'function') showToast('Gagal: ' + (res?.error || 'Periksa tautan Canva.'), 'error');
       }
     } catch (e) {
-      alert('Error koneksi: ' + e.message);
+      if (typeof showToast === 'function') showToast('Error koneksi: ' + e.message, 'error');
     } finally {
       if (btn) {
         btn.disabled = false;

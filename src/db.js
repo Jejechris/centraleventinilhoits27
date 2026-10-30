@@ -163,6 +163,15 @@ async function initSchema() {
         updated_by VARCHAR(100),
         updated_at TIMESTAMPTZ DEFAULT NOW()
       );
+      CREATE TABLE IF NOT EXISTS deleted_sheet_ids (
+        id VARCHAR(100) PRIMARY KEY,
+        deleted_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS deleted_canva_ids (
+        id VARCHAR(100) PRIMARY KEY,
+        deleted_at TIMESTAMPTZ DEFAULT NOW()
+      );
     `);
 
     console.log('✅ Schema tabel Supabase Cloud berhasil diverifikasi!');
@@ -207,6 +216,10 @@ async function syncLocalToSupabase() {
         JSON.stringify(sub.stations || []), JSON.stringify(sub.rundown || [])
       ]);
     }
+
+    // Purge any deleted items from DB
+    await query('DELETE FROM spreadsheets WHERE id IN (SELECT id FROM deleted_sheet_ids)').catch(() => {});
+    await query('DELETE FROM canva_links WHERE id IN (SELECT id FROM deleted_canva_ids)').catch(() => {});
 
     // 2. Sync Spreadsheets (DEFAULT_SHEETS)
     const spreadsheetRegistry = require('./services/spreadsheetRegistry');

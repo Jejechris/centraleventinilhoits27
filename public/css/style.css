@@ -1143,3 +1143,8 @@ html.light-theme .milestone-notes-box strong,
 html.light-theme .milestone-notes-box b {
   color: #0F172A !important;
 }
+
+/* Ensure workspace modal is always top-layer over explorer modals */
+#workspaceModal {
+  z-index: 200 !important;
+}

@@ -41,7 +41,7 @@ const WorkspaceModal = {
     if (document.getElementById('workspaceModal')) return;
 
     const modalHtml = `
-      <div id="workspaceModal" class="fixed inset-0 z-[100] bg-[#07090E]/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
+      <div id="workspaceModal" class="fixed inset-0 z-[200] bg-[#07090E]/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
         
         <div id="workspaceChassis" class="chassis w-full max-w-6xl h-[92vh] flex flex-col transition-all duration-300 transform scale-[0.98] overflow-hidden rounded-2xl shadow-2xl relative">
           <div class="chassis-core flex flex-col h-full !p-0 overflow-hidden ws-surface-primary">
@@ -1199,7 +1199,7 @@ const WorkspaceModal = {
     const btn = document.getElementById('wsSetupSheetSubmitBtn');
     const val = input?.value?.trim();
     if (!val) {
-      alert('Mohon masukkan Link atau ID Google Spreadsheet.');
+      if (typeof showToast === 'function') showToast('Mohon masukkan Link atau ID Google Spreadsheet.', 'error'); else console.warn('Mohon masukkan Link atau ID Google Spreadsheet.');
       return;
     }
 
@@ -1326,7 +1326,7 @@ const WorkspaceModal = {
     const urlOrId = urlInput ? urlInput.value.trim() : '';
 
     if (!urlOrId) {
-      alert('Masukkan link atau ID Google Drive terlebih dahulu!');
+      if (typeof showToast === 'function') showToast('Masukkan link atau ID Google Drive terlebih dahulu!', 'error'); else console.warn('Masukkan link atau ID Google Drive terlebih dahulu!');
       return;
     }
 
@@ -1347,7 +1347,7 @@ const WorkspaceModal = {
         throw new Error(res.error || 'Gagal menautkan Google Drive');
       }
     } catch (err) {
-      alert(`Error: ${err.message}`);
+      if (typeof showToast === 'function') showToast(`Error: ${err.message}`, 'error'); else console.warn(`Error: ${err.message}`);
     } finally {
       if (btn) {
         btn.disabled = false;
@@ -1463,7 +1463,7 @@ const WorkspaceModal = {
     }
 
     // Find requested sheet or primary configured sheet for this sub-divisi specifically
-    let selectedSheet = this.availableSheets.find(s => s.id === targetSubOrId)
+    let selectedSheet = this.availableSheets.find(s => s.id === targetSubOrId || s.sheetId === targetSubOrId)
       || this.availableSheets.find(s => s.subEventId === this.activeSubEventId && s.isConfigured)
       || this.availableSheets.find(s => s.subEventId === this.activeSubEventId)
       || {
@@ -1713,7 +1713,7 @@ const WorkspaceModal = {
     };
 
     reader.onerror = () => {
-      alert('Gagal membaca berkas dari sistem.');
+      if (typeof showToast === 'function') showToast('Gagal membaca berkas dari sistem.', 'error'); else console.warn('Gagal membaca berkas dari sistem.');
       if (submitBtn) submitBtn.disabled = false;
     };
 
@@ -1751,7 +1751,7 @@ const WorkspaceModal = {
     const sheetUrl = urlInput?.value?.trim();
 
     if (!sheetUrl) {
-      alert('Mohon masukkan Link atau ID Google Spreadsheet.');
+      if (typeof showToast === 'function') showToast('Mohon masukkan Link atau ID Google Spreadsheet.', 'error'); else console.warn('Mohon masukkan Link atau ID Google Spreadsheet.');
       return;
     }
 

@@ -2,6 +2,27 @@ const fs = require('fs');
 const path = require('path');
 
 const DATA_FILE = path.join(__dirname, '../../data/canva.json');
+const DELETED_CANVA_FILE = path.join(__dirname, '../../data/deleted_canva.json');
+
+function loadDeletedCanvaIds() {
+  try {
+    if (fs.existsSync(DELETED_CANVA_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(DELETED_CANVA_FILE, 'utf8'));
+      return new Set(Array.isArray(parsed) ? parsed : []);
+    }
+  } catch (_) {}
+  return new Set();
+}
+
+function saveDeletedCanvaIds(set) {
+  try {
+    ensureDataDir();
+    fs.writeFileSync(DELETED_CANVA_FILE, JSON.stringify(Array.from(set), null, 2), 'utf8');
+  } catch (_) {}
+}
+
+const deletedCanvaIds = loadDeletedCanvaIds();
+
 let canvaCache = [];
 let lastFetchedFromDb = 0;
 const CACHE_TTL_MS = 2500;
@@ -299,7 +320,7 @@ async function refreshFromDatabase(force = false) {
     const db = require('../db');
     const res = await db.query('SELECT * FROM canva_links ORDER BY created_at ASC');
     if (res && res.rows && res.rows.length > 0) {
-      canvaCache = res.rows.map(row => ({
+      canvaCache = res.rows.filter(r => !deletedCanvaIds.has(r.id)).map(row => ({
         id: row.id,
         name: row.name,
         subEventId: row.sub_event_id,

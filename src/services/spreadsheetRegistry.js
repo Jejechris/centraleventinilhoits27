@@ -3,6 +3,27 @@ const path = require('path');
 const config = require('../config');
 
 const DATA_FILE = path.join(__dirname, '../../data/spreadsheets.json');
+const DELETED_SHEETS_FILE = path.join(__dirname, '../../data/deleted_spreadsheets.json');
+
+function loadDeletedSheetIds() {
+  try {
+    if (fs.existsSync(DELETED_SHEETS_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(DELETED_SHEETS_FILE, 'utf8'));
+      return new Set(Array.isArray(parsed) ? parsed : []);
+    }
+  } catch (_) {}
+  return new Set();
+}
+
+function saveDeletedSheetIds(set) {
+  try {
+    ensureDataDir();
+    fs.writeFileSync(DELETED_SHEETS_FILE, JSON.stringify(Array.from(set), null, 2), 'utf8');
+  } catch (_) {}
+}
+
+const deletedSheetIds = loadDeletedSheetIds();
+
 
 // Default initial spreadsheet banks for all 4 core sub-events of Central Event 2027
 const DEFAULT_SHEETS = [
