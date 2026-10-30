@@ -1505,6 +1505,22 @@ const WorkspaceModal = {
     this.openSheet(subEventId, 'edit');
   },
 
+  openSheetBank(subEventId) {
+    if (typeof SpreadsheetHub !== 'undefined') {
+      SpreadsheetHub.openExplorer('sheets', subEventId);
+    } else {
+      this.openSheet(subEventId);
+    }
+  },
+
+  openCanvaBank(subEventId) {
+    if (typeof SpreadsheetHub !== 'undefined') {
+      SpreadsheetHub.openExplorer('canva', subEventId);
+    } else {
+      window.location.href = '/safari.html#canva';
+    }
+  },
+
   /**
    * Open Canva Modal / Viewer (Fullscreen In-App or Direct Launcher)
    */

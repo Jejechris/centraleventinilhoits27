@@ -87,12 +87,15 @@
 
           <!-- Controls & Actions -->
           <div class="flex flex-wrap items-center gap-2.5">
-            <button onclick="WorkspaceModal.openSheet('safari')" class="btn-tactical text-xs py-2 px-3.5 bg-emerald-600 hover:bg-emerald-500 font-bold">
+            <button onclick="SpreadsheetHub.openExplorer('sheets', 'safari')" class="btn-tactical text-xs py-2 px-3.5 bg-emerald-600 hover:bg-emerald-500 font-bold">
               <span>📊 BUKA SHEET</span>
               <div class="btn-icon-bay">↗</div>
             </button>
             <button onclick="WorkspaceModal.openDriveForSubEvent('safari')" class="btn-ghost text-xs py-2 px-3.5 text-blue-400 border-blue-500/30 hover:border-blue-500 font-bold">
               <span>📁 REPOSITORI DRIVE</span>
+            </button>
+            <button onclick="SpreadsheetHub.openExplorer('canva', 'safari')" class="btn-ghost text-xs py-2 px-3.5 text-blue-400 border-blue-500/30 hover:border-blue-400 font-bold">
+              <span>🎨 BANK CANVA</span>
             </button>
             <button onclick="WorkspaceModal.openUploadModal()" class="btn-ghost text-xs py-2 px-3 text-emerald-400 border-emerald-500/30 hover:border-emerald-500 font-bold">
               <span>📤 UNGGAH BERKAS</span>

@@ -268,7 +268,7 @@ const Sidebar = {
           <div class="flex items-center gap-2 sm:gap-2.5">
             
             <!-- Direct Buttons for Spreadsheet & Drive In-App -->
-            <button onclick="WorkspaceModal.openSheet('${targetSubEvent}')" title="Buka Spreadsheet In-App (Full Edit)" class="btn-tactical py-1.5 px-3 text-xs flex items-center gap-1.5 font-bold shadow-sm">
+            <button onclick="SpreadsheetHub.openExplorer('sheets', '${targetSubEvent}')" title="Buka Spreadsheet In-App (Full Edit)" class="btn-tactical py-1.5 px-3 text-xs flex items-center gap-1.5 font-bold shadow-sm">
               <span>📊</span>
               <span class="font-mono text-[11px]">Buka Sheet</span>
             </button>
@@ -365,19 +365,19 @@ const Sidebar = {
     });
   },
 
-  openCanvaBank() {
+  openCanvaBank(subEventId = null) {
     if (typeof SpreadsheetHub !== 'undefined') {
-      SpreadsheetHub.openFullCatalog('canva');
+      SpreadsheetHub.openExplorer('canva', subEventId);
     } else {
       window.location.href = '/safari.html#canva';
     }
   },
 
-  openSheetsBank() {
+  openSheetsBank(subEventId = null) {
     if (typeof SpreadsheetHub !== 'undefined') {
-      SpreadsheetHub.openFullCatalog('sheets');
+      SpreadsheetHub.openExplorer('sheets', subEventId);
     } else if (typeof WorkspaceModal !== 'undefined' && typeof WorkspaceModal.openSheet === 'function') {
-      WorkspaceModal.openSheet();
+      WorkspaceModal.openSheet(subEventId);
     } else {
       window.location.href = '/safari.html';
     }

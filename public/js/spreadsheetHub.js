@@ -1,19 +1,21 @@
 /**
  * CENTRAL EVENT 2027 — SPREADSHEET & CANVA DESIGN BANK HUB
- * Menampilkan Bank Spreadsheet & Bank Link Canva terorganisir per sub-divisi,
- * dilengkapi Katalog Pop-up Layar Luas, Fitur Edit/Rename, Pencarian Real-time, dan Supabase Cloud Sync.
+ * Menghadirkan Pop-up UI/UX Explorer Terpadu (layaknya Drive In-App Explorer)
+ * lengkap dengan Sortir Fleksibel (A-Z, Tanggal, Sub-Divisi, Kategori), Tampilan Grid/Tabel,
+ * Fitur Edit & Rename Judul/Tautan, dan Sinkronisasi Real-Time Supabase Cloud.
  */
 
 const SpreadsheetHub = {
   currentSubEventId: 'safari',
   containerId: 'sharedSpreadsheetMount',
-  activeTab: 'sheets', // 'sheets' | 'canva'
-  activeCanvaFilter: 'all',
   
-  // Catalog Modal Filter States
-  catalogSearchQuery: '',
-  catalogSubEventFilter: 'all',
-  catalogCanvaCategoryFilter: 'all',
+  // Explorer States
+  activeTab: 'sheets', // 'sheets' | 'canva'
+  subEventFilter: 'all',
+  canvaCategoryFilter: 'all',
+  searchQuery: '',
+  sortBy: 'sub_asc', // 'name_asc' | 'name_desc' | 'date_desc' | 'sub_asc' | 'category'
+  layoutMode: 'grid', // 'grid' | 'table'
 
   sheets: [],
   canvaLinks: [],
@@ -43,7 +45,7 @@ const SpreadsheetHub = {
   async init(subEventId = 'safari', containerId = 'sharedSpreadsheetMount') {
     this.currentSubEventId = subEventId;
     this.containerId = containerId;
-    this.catalogSubEventFilter = subEventId || 'all';
+    this.subEventFilter = subEventId || 'all';
 
     if (typeof window !== 'undefined' && window.location.hash === '#canva') {
       this.activeTab = 'canva';
@@ -53,36 +55,8 @@ const SpreadsheetHub = {
     await this.fetchAndRender();
   },
 
-  async switchTab(tab) {
-    this.activeTab = tab;
-    this.render();
-    if (this.isFullCatalogOpen()) {
-      this.renderFullCatalog();
-    }
-  },
-
-  setCanvaFilter(category) {
-    this.activeCanvaFilter = category;
-    this.render();
-  },
-
-  setCatalogSubEvent(subId) {
-    this.catalogSubEventFilter = subId;
-    this.renderFullCatalog();
-  },
-
-  setCatalogCanvaCategory(cat) {
-    this.catalogCanvaCategoryFilter = cat;
-    this.renderFullCatalog();
-  },
-
-  onCatalogSearch(val) {
-    this.catalogSearchQuery = (val || '').toLowerCase().trim();
-    this.renderFullCatalog();
-  },
-
   async fetchAndRender() {
-    // 1. Fetch Spreadsheets (all or by current sub-event)
+    // 1. Fetch Spreadsheets
     try {
       const res = await fetch(`/api/spreadsheets/${this.currentSubEventId}`);
       const json = await res.json();
@@ -104,251 +78,138 @@ const SpreadsheetHub = {
       console.warn('Gagal memuat list canva:', e);
     }
 
-    this.render();
-    if (this.isFullCatalogOpen()) {
-      this.renderFullCatalog();
+    this.renderOnPageWidget();
+    if (this.isExplorerOpen()) {
+      this.renderExplorerContent();
     }
   },
 
   /**
-   * Render On-Page Widget (Inside #sharedSpreadsheetMount)
+   * ================================================================
+   * ON-PAGE WIDGET (Inside #sharedSpreadsheetMount)
+   * Menggantikan kotak kecil yang sesak dengan Launcher Explorer Elegan
+   * ================================================================
    */
-  render() {
+  renderOnPageWidget() {
     const container = document.getElementById(this.containerId);
     if (!container) return;
 
     const subInfo = this.subEventMap[this.currentSubEventId] || { name: this.currentSubEventId, code: 'SUB', icon: '📊' };
-    const configuredSheets = (this.sheets || []).filter(s => s.isConfigured);
-    const canvaList = this.canvaLinks || [];
-
-    const filteredCanva = this.activeCanvaFilter === 'all'
-      ? canvaList
-      : canvaList.filter(c => c.category === this.activeCanvaFilter);
-
-    const availableCategories = ['all', ...new Set(canvaList.map(c => c.category).filter(Boolean))];
+    const sheetCount = (this.sheets || []).length;
+    const canvaCount = (this.canvaLinks || []).length;
 
     container.innerHTML = `
-      <div class="chassis-core flex flex-col justify-between h-full space-y-3.5">
+      <div class="chassis-core flex flex-col justify-between h-full space-y-4">
         
-        <!-- Top Ribbon: Mode Switcher, Pop-up Launcher & Actions -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-white/5 gap-2.5 flex-shrink-0">
+        <!-- Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 border-b border-white/5 gap-2.5">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="eyebrow-pill emerald text-[9px] font-mono font-bold">● CLOUD REPO LIVE</span>
-              <span class="eyebrow-pill cobalt text-[9px] font-mono font-bold">${subInfo.code} REPO</span>
+              <span class="eyebrow-pill emerald text-[9px] font-mono font-bold">● CLOUD LIVE REPO</span>
+              <span class="eyebrow-pill cobalt text-[9px] font-mono font-bold">${subInfo.code} REPOSITORI</span>
             </div>
-            
-            <!-- Dual Tab Selector -->
-            <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-              <button 
-                onclick="SpreadsheetHub.switchTab('sheets')" 
-                class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 ${this.activeTab === 'sheets' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/20' : 'bay-recessed text-slate-400 hover:text-white border border-white/5'}"
-              >
-                <span>📊 Bank Sheet</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-black/30 text-emerald-200">${configuredSheets.length}</span>
-              </button>
-
-              <button 
-                onclick="SpreadsheetHub.switchTab('canva')" 
-                class="px-3 py-1.5 rounded-xl text-xs font-mono font-bold transition flex items-center gap-1.5 ${this.activeTab === 'canva' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bay-recessed text-slate-400 hover:text-white border border-white/5'}"
-              >
-                <span>🎨 Bank Canva</span>
-                <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-black/30 text-blue-200">${canvaList.length}</span>
-              </button>
-            </div>
+            <h3 class="text-sm font-extrabold text-white font-display flex items-center gap-2">
+              <span>📊</span> Bank Lembar Kerja & <span>🎨</span> Desain Canva
+            </h3>
+            <p class="text-[11px] font-mono text-slate-300">
+              Akses cepat lembar kerja operasional & aset visual resmi ${subInfo.name}
+            </p>
           </div>
 
-          <!-- Action Buttons: Full Catalog Pop-up & Add New -->
+          <!-- Fast Add & Pop-up Explorer Buttons -->
           <div class="flex items-center gap-2 self-start sm:self-auto flex-wrap">
             <button 
-              onclick="SpreadsheetHub.openFullCatalog()" 
-              class="px-2.5 py-1.5 rounded-xl text-xs font-mono font-bold bay-recessed text-blue-300 hover:text-white border border-blue-500/30 hover:border-blue-400 flex items-center gap-1.5 transition active:scale-[0.98] shadow-sm"
-              title="Buka katalog lengkap di pop-up layar luas"
+              onclick="SpreadsheetHub.openExplorer('sheets')" 
+              class="btn-tactical py-1.5 px-3 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white flex items-center gap-1.5 shadow-md shadow-emerald-600/20"
             >
-              <span>⛶</span>
-              <span class="hidden md:inline">Katalog Luas</span>
+              <span>📊 BUKA BANK SHEET</span>
+              <span class="text-[10px]">↗</span>
             </button>
-
-            ${this.activeTab === 'sheets' ? `
-              <button onclick="SpreadsheetHub.openAddModal()" class="btn-tactical py-1.5 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition">
-                <span>➕</span>
-                <span>Tambah Sheet</span>
-              </button>
-            ` : `
-              <button onclick="SpreadsheetHub.openAddCanvaModal()" class="btn-tactical py-1.5 px-3 text-xs bg-blue-600 hover:bg-blue-500 font-bold flex items-center gap-1.5 shadow-md shadow-blue-600/20 transition">
-                <span>➕</span>
-                <span>Tambah Canva</span>
-              </button>
-            `}
+            <button 
+              onclick="SpreadsheetHub.openExplorer('canva')" 
+              class="btn-ghost py-1.5 px-3 text-xs font-bold text-blue-400 border-blue-500/30 hover:border-blue-400 flex items-center gap-1.5"
+            >
+              <span>🎨 BUKA CANVA</span>
+              <span class="text-[10px]">↗</span>
+            </button>
           </div>
         </div>
 
-        <!-- Tab 1: SPREADSHEET REPOSITORY LIST -->
-        ${this.activeTab === 'sheets' ? `
-          <div class="space-y-2.5 overflow-y-auto custom-scrollbar flex-1 max-h-[300px] pr-1">
-            ${configuredSheets.length === 0 ? `
-              <div class="p-6 rounded-xl bay-recessed border border-dashed border-white/10 text-center space-y-2">
-                <div class="text-2xl">📊</div>
-                <div class="text-xs font-mono font-bold text-slate-300">Belum Ada Spreadsheet Terhubung</div>
-                <p class="text-[11px] font-mono text-slate-400 max-w-xs mx-auto">
-                  Tautkan lembar kerja Google Sheets untuk kolaborasi data real-time panitia.
-                </p>
-                <button onclick="SpreadsheetHub.openAddModal()" class="btn-ghost py-1 px-3 text-xs text-emerald-400 border-emerald-500/30 hover:border-emerald-400 font-bold mt-2">
-                  + Tautkan Lembar Kerja
-                </button>
+        <!-- 2 Grand Interactive Hub Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          
+          <!-- Card 1: Bank Spreadsheet Hub -->
+          <div 
+            onclick="SpreadsheetHub.openExplorer('sheets')" 
+            class="bay-recessed p-4 rounded-2xl border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition cursor-pointer flex flex-col justify-between group space-y-3"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono font-bold flex items-center justify-center text-lg group-hover:scale-105 transition">
+                  📊
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">
+                  ${sheetCount} LEMBAR KERJA
+                </span>
               </div>
-            ` : configuredSheets.map((sheet) => {
-              const cleanSheetId = sheet.sheetId || (sheet.id.startsWith('sheet_') ? '' : sheet.id);
-              const previewLink = cleanSheetId
-                ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/htmlembed?widget=true`
-                : (sheet.previewUrl || sheet.externalUrl);
-              const editLink = cleanSheetId
-                ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit`
-                : (sheet.editUrl || sheet.externalUrl);
-
-              return `
-                <div class="bay-recessed p-3 rounded-xl border border-white/10 hover:border-emerald-500/30 transition flex flex-col justify-between gap-2.5 group">
-                  <div class="flex items-start justify-between gap-2">
-                    <div class="flex items-start gap-2.5 min-w-0">
-                      <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-base text-emerald-400 flex-shrink-0 mt-0.5">
-                        ${sheet.icon || '📊'}
-                      </div>
-                      <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                          <span class="text-xs font-extrabold text-white truncate group-hover:text-emerald-300 transition">${sheet.name}</span>
-                          <span class="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold bg-emerald-400/20 text-emerald-300 border border-emerald-400/30">ONLINE</span>
-                        </div>
-                        <p class="text-[10px] font-mono text-slate-400 truncate">${sheet.date || 'Tersambung Cloud'}</p>
-                      </div>
-                    </div>
-
-                    <div class="flex items-center gap-1">
-                      <button onclick="SpreadsheetHub.openEditSheetModal('${sheet.id}')" class="text-slate-400 hover:text-amber-400 p-1 text-xs transition" title="Edit / Ganti Nama Sheet">
-                        ✏️
-                      </button>
-                      <button onclick="SpreadsheetHub.deleteSheet('${sheet.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Hapus Spreadsheet">
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Direct Actions Row -->
-                  <div class="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/5">
-                    <div class="flex items-center gap-1">
-                      <button onclick="SpreadsheetHub.openEditSheetModal('${sheet.id}')" class="btn-ghost py-1 px-2 text-[10px] text-amber-400 hover:text-amber-300 border-amber-500/20">
-                        ✏️ Edit / Rename
-                      </button>
-                      <button onclick="SpreadsheetHub.copyLink('${editLink}')" class="btn-ghost py-1 px-2 text-[10px] text-slate-400 hover:text-white" title="Salin Tautan">
-                        📋 Salin
-                      </button>
-                    </div>
-
-                    <div class="flex items-center gap-1.5">
-                      <button onclick="SpreadsheetHub.openInApp('${cleanSheetId || sheet.id}')" class="btn-tactical py-1 px-2.5 text-xs font-bold flex items-center gap-1 shadow-sm">
-                        <span>📊 Buka In-App</span>
-                        <span class="text-[10px]">↗</span>
-                      </button>
-                      <a href="${editLink}" target="_blank" class="btn-ghost py-1 px-2 text-xs text-slate-400 hover:text-white" title="Buka di Tab Baru">
-                        ↗
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        ` : `
-          <!-- Tab 2: CANVA DESIGN BANK LIST -->
-          <div class="flex flex-col space-y-2.5 flex-1">
-            <!-- Filter Categories Chip Ribbon -->
-            <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-[10px] font-mono flex-shrink-0">
-              ${availableCategories.map(cat => {
-                const isActive = this.activeCanvaFilter === cat;
-                const label = cat === 'all' ? 'Semua Desain' : cat;
-                return `
-                  <button 
-                    onclick="SpreadsheetHub.setCanvaFilter('${cat}')" 
-                    class="px-2.5 py-0.5 rounded-full border transition whitespace-nowrap ${isActive ? 'bg-blue-600 text-white font-bold border-blue-500' : 'bay-recessed text-slate-400 hover:text-white border-white/5'}"
-                  >
-                    ${label}
-                  </button>
-                `;
-              }).join('')}
+              <h4 class="text-sm font-extrabold text-white font-display group-hover:text-emerald-300 transition">
+                Bank Spreadsheet Operasional
+              </h4>
+              <p class="text-[11px] font-mono text-slate-400 mt-1 line-clamp-2">
+                Master Rundown, Plotting Rute, Logistik, Presensi, dan inventaris tim Central Event.
+              </p>
             </div>
 
-            <div class="space-y-2.5 overflow-y-auto custom-scrollbar flex-1 max-h-[270px] pr-1">
-              ${filteredCanva.length === 0 ? `
-                <div class="p-6 rounded-xl bay-recessed border border-dashed border-white/10 text-center space-y-2">
-                  <div class="text-2xl">🎨</div>
-                  <div class="text-xs font-mono font-bold text-slate-300">Belum Ada Tautan Canva</div>
-                  <p class="text-[11px] font-mono text-slate-400 max-w-xs mx-auto">
-                    Kumpulkan tautan ID Card, Banner, Backdrop, & Cue Card Canva tim agar tersortir rapi!
-                  </p>
-                  <button onclick="SpreadsheetHub.openAddCanvaModal()" class="btn-ghost py-1 px-3 text-xs text-blue-400 border-blue-500/30 hover:border-blue-400 font-bold mt-2">
-                    + Tambah Link Canva
-                  </button>
+            <!-- Quick Pill Peek -->
+            <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono">
+              <span class="text-[10px] text-slate-500 font-bold">MODE POP-UP & SORTIR</span>
+              <span class="text-emerald-400 group-hover:underline font-bold flex items-center gap-1">
+                Eksplorasi Sheet <span>→</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- Card 2: Bank Desain Canva Hub -->
+          <div 
+            onclick="SpreadsheetHub.openExplorer('canva')" 
+            class="bay-recessed p-4 rounded-2xl border border-white/10 hover:border-blue-500/40 hover:bg-blue-500/5 transition cursor-pointer flex flex-col justify-between group space-y-3"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2">
+                <div class="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 font-mono font-bold flex items-center justify-center text-lg group-hover:scale-105 transition">
+                  🎨
                 </div>
-              ` : filteredCanva.map(item => {
-                return `
-                  <div class="bay-recessed p-3 rounded-xl border border-white/10 hover:border-blue-500/30 transition flex flex-col justify-between gap-2.5 group">
-                    <div class="flex items-start justify-between gap-2">
-                      <div class="flex items-start gap-2.5 min-w-0">
-                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-base text-blue-400 flex-shrink-0 mt-0.5">
-                          ${item.icon || '🎨'}
-                        </div>
-                        <div class="min-w-0 flex-1">
-                          <div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                            <span class="text-xs font-extrabold text-white truncate group-hover:text-blue-300 transition">${item.name}</span>
-                            <span class="px-1.5 py-0.2 rounded text-[8px] font-mono font-bold bg-blue-400/20 text-blue-300 border border-blue-400/30">${item.category || 'Desain'}</span>
-                          </div>
-                          <p class="text-[10px] font-mono text-slate-300 line-clamp-1">${item.description || 'Aset desain resmi tim Central Event.'}</p>
-                        </div>
-                      </div>
-
-                      <div class="flex items-center gap-1">
-                        <button onclick="SpreadsheetHub.openEditCanvaModal('${item.id}')" class="text-slate-400 hover:text-amber-400 p-1 text-xs transition" title="Edit / Ganti Nama & Link Canva">
-                          ✏️
-                        </button>
-                        <button onclick="SpreadsheetHub.deleteCanva('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Hapus Link Canva">
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-
-                    <!-- Direct Actions Row -->
-                    <div class="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/5">
-                      <div class="flex items-center gap-1">
-                        <button onclick="SpreadsheetHub.openEditCanvaModal('${item.id}')" class="btn-ghost py-1 px-2 text-[10px] text-amber-400 hover:text-amber-300 border-amber-500/20">
-                          ✏️ Edit
-                        </button>
-                        <button onclick="SpreadsheetHub.copyLink('${item.url}')" class="btn-ghost py-1 px-2 text-[10px] text-slate-400 hover:text-white" title="Salin Tautan">
-                          📋 Salin
-                        </button>
-                      </div>
-
-                      <div class="flex items-center gap-1.5">
-                        <button onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" class="btn-tactical py-1 px-3 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1 shadow-sm">
-                          <span>🎨 Buka Desain</span>
-                          <span class="text-[10px]">↗</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-blue-400/20 text-blue-300 border border-blue-400/30">
+                  ${canvaCount} ASET DESAIN
+                </span>
+              </div>
+              <h4 class="text-sm font-extrabold text-white font-display group-hover:text-blue-300 transition">
+                Bank Desain Canva Resmi
+              </h4>
+              <p class="text-[11px] font-mono text-slate-400 mt-1 line-clamp-2">
+                ID Card Panitia, Banner Gate, Cue Card MC, PPT Deck, Signage, dan materi publikasi.
+              </p>
             </div>
 
+            <!-- Quick Pill Peek -->
+            <div class="pt-2 border-t border-white/5 flex items-center justify-between text-xs font-mono">
+              <span class="text-[10px] text-slate-500 font-bold">MODE POP-UP & SORTIR</span>
+              <span class="text-blue-400 group-hover:underline font-bold flex items-center gap-1">
+                Eksplorasi Canva <span>→</span>
+              </span>
+            </div>
           </div>
-        `}
 
-        <!-- Bottom Telemetry Status -->
-        <div class="bay-recessed p-2.5 rounded-xl border border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-400 flex-shrink-0">
+        </div>
+
+        <!-- Telemetry Bottom Strip -->
+        <div class="bay-recessed p-2.5 rounded-xl border border-white/5 flex items-center justify-between text-[10px] font-mono text-slate-400">
           <span class="flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            Akses Terpadu Spreadsheet & Canva Central Event
+            Tersinkronisasi Otomatis Supabase Cloud & Multi-Device
           </span>
-          <button onclick="SpreadsheetHub.openFullCatalog()" class="text-blue-400 hover:text-blue-300 font-bold hover:underline">
-            Buka Katalog Pop-up ⛶
+          <button onclick="SpreadsheetHub.openExplorer()" class="text-blue-400 hover:text-blue-300 font-bold hover:underline">
+            Buka Explorer Penuh ⛶
           </button>
         </div>
 
@@ -358,16 +219,17 @@ const SpreadsheetHub = {
 
   /**
    * ================================================================
-   * EXPANSIVE FULL CATALOG POP-UP (SOLVING THE TINY SCROLLBOX ISSUE)
+   * POP-UP UI/UX EXPLORER (Mirip Drive In-App Explorer)
+   * Menyediakan Sortir Lengkap, Filter Kategori, Grid/Table View, Edit/Rename
    * ================================================================
    */
-  async openFullCatalog(tab, subEventId) {
-    if (tab) this.activeTab = tab;
-    if (subEventId) this.catalogSubEventFilter = subEventId;
-    
-    this.injectFullCatalogModal();
-    const modal = document.getElementById('fullCatalogHubModal');
-    const card = document.getElementById('fullCatalogHubCard');
+  async openExplorer(type = 'sheets', subEventId = null) {
+    if (type) this.activeTab = type;
+    if (subEventId) this.subEventFilter = subEventId;
+
+    this.injectExplorerModal();
+    const modal = document.getElementById('hubExplorerModal');
+    const card = document.getElementById('hubExplorerCard');
     if (!modal || !card) return;
 
     modal.classList.remove('opacity-0', 'pointer-events-none');
@@ -376,17 +238,22 @@ const SpreadsheetHub = {
     card.classList.add('scale-100');
 
     document.body.classList.add('overflow-hidden');
-    
+
     if ((!this.sheets || this.sheets.length === 0) && (!this.canvaLinks || this.canvaLinks.length === 0)) {
       await this.fetchAndRender();
     } else {
-      this.renderFullCatalog();
+      this.renderExplorerContent();
     }
   },
 
-  closeFullCatalog() {
-    const modal = document.getElementById('fullCatalogHubModal');
-    const card = document.getElementById('fullCatalogHubCard');
+  // Alias for backward compatibility
+  openFullCatalog(type, subEventId) {
+    return this.openExplorer(type, subEventId);
+  },
+
+  closeExplorer() {
+    const modal = document.getElementById('hubExplorerModal');
+    const card = document.getElementById('hubExplorerCard');
     if (modal && card) {
       modal.classList.remove('opacity-100', 'pointer-events-auto');
       modal.classList.add('opacity-0', 'pointer-events-none');
@@ -396,35 +263,61 @@ const SpreadsheetHub = {
     document.body.classList.remove('overflow-hidden');
   },
 
-  isFullCatalogOpen() {
-    const modal = document.getElementById('fullCatalogHubModal');
+  isExplorerOpen() {
+    const modal = document.getElementById('hubExplorerModal');
     return modal && modal.classList.contains('opacity-100');
   },
 
-  renderFullCatalog() {
-    const gridContainer = document.getElementById('fullCatalogContentArea');
-    const titleCountEl = document.getElementById('catalogModalCountBadge');
-    if (!gridContainer) return;
+  switchExplorerTab(tab) {
+    this.activeTab = tab;
+    this.renderExplorerContent();
+  },
 
-    // Filter items based on activeTab, catalogSubEventFilter, catalogCanvaCategoryFilter, and catalogSearchQuery
+  setSubEventFilter(subId) {
+    this.subEventFilter = subId;
+    this.renderExplorerContent();
+  },
+
+  setCanvaCategoryFilter(cat) {
+    this.canvaCategoryFilter = cat;
+    this.renderExplorerContent();
+  },
+
+  setSortBy(sortKey) {
+    this.sortBy = sortKey;
+    this.renderExplorerContent();
+  },
+
+  setLayoutMode(layout) {
+    this.layoutMode = layout;
+    this.renderExplorerContent();
+  },
+
+  onSearch(query) {
+    this.searchQuery = (query || '').toLowerCase().trim();
+    this.renderExplorerContent();
+  },
+
+  /**
+   * Filter and Sort Data
+   */
+  getSortedAndFilteredItems() {
     const isSheets = this.activeTab === 'sheets';
-    const subFilter = this.catalogSubEventFilter;
-    const q = this.catalogSearchQuery;
+    let items = isSheets ? [...this.sheets] : [...this.canvaLinks];
 
-    let items = isSheets ? this.sheets : this.canvaLinks;
-
-    // Filter by Sub-Divisi
-    if (subFilter !== 'all') {
-      items = items.filter(it => it.subEventId === subFilter);
+    // 1. Filter by Sub-Divisi
+    if (this.subEventFilter && this.subEventFilter !== 'all') {
+      items = items.filter(it => it.subEventId === this.subEventFilter);
     }
 
-    // If Canva, filter by Category
-    if (!isSheets && this.catalogCanvaCategoryFilter !== 'all') {
-      items = items.filter(it => it.category === this.catalogCanvaCategoryFilter);
+    // 2. Filter by Canva Category
+    if (!isSheets && this.canvaCategoryFilter && this.canvaCategoryFilter !== 'all') {
+      items = items.filter(it => it.category === this.canvaCategoryFilter);
     }
 
-    // Filter by Search Query
-    if (q) {
+    // 3. Filter by Search Query
+    if (this.searchQuery) {
+      const q = this.searchQuery;
       items = items.filter(it => {
         const nameMatch = (it.name || '').toLowerCase().includes(q);
         const subMatch = (it.subEventName || it.subEventId || '').toLowerCase().includes(q);
@@ -434,49 +327,100 @@ const SpreadsheetHub = {
       });
     }
 
-    if (titleCountEl) {
-      titleCountEl.innerText = `${items.length} ${isSheets ? 'Spreadsheet' : 'Desain'}`;
+    // 4. Sort Items ("lebih enak buat sortir")
+    switch (this.sortBy) {
+      case 'name_asc':
+        items.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        break;
+      case 'name_desc':
+        items.sort((a, b) => (b.name || '').localeCompare(a.name || ''));
+        break;
+      case 'date_desc':
+        items.sort((a, b) => (b.created_at || b.date || '').localeCompare(a.created_at || a.date || ''));
+        break;
+      case 'sub_asc':
+        items.sort((a, b) => (a.subEventId || '').localeCompare(b.subEventId || ''));
+        break;
+      case 'category':
+        items.sort((a, b) => (a.category || '').localeCompare(b.category || '') || (a.name || '').localeCompare(b.name || ''));
+        break;
+      default:
+        break;
     }
 
-    // Render Toolbar Tabs & Sub-Event Chips
-    const toolbarEl = document.getElementById('catalogToolbarArea');
+    return items;
+  },
+
+  renderExplorerContent() {
+    const isSheets = this.activeTab === 'sheets';
+    const items = this.getSortedAndFilteredItems();
+
+    // 1. Update Top Title & Eyebrow
+    const titleEl = document.getElementById('hubExplorerTitle');
+    const badgeEl = document.getElementById('hubExplorerStatusBadge');
+    const iconEl = document.getElementById('hubExplorerIconBadge');
+    const counterEl = document.getElementById('hubExplorerCounter');
+
+    if (titleEl) {
+      titleEl.innerText = isSheets 
+        ? 'Bank Spreadsheet Operasional Central Event 2027' 
+        : 'Bank Desain Canva Resmi Central Event 2027';
+    }
+    if (badgeEl) {
+      badgeEl.innerText = isSheets ? 'SPREADSHEET IN-APP EXPLORER' : 'CANVA DESIGN ASSET EXPLORER';
+      badgeEl.className = isSheets 
+        ? 'eyebrow-pill emerald text-[9px] font-mono' 
+        : 'eyebrow-pill cobalt text-[9px] font-mono';
+    }
+    if (iconEl) {
+      iconEl.innerText = isSheets ? '📊' : '🎨';
+      iconEl.className = isSheets
+        ? 'w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0'
+        : 'w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/40 text-blue-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0';
+    }
+    if (counterEl) {
+      counterEl.innerText = `${items.length} ${isSheets ? 'Lembar Kerja' : 'Aset Desain'}`;
+    }
+
+    // 2. Render Toolbar (Breadcrumbs/Tabs, Search, Sort Dropdown, Layout Switcher)
+    const toolbarEl = document.getElementById('hubExplorerToolbar');
     if (toolbarEl) {
       toolbarEl.innerHTML = `
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-white/10">
+        <!-- Sub-Ribbon Row 1: Mode Tabs & Sub-Divisi Switcher -->
+        <div class="px-4 sm:px-6 py-2.5 border-b border-white/5 ws-surface-primary flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
           
-          <!-- Mode Tabs Switcher -->
-          <div class="flex items-center gap-2">
+          <!-- Mode Tabs (Bank Sheet vs Bank Canva) -->
+          <div class="flex items-center gap-1.5 bay-recessed p-1 rounded-xl border border-white/10">
             <button 
-              onclick="SpreadsheetHub.switchTab('sheets')" 
-              class="px-4 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 ${isSheets ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bay-recessed text-slate-400 hover:text-white border border-white/5'}"
+              onclick="SpreadsheetHub.switchExplorerTab('sheets')" 
+              class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-1.5 ${isSheets ? 'bg-emerald-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}"
             >
-              <span>📊 Bank Spreadsheet</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] bg-black/30 font-bold">${this.sheets.length}</span>
+              <span>📊 Bank Sheet</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-black/40 text-emerald-200">${this.sheets.length}</span>
             </button>
-
             <button 
-              onclick="SpreadsheetHub.switchTab('canva')" 
-              class="px-4 py-2 rounded-xl text-xs font-mono font-bold transition flex items-center gap-2 ${!isSheets ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30' : 'bay-recessed text-slate-400 hover:text-white border border-white/5'}"
+              onclick="SpreadsheetHub.switchExplorerTab('canva')" 
+              class="px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition flex items-center gap-1.5 ${!isSheets ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-white'}"
             >
-              <span>🎨 Bank Desain Canva</span>
-              <span class="px-2 py-0.5 rounded-full text-[10px] bg-black/30 font-bold">${this.canvaLinks.length}</span>
+              <span>🎨 Bank Canva</span>
+              <span class="px-1.5 py-0.2 rounded-full text-[9px] bg-black/40 text-blue-200">${this.canvaLinks.length}</span>
             </button>
           </div>
 
-          <!-- Sub-Divisi Filter Chips -->
-          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1 text-xs font-mono">
+          <!-- Sub-Divisi Filter Pills -->
+          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-xs font-mono">
             ${[
-              { id: 'all', label: '🌐 Semua Sub', code: 'ALL' },
-              { id: 'safari', label: '🏛️ Safari', code: 'SF' },
-              { id: 'startpoint', label: '🚀 Start Point', code: 'SP' },
+              { id: 'all', label: '🌐 Semua', code: 'ALL' },
+              { id: 'safari', label: '🏛️ SF', code: 'SF' },
+              { id: 'startpoint', label: '🚀 SP', code: 'SP' },
               { id: 'odl', label: '🎓 ODL', code: 'ODL' },
-              { id: 'technocraft', label: '⚡ Technocraft', code: 'TCP' }
+              { id: 'technocraft', label: '⚡ TCP', code: 'TCP' }
             ].map(s => {
-              const active = this.catalogSubEventFilter === s.id;
+              const active = this.subEventFilter === s.id;
               return `
                 <button 
-                  onclick="SpreadsheetHub.setCatalogSubEvent('${s.id}')" 
-                  class="px-3 py-1 rounded-xl transition whitespace-nowrap font-bold ${active ? 'bg-white/15 text-white border border-white/30 shadow-sm' : 'bay-recessed text-slate-400 hover:text-white border border-white/5'}"
+                  onclick="SpreadsheetHub.setSubEventFilter('${s.id}')" 
+                  class="px-2.5 py-1 rounded-lg transition font-bold whitespace-nowrap ${active ? 'bg-white/15 text-white border border-white/30 shadow-sm' : 'bay-recessed text-slate-400 hover:text-white border border-white/5'}"
                 >
                   ${s.label}
                 </button>
@@ -484,52 +428,88 @@ const SpreadsheetHub = {
             }).join('')}
           </div>
 
-        </div>
-
-        <!-- Secondary Filter Bar (Search + Canva Categories + Add Button) -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
-          
-          <!-- Search Input -->
-          <div class="relative flex-1 max-w-md">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs pointer-events-none">🔍</span>
-            <input 
-              type="text" 
-              id="catalogLiveSearchInput" 
-              value="${this.catalogSearchQuery}" 
-              oninput="SpreadsheetHub.onCatalogSearch(this.value)"
-              placeholder="Cari nama lembar kerja, PIC, kategori, atau tag..." 
-              class="w-full pl-8 pr-3.5 py-2 bay-recessed rounded-xl text-xs font-mono text-white placeholder-slate-500 border border-white/10 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-
-          <!-- Add Trigger in Modal -->
-          <div class="flex items-center gap-2 self-end sm:self-auto">
+          <!-- Add Trigger -->
+          <div class="flex items-center gap-2">
             ${isSheets ? `
-              <button onclick="SpreadsheetHub.openAddModal()" class="btn-tactical py-2 px-4 text-xs bg-emerald-600 hover:bg-emerald-500 font-bold flex items-center gap-2 shadow-md shadow-emerald-600/20">
+              <button onclick="SpreadsheetHub.openAddModal()" class="btn-tactical py-1.5 px-3 text-xs bg-emerald-600 hover:bg-emerald-500 font-bold flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
                 <span>➕</span>
-                <span>Tautkan Spreadsheet Baru</span>
+                <span class="hidden sm:inline">Tambah Sheet</span>
               </button>
             ` : `
-              <button onclick="SpreadsheetHub.openAddCanvaModal()" class="btn-tactical py-2 px-4 text-xs bg-blue-600 hover:bg-blue-500 font-bold flex items-center gap-2 shadow-md shadow-blue-600/20">
+              <button onclick="SpreadsheetHub.openAddCanvaModal()" class="btn-tactical py-1.5 px-3 text-xs bg-blue-600 hover:bg-blue-500 font-bold flex items-center gap-1.5 shadow-md shadow-blue-600/20">
                 <span>➕</span>
-                <span>Tambah Desain Canva Baru</span>
+                <span class="hidden sm:inline">Tambah Canva</span>
               </button>
             `}
           </div>
 
         </div>
 
-        <!-- Canva Category Chips (Only if Canva Tab) -->
+        <!-- Sub-Ribbon Row 2: Search, Sorting Dropdown, Layout Mode -->
+        <div class="px-4 sm:px-6 py-2 border-b border-white/5 bg-black/10 flex flex-wrap items-center justify-between gap-3 text-xs font-mono flex-shrink-0">
+          
+          <div class="flex items-center gap-2.5 flex-1 max-w-md">
+            <!-- Search Input -->
+            <div class="relative w-full">
+              <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+              <input 
+                type="text" 
+                value="${this.searchQuery}" 
+                oninput="SpreadsheetHub.onSearch(this.value)"
+                placeholder="Tapis & cari ${isSheets ? 'spreadsheet...' : 'desain Canva...'}" 
+                class="w-full pl-8 pr-3 py-1.5 rounded-lg text-xs bay-recessed border border-white/10 focus:outline-none focus:border-blue-500 text-white placeholder:text-slate-500"
+              />
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Sort Dropdown ("lebih enak buat sortir") -->
+            <div class="flex items-center gap-1.5 bay-recessed px-2.5 py-1 rounded-lg border border-white/10 text-slate-300">
+              <span class="text-[10px] text-slate-400 font-bold">⇅ SORTIR:</span>
+              <select 
+                onchange="SpreadsheetHub.setSortBy(this.value)" 
+                class="bg-transparent text-xs text-white focus:outline-none cursor-pointer font-bold"
+              >
+                <option value="sub_asc" ${this.sortBy === 'sub_asc' ? 'selected' : ''}>🏛️ Sub-Divisi</option>
+                <option value="name_asc" ${this.sortBy === 'name_asc' ? 'selected' : ''}>🔤 Nama (A - Z)</option>
+                <option value="name_desc" ${this.sortBy === 'name_desc' ? 'selected' : ''}>🔤 Nama (Z - A)</option>
+                <option value="date_desc" ${this.sortBy === 'date_desc' ? 'selected' : ''}>📅 Terbaru</option>
+                ${!isSheets ? `<option value="category" ${this.sortBy === 'category' ? 'selected' : ''}>🏷️ Kategori</option>` : ''}
+              </select>
+            </div>
+
+            <!-- Layout Mode Switcher (Grid vs Table) -->
+            <div class="flex items-center bay-recessed p-0.5 border border-white/10 rounded-lg">
+              <button 
+                onclick="SpreadsheetHub.setLayoutMode('grid')" 
+                title="Tampilan Kotak / Kartu" 
+                class="px-2.5 py-1 rounded text-xs transition ${this.layoutMode === 'grid' ? (isSheets ? 'bg-emerald-600 text-white font-bold' : 'bg-blue-600 text-white font-bold') : 'text-slate-400 hover:text-white'}"
+              >
+                ▦ Kotak
+              </button>
+              <button 
+                onclick="SpreadsheetHub.setLayoutMode('table')" 
+                title="Tampilan Tabel Data" 
+                class="px-2.5 py-1 rounded text-xs transition ${this.layoutMode === 'table' ? (isSheets ? 'bg-emerald-600 text-white font-bold' : 'bg-blue-600 text-white font-bold') : 'text-slate-400 hover:text-white'}"
+              >
+                ☰ Tabel
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Canva Category Chips Ribbon (Only in Canva Tab) -->
         ${!isSheets ? `
-          <div class="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pt-2 pb-1 text-[11px] font-mono">
-            <span class="text-slate-400 font-bold mr-1">🏷️ Kategori:</span>
+          <div class="px-4 sm:px-6 py-1.5 border-b border-white/5 bg-[#080b14] flex items-center gap-1.5 overflow-x-auto custom-scrollbar text-[10px] font-mono flex-shrink-0">
+            <span class="text-slate-400 font-bold mr-1">🏷️ KATEGORI:</span>
             ${this.canvaCategories.map(cat => {
-              const active = this.catalogCanvaCategoryFilter === cat;
-              const label = cat === 'all' ? 'Semua Desain' : cat;
+              const active = this.canvaCategoryFilter === cat;
+              const label = cat === 'all' ? 'Semua Kategori' : cat;
               return `
                 <button 
-                  onclick="SpreadsheetHub.setCatalogCanvaCategory('${cat}')" 
-                  class="px-2.5 py-1 rounded-lg border transition whitespace-nowrap ${active ? 'bg-blue-600 text-white font-bold border-blue-500' : 'bay-recessed text-slate-400 hover:text-white border-white/5'}"
+                  onclick="SpreadsheetHub.setCanvaCategoryFilter('${cat}')" 
+                  class="px-2.5 py-0.5 rounded-full border transition whitespace-nowrap ${active ? 'bg-blue-600 text-white font-bold border-blue-500' : 'bay-recessed text-slate-400 hover:text-white border-white/5'}"
                 >
                   ${label}
                 </button>
@@ -540,159 +520,224 @@ const SpreadsheetHub = {
       `;
     }
 
-    // Render Cards in Expansive Multi-Column Grid
+    // 3. Render Items Canvas (Grid or Table)
+    const canvasEl = document.getElementById('hubExplorerCanvas');
+    if (!canvasEl) return;
+
     if (items.length === 0) {
-      gridContainer.innerHTML = `
-        <div class="p-12 rounded-2xl bay-recessed border border-dashed border-white/10 text-center space-y-3 col-span-full">
+      canvasEl.innerHTML = `
+        <div class="p-12 rounded-2xl bay-recessed border border-dashed border-white/10 text-center space-y-3">
           <div class="text-4xl">${isSheets ? '📊' : '🎨'}</div>
           <div class="text-base font-extrabold text-white font-display">Tidak Ada Data Ditemukan</div>
           <p class="text-xs font-mono text-slate-400 max-w-md mx-auto">
-            Tidak ada lembar kerja atau aset desain yang cocok dengan kata kunci <b>"${this.catalogSearchQuery}"</b> atau filter yang dipilih.
+            Tidak ada item yang sesuai dengan kata kunci atau filter yang Anda pilih.
           </p>
-          <div class="flex items-center justify-center gap-3 pt-2">
-            <button onclick="SpreadsheetHub.onCatalogSearch(''); SpreadsheetHub.setCatalogSubEvent('all'); SpreadsheetHub.setCatalogCanvaCategory('all');" class="btn-ghost py-1.5 px-4 text-xs text-blue-400 border-blue-500/30 hover:border-blue-400 font-bold">
-              Reset Semua Filter
-            </button>
-          </div>
+          <button onclick="SpreadsheetHub.onSearch(''); SpreadsheetHub.setSubEventFilter('all'); SpreadsheetHub.setCanvaCategoryFilter('all');" class="btn-ghost py-1.5 px-4 text-xs text-blue-400 border-blue-500/30 hover:border-blue-400 font-bold mt-2">
+            Reset Filter
+          </button>
         </div>
       `;
       return;
     }
 
-    if (isSheets) {
-      gridContainer.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-          ${items.map(sheet => {
-            const cleanSheetId = sheet.sheetId || (sheet.id.startsWith('sheet_') ? '' : sheet.id);
-            const sub = this.subEventMap[sheet.subEventId] || { name: sheet.subEventName || sheet.subEventId, code: 'SUB', icon: '📊' };
-            const editLink = cleanSheetId
-              ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit`
-              : (sheet.editUrl || sheet.externalUrl);
+    if (this.layoutMode === 'table') {
+      // TABLE VIEW (☰)
+      canvasEl.innerHTML = this.renderTableView(items, isSheets);
+    } else {
+      // GRID CARDS VIEW (▦)
+      canvasEl.innerHTML = this.renderGridView(items, isSheets);
+    }
+  },
 
-            return `
-              <div class="chassis p-4 rounded-2xl border border-white/10 hover:border-emerald-500/40 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-200 flex flex-col justify-between space-y-3.5 group bg-[#0c101c]/80">
-                
-                <div>
-                  <!-- Card Header: Badges & Edit Triggers -->
-                  <div class="flex items-center justify-between pb-2 border-b border-white/5 gap-2">
-                    <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-extrabold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+  /**
+   * Render Grid View (▦)
+   */
+  renderGridView(items, isSheets) {
+    return `
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+        ${items.map(item => {
+          const sub = this.subEventMap[item.subEventId] || { name: item.subEventName || item.subEventId, code: 'SUB', icon: isSheets ? '📊' : '🎨' };
+          const cleanSheetId = item.sheetId || (item.id && !item.id.startsWith('sheet_') ? item.id : null);
+          const externalUrl = item.externalUrl || item.url || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit` : '#');
+
+          return `
+            <div class="chassis p-4 rounded-2xl border border-white/10 ${isSheets ? 'hover:border-emerald-500/40 hover:shadow-emerald-500/10' : 'hover:border-blue-500/40 hover:shadow-blue-500/10'} hover:shadow-xl transition-all duration-200 flex flex-col justify-between space-y-3.5 group bg-[#0c101c]/80">
+              
+              <div>
+                <!-- Card Header -->
+                <div class="flex items-center justify-between pb-2 border-b border-white/5 gap-2">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-extrabold ${isSheets ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30' : 'bg-blue-500/15 text-blue-300 border border-blue-500/30'} flex items-center gap-1">
                       <span>${sub.icon}</span>
                       <span>${sub.code} • ${sub.name}</span>
                     </span>
-                    
-                    <div class="flex items-center gap-1">
-                      <button onclick="SpreadsheetHub.openEditSheetModal('${sheet.id}')" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/10 text-amber-300 hover:bg-amber-500 hover:text-black border border-amber-500/30 transition flex items-center gap-1" title="Edit nama & link spreadsheet">
-                        <span>✏️</span>
-                        <span>Edit</span>
-                      </button>
-                      <button onclick="SpreadsheetHub.deleteSheet('${sheet.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Hapus Spreadsheet">
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-
-                  <!-- Card Title & Meta -->
-                  <div class="pt-2">
-                    <h4 class="text-sm font-extrabold text-white font-display leading-snug group-hover:text-emerald-300 transition line-clamp-2">
-                      ${sheet.name}
-                    </h4>
-                    <div class="flex items-center gap-2 mt-1.5 text-[10px] font-mono text-slate-400">
-                      <span class="text-emerald-400 font-bold">● Google Sheets</span>
-                      <span>•</span>
-                      <span>${sheet.date || 'Tersambung Cloud'}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Card Action Footer -->
-                <div class="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-1.5">
-                    <button onclick="SpreadsheetHub.copyLink('${editLink}')" class="btn-ghost py-1 px-2.5 text-[11px] font-mono text-slate-400 hover:text-white" title="Salin Tautan">
-                      📋 Salin
-                    </button>
-                    <a href="${editLink}" target="_blank" class="btn-ghost py-1 px-2 text-[11px] font-mono text-slate-400 hover:text-white" title="Buka Tab Baru Google">
-                      ↗
-                    </a>
-                  </div>
-
-                  <button onclick="SpreadsheetHub.openInApp('${cleanSheetId || sheet.id}')" class="btn-tactical py-1.5 px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-sm">
-                    <span>📊 Buka In-App</span>
-                    <span class="text-[10px]">↗</span>
-                  </button>
-                </div>
-
-              </div>
-            `;
-          }).join('')}
-        </div>
-      `;
-    } else {
-      // Canva Items Grid
-      gridContainer.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-          ${items.map(item => {
-            const sub = this.subEventMap[item.subEventId] || { name: item.subEventName || item.subEventId, code: 'SUB', icon: '🎨' };
-            return `
-              <div class="chassis p-4 rounded-2xl border border-white/10 hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-200 flex flex-col justify-between space-y-3.5 group bg-[#0c101c]/80">
-                
-                <div>
-                  <!-- Card Header: Badges & Edit Triggers -->
-                  <div class="flex items-center justify-between pb-2 border-b border-white/5 gap-2">
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                      <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-extrabold bg-blue-500/15 text-blue-300 border border-blue-500/30 flex items-center gap-1">
-                        <span>${sub.icon}</span>
-                        <span>${sub.code}</span>
-                      </span>
+                    ${!isSheets ? `
                       <span class="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
                         ${item.category || 'Desain'}
                       </span>
-                    </div>
-
-                    <div class="flex items-center gap-1">
-                      <button onclick="SpreadsheetHub.openEditCanvaModal('${item.id}')" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/10 text-amber-300 hover:bg-amber-500 hover:text-black border border-amber-500/30 transition flex items-center gap-1" title="Edit nama, kategori & link Canva">
-                        <span>✏️</span>
-                        <span>Edit</span>
-                      </button>
-                      <button onclick="SpreadsheetHub.deleteCanva('${item.id}')" class="text-slate-500 hover:text-rose-400 p-1 text-xs transition" title="Hapus Desain Canva">
-                        🗑️
-                      </button>
-                    </div>
+                    ` : ''}
                   </div>
 
-                  <!-- Card Title & Description -->
-                  <div class="pt-2 space-y-1">
-                    <h4 class="text-sm font-extrabold text-white font-display leading-snug group-hover:text-blue-300 transition line-clamp-2">
-                      ${item.name}
-                    </h4>
-                    <p class="text-[11px] font-mono text-slate-300 leading-relaxed line-clamp-2">
-                      ${item.description || 'Aset desain resmi tim Central Event 2027.'}
-                    </p>
+                  <div class="flex items-center gap-1">
+                    <button 
+                      onclick="${isSheets ? `SpreadsheetHub.openEditSheetModal('${item.id}')` : `SpreadsheetHub.openEditCanvaModal('${item.id}')`}" 
+                      class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/10 text-amber-300 hover:bg-amber-500 hover:text-black border border-amber-500/30 transition flex items-center gap-1"
+                      title="Edit / Rename & Ganti Link"
+                    >
+                      <span>✏️</span>
+                      <span>Edit</span>
+                    </button>
+                    <button 
+                      onclick="${isSheets ? `SpreadsheetHub.deleteSheet('${item.id}')` : `SpreadsheetHub.deleteCanva('${item.id}')`}" 
+                      class="text-slate-500 hover:text-rose-400 p-1 text-xs transition"
+                      title="Hapus"
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
 
-                <!-- Card Action Footer -->
-                <div class="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-1.5">
-                    <button onclick="SpreadsheetHub.copyLink('${item.url}')" class="btn-ghost py-1 px-2.5 text-[11px] font-mono text-slate-400 hover:text-white" title="Salin Tautan">
-                      📋 Salin
-                    </button>
-                    <a href="${item.url}" target="_blank" class="btn-ghost py-1 px-2 text-[11px] font-mono text-slate-400 hover:text-white" title="Buka Canva.com">
-                      ↗
-                    </a>
-                  </div>
+                <!-- Card Body -->
+                <div class="pt-2 space-y-1">
+                  <h4 class="text-sm font-extrabold text-white font-display leading-snug ${isSheets ? 'group-hover:text-emerald-300' : 'group-hover:text-blue-300'} transition line-clamp-2">
+                    ${item.name}
+                  </h4>
+                  <p class="text-[11px] font-mono text-slate-400 leading-relaxed line-clamp-2">
+                    ${item.description || (isSheets ? 'Lembar kerja operasional resmi Central Event.' : 'Aset visual Canva resmi.')}
+                  </p>
+                </div>
+              </div>
 
+              <!-- Card Action Tray -->
+              <div class="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                  <button onclick="SpreadsheetHub.copyLink('${externalUrl}')" class="btn-ghost py-1 px-2.5 text-[11px] font-mono text-slate-400 hover:text-white" title="Salin Tautan">
+                    📋 Salin
+                  </button>
+                  <a href="${externalUrl}" target="_blank" class="btn-ghost py-1 px-2 text-[11px] font-mono text-slate-400 hover:text-white" title="Buka Tab Baru">
+                    ↗
+                  </a>
+                </div>
+
+                ${isSheets ? `
+                  <button onclick="SpreadsheetHub.openInApp('${cleanSheetId || item.id}')" class="btn-tactical py-1.5 px-3.5 text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                    <span>📊 Buka In-App</span>
+                    <span class="text-[10px]">↗</span>
+                  </button>
+                ` : `
                   <button onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" class="btn-tactical py-1.5 px-3.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 shadow-sm">
                     <span>🎨 Buka Desain</span>
                     <span class="text-[10px]">↗</span>
                   </button>
-                </div>
-
+                `}
               </div>
-            `;
-          }).join('')}
-        </div>
-      `;
-    }
+
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  },
+
+  /**
+   * Render Table View (☰) - Format data tabular yang rapi
+   */
+  renderTableView(items, isSheets) {
+    return `
+      <div class="overflow-x-auto custom-scrollbar rounded-2xl border border-white/10 bg-[#0c101c]/90">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-white/5 border-b border-white/10 text-slate-400 uppercase text-[10px] tracking-wider">
+            <tr>
+              <th class="py-3 px-4">Nama Item</th>
+              <th class="py-3 px-3">Sub-Divisi</th>
+              ${!isSheets ? '<th class="py-3 px-3">Kategori</th>' : '<th class="py-3 px-3">Tipe</th>'}
+              <th class="py-3 px-3">Tanggal / Info</th>
+              <th class="py-3 px-4 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            ${items.map(item => {
+              const sub = this.subEventMap[item.subEventId] || { name: item.subEventName || item.subEventId, code: 'SUB', icon: isSheets ? '📊' : '🎨' };
+              const cleanSheetId = item.sheetId || (item.id && !item.id.startsWith('sheet_') ? item.id : null);
+              const externalUrl = item.externalUrl || item.url || (cleanSheetId ? `https://docs.google.com/spreadsheets/d/${cleanSheetId}/edit` : '#');
+
+              return `
+                <tr class="hover:bg-white/5 transition group">
+                  
+                  <!-- Nama -->
+                  <td class="py-3 px-4 font-bold text-white group-hover:text-blue-300">
+                    <div class="flex items-center gap-2">
+                      <span>${item.icon || (isSheets ? '📊' : '🎨')}</span>
+                      <span class="max-w-xs sm:max-w-md truncate">${item.name}</span>
+                    </div>
+                  </td>
+
+                  <!-- Sub-Divisi -->
+                  <td class="py-3 px-3 whitespace-nowrap">
+                    <span class="px-2 py-0.5 rounded text-[10px] bg-white/5 border border-white/10 text-slate-300">
+                      ${sub.icon} ${sub.code}
+                    </span>
+                  </td>
+
+                  <!-- Kategori / Tipe -->
+                  <td class="py-3 px-3 whitespace-nowrap text-slate-400">
+                    ${!isSheets ? (item.category || 'Desain') : 'Google Sheets'}
+                  </td>
+
+                  <!-- Tanggal / Status -->
+                  <td class="py-3 px-3 whitespace-nowrap text-slate-500 text-[11px]">
+                    ${item.date || 'Aktif'}
+                  </td>
+
+                  <!-- Aksi -->
+                  <td class="py-3 px-4 text-right whitespace-nowrap">
+                    <div class="flex items-center justify-end gap-1.5">
+                      <button 
+                        onclick="${isSheets ? `SpreadsheetHub.openEditSheetModal('${item.id}')` : `SpreadsheetHub.openEditCanvaModal('${item.id}')`}" 
+                        class="px-2 py-1 rounded text-[10px] bg-amber-500/10 text-amber-300 hover:bg-amber-500 hover:text-black transition font-bold"
+                        title="Edit / Rename"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button 
+                        onclick="SpreadsheetHub.copyLink('${externalUrl}')" 
+                        class="px-2 py-1 rounded text-[10px] bg-white/5 text-slate-400 hover:text-white transition"
+                        title="Salin Link"
+                      >
+                        📋 Salin
+                      </button>
+                      ${isSheets ? `
+                        <button 
+                          onclick="SpreadsheetHub.openInApp('${cleanSheetId || item.id}')" 
+                          class="px-2.5 py-1 rounded text-[10px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition shadow-sm"
+                        >
+                          Buka In-App ↗
+                        </button>
+                      ` : `
+                        <button 
+                          onclick="SpreadsheetHub.openCanvaInApp('${item.url}')" 
+                          class="px-2.5 py-1 rounded text-[10px] bg-blue-600 hover:bg-blue-500 text-white font-bold transition shadow-sm"
+                        >
+                          Buka Canva ↗
+                        </button>
+                      `}
+                      <button 
+                        onclick="${isSheets ? `SpreadsheetHub.deleteSheet('${item.id}')` : `SpreadsheetHub.deleteCanva('${item.id}')`}" 
+                        class="text-slate-500 hover:text-rose-400 p-1 text-xs transition"
+                        title="Hapus"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
   },
 
   openInApp(sheetId) {
@@ -726,7 +771,7 @@ const SpreadsheetHub = {
   },
 
   async deleteSheet(id) {
-    if (!confirm('Hapus lembar kerja ini dari daftar repositori?')) return;
+    if (!confirm('Hapus lembar kerja ini dari repositori?')) return;
     try {
       const res = await CE_API.deleteSpreadsheet(id);
       if (res && res.success) {
@@ -741,7 +786,7 @@ const SpreadsheetHub = {
   },
 
   async deleteCanva(id) {
-    if (!confirm('Hapus tautan Canva ini dari daftar aset?')) return;
+    if (!confirm('Hapus tautan Canva ini dari daftar?')) return;
     try {
       const res = await CE_API.deleteCanvaLink(id);
       if (res && res.success) {
@@ -761,64 +806,74 @@ const SpreadsheetHub = {
    * ================================================================
    */
   injectAllModals() {
+    this.injectExplorerModal();
     this.injectAddSpreadsheetModal();
     this.injectAddCanvaModal();
     this.injectEditSpreadsheetModal();
     this.injectEditCanvaModal();
-    this.injectFullCatalogModal();
   },
 
-  injectFullCatalogModal() {
-    if (document.getElementById('fullCatalogHubModal')) return;
+  injectExplorerModal() {
+    if (document.getElementById('hubExplorerModal')) return;
 
     const modalHtml = `
-      <div id="fullCatalogHubModal" class="fixed inset-0 z-[140] bg-[#05070c]/90 backdrop-blur-2xl flex items-center justify-center p-3 sm:p-6 transition-all duration-300 opacity-0 pointer-events-none">
-        <div class="chassis max-w-6xl w-full max-h-[92vh] flex flex-col rounded-3xl shadow-2xl relative transform transition-all duration-300 scale-95 border border-white/10 overflow-hidden" id="fullCatalogHubCard">
-          
-          <!-- Top Modal Header -->
-          <div class="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between gap-4 flex-shrink-0 bg-[#090d18]/90">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-white/10 flex items-center justify-center text-xl shadow-inner">
-                📁
-              </div>
-              <div>
-                <div class="flex items-center gap-2 mb-0.5">
-                  <span class="eyebrow-pill emerald text-[9px] font-mono font-bold">● CLOUD LIVE REPOSITORY</span>
-                  <span id="catalogModalCountBadge" class="eyebrow-pill cobalt text-[9px] font-mono font-bold">KATALOG MASTER</span>
+      <div id="hubExplorerModal" class="fixed inset-0 z-[140] bg-[#05070c]/90 backdrop-blur-2xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
+        
+        <div id="hubExplorerCard" class="chassis w-full max-w-6xl h-[92vh] flex flex-col transition-all duration-300 transform scale-[0.98] overflow-hidden rounded-2xl shadow-2xl relative border border-white/10">
+          <div class="chassis-core flex flex-col h-full !p-0 overflow-hidden ws-surface-primary bg-[#080b14]">
+            
+            <!-- 1. MODAL COMMAND BAR (Menyerupai Workspace Drive Ribbon) -->
+            <div class="px-4 sm:px-6 py-3 border-b border-white/10 flex items-center justify-between gap-3 ws-surface-primary flex-shrink-0 z-20 bg-[#090d18]">
+              
+              <!-- Left: Title, Icon & Status -->
+              <div class="flex items-center gap-3 min-w-0">
+                <div id="hubExplorerIconBadge" class="w-9 h-9 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 font-mono font-bold flex items-center justify-center text-base flex-shrink-0">
+                  📊
                 </div>
-                <h3 class="text-base sm:text-lg font-black text-white font-display tracking-tight">
-                  Master Repositori Bank Spreadsheet & Desain Canva 2027
-                </h3>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <span id="hubExplorerStatusBadge" class="eyebrow-pill emerald text-[9px] font-mono">SPREADSHEET IN-APP EXPLORER</span>
+                    <span id="hubExplorerCounter" class="eyebrow-pill cobalt text-[9px] font-mono hidden sm:inline">0 Items</span>
+                  </div>
+                  <h3 id="hubExplorerTitle" class="text-sm sm:text-base font-extrabold text-white ws-text-title font-display truncate leading-snug mt-0.5">
+                    Bank Spreadsheet Operasional Central Event 2027
+                  </h3>
+                </div>
               </div>
+
+              <!-- Right: Close Button -->
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <button onclick="SpreadsheetHub.closeExplorer()" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition text-sm font-bold border border-white/10">
+                  ✕ Tutup
+                </button>
+              </div>
+
             </div>
 
-            <button onclick="SpreadsheetHub.closeFullCatalog()" class="w-9 h-9 rounded-xl bay-recessed border border-white/10 text-slate-400 hover:text-white flex items-center justify-center text-base transition hover:border-white/30">
-              ✕
-            </button>
-          </div>
+            <!-- 2. TOOLBAR SUB-RIBBON (Search, Sort, Layout Switcher) -->
+            <div id="hubExplorerToolbar" class="flex-shrink-0">
+              <!-- Injected by renderExplorerContent() -->
+            </div>
 
-          <!-- Dynamic Filter & Search Toolbar -->
-          <div id="catalogToolbarArea" class="px-5 sm:px-6 pt-4 pb-3 flex-shrink-0 bg-[#070a14]/95 border-b border-white/5 space-y-2">
-            <!-- Injected by renderFullCatalog() -->
-          </div>
+            <!-- 3. SCROLLABLE ITEM CANVAS -->
+            <div id="hubExplorerCanvas" class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 bg-[#060810]/60">
+              <!-- Injected by renderExplorerContent() -->
+            </div>
 
-          <!-- Scrollable Cards Grid Area -->
-          <div id="fullCatalogContentArea" class="flex-1 overflow-y-auto custom-scrollbar p-5 sm:p-6 bg-[#060810]/60">
-            <!-- Injected cards grid -->
-          </div>
+            <!-- 4. BOTTOM TELEMETRY FOOTER -->
+            <div class="px-4 sm:px-6 py-2.5 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400 flex-shrink-0 bg-[#090d18]">
+              <span class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Pusat Kendali Lembar Kerja & Aset Visual Central Event 2027
+              </span>
+              <span class="text-blue-400 font-bold hidden sm:inline">
+                Supabase Cloud PostgreSQL Synchronized
+              </span>
+            </div>
 
-          <!-- Footer Telemetry -->
-          <div class="p-3.5 px-6 border-t border-white/10 flex items-center justify-between text-[11px] font-mono text-slate-400 flex-shrink-0 bg-[#090d18]/90">
-            <span class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Pusat Kolaborasi Data & Desain Resmi Central Event 2027
-            </span>
-            <span class="text-blue-400 font-bold hidden sm:inline">
-              100% Realtime Cloud Synchronized
-            </span>
           </div>
-
         </div>
+
       </div>
     `;
 
@@ -958,9 +1013,6 @@ const SpreadsheetHub = {
                   placeholder="https://www.canva.com/design/DAF.../view" 
                   class="w-full bay-recessed px-3.5 py-2.5 rounded-xl text-xs text-white border border-white/10 focus:outline-none focus:border-blue-500 font-mono"
                 />
-                <p class="text-[10px] font-mono text-slate-400 mt-1">
-                  💡 Tempel tautan Share / View / Edit Canva Anda.
-                </p>
               </div>
 
               <div>
@@ -1002,11 +1054,6 @@ const SpreadsheetHub = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
   },
 
-  /**
-   * ================================================================
-   * EDIT & RENAME SPREADSHEET MODAL
-   * ================================================================
-   */
   injectEditSpreadsheetModal() {
     if (document.getElementById('editSpreadsheetHubModal')) return;
 
@@ -1083,11 +1130,6 @@ const SpreadsheetHub = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
   },
 
-  /**
-   * ================================================================
-   * EDIT & RENAME CANVA LINK MODAL
-   * ================================================================
-   */
   injectEditCanvaModal() {
     if (document.getElementById('editCanvaHubModal')) return;
 
@@ -1185,9 +1227,6 @@ const SpreadsheetHub = {
     document.body.insertAdjacentHTML('beforeend', modalHtml);
   },
 
-  /**
-   * Open Edit Sheet Dialog
-   */
   openEditSheetModal(sheetId) {
     this.injectEditSpreadsheetModal();
     const sheet = (this.sheets || []).find(s => s.id === sheetId);
@@ -1277,9 +1316,6 @@ const SpreadsheetHub = {
     }
   },
 
-  /**
-   * Open Edit Canva Dialog
-   */
   openEditCanvaModal(canvaId) {
     this.injectEditCanvaModal();
     const item = (this.canvaLinks || []).find(c => c.id === canvaId);
@@ -1384,9 +1420,6 @@ const SpreadsheetHub = {
     }
   },
 
-  /**
-   * Modal Open / Close for Add Operations
-   */
   openAddModal() {
     this.injectAddSpreadsheetModal();
     const modal = document.getElementById('addSpreadsheetHubModal');
