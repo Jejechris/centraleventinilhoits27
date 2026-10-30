@@ -1119,6 +1119,15 @@ const WorkspaceModal = {
           </button>
         </div>
       `;
+    } else if (file.type === 'canva') {
+      switches.innerHTML = `
+        <div class="bay-recessed p-0.5 border border-white/10 rounded-lg flex items-center">
+          <a href="${file.externalUrl || file.previewUrl}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold transition bg-blue-600 hover:bg-blue-500 text-white flex items-center gap-1.5 shadow-sm">
+            <span>🎨 Buka di Canva.com</span>
+            <span>↗</span>
+          </a>
+        </div>
+      `;
     } else {
       switches.innerHTML = '';
     }
@@ -1128,6 +1137,8 @@ const WorkspaceModal = {
     let targetUrl = file.previewUrl;
     if (file.type === 'sheet' && file.editUrl) {
       targetUrl = file.editUrl;
+    } else if (file.type === 'canva') {
+      targetUrl = file.previewUrl || file.externalUrl;
     }
 
     if (iframe) {
@@ -1492,6 +1503,39 @@ const WorkspaceModal = {
 
   openSheetForSubEvent(subEventId) {
     this.openSheet(subEventId, 'edit');
+  },
+
+  /**
+   * Open Canva Modal / Viewer (Fullscreen In-App or Direct Launcher)
+   */
+  openCanva(canvaLinkOrUrl, customTitle) {
+    this.injectModal();
+    this.activeView = 'canva';
+    this.toggleFullscreen(true);
+    this.showModal();
+
+    let url = typeof canvaLinkOrUrl === 'string' ? canvaLinkOrUrl : (canvaLinkOrUrl?.url || canvaLinkOrUrl?.embedUrl);
+    let title = customTitle || (typeof canvaLinkOrUrl === 'object' ? canvaLinkOrUrl.name : 'Desain Visual Canva');
+    let category = typeof canvaLinkOrUrl === 'object' ? (canvaLinkOrUrl.category || 'Desain Visual') : 'Desain Visual';
+
+    let embedUrl = url;
+    if (embedUrl && embedUrl.includes('canva.com/design/') && !embedUrl.includes('view?embed')) {
+      embedUrl = embedUrl.replace(/\/edit.*$/, '').replace(/\/view.*$/, '') + '/view?embed';
+    }
+
+    const canvaFile = {
+      id: 'canva_' + Date.now(),
+      name: title,
+      subEventName: category,
+      type: 'canva',
+      icon: '🎨',
+      previewUrl: embedUrl || url,
+      editUrl: url,
+      externalUrl: url,
+      isConfigured: true
+    };
+
+    this.openFilePreview(canvaFile);
   },
 
   renderSheetSelector() {

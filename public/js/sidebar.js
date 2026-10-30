@@ -150,6 +150,14 @@ const Sidebar = {
               <span class="text-[9px] font-mono text-emerald-400 font-bold group-hover:text-emerald-300">EDIT LIVE ↗</span>
             </button>
 
+            <button onclick="Sidebar.openCanvaBank()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/5 transition border border-transparent group">
+              <div class="flex items-center gap-2.5">
+                <span class="text-sm">🎨</span>
+                <span class="font-medium">Bank Desain Canva</span>
+              </div>
+              <span class="text-[9px] font-mono text-blue-400 font-bold group-hover:text-blue-300">ASSET HUB ↗</span>
+            </button>
+
             <a href="https://t.me/bolo_ce_bot" target="_blank" class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/5 transition border border-transparent">
               <div class="flex items-center gap-2.5">
                 <span class="text-sm">🤖</span>
@@ -300,6 +308,10 @@ const Sidebar = {
             <button onclick="WorkspaceModal.openDriveForSubEvent('${targetSubEvent}')" class="text-[11px] font-mono font-bold text-blue-400 hover:text-blue-300 hover:underline flex items-center gap-1">
               <span>📁 Drive ${currentItem.code}</span>
             </button>
+            <span class="text-slate-600">•</span>
+            <button onclick="Sidebar.openCanvaBank()" class="text-[11px] font-mono font-bold text-blue-400 hover:text-blue-300 hover:underline flex items-center gap-1">
+              <span>🎨 Canva Hub</span>
+            </button>
             <span class="text-slate-600 hidden sm:inline">•</span>
             <button onclick="WorkspaceModal.openUploadModal()" class="text-[11px] font-mono font-bold text-slate-400 hover:text-white hover:underline hidden sm:inline-flex items-center gap-1">
               <span>📤 Unggah File</span>
@@ -351,6 +363,16 @@ const Sidebar = {
         this.toggleMobile(false);
       }
     });
+  },
+
+  openCanvaBank() {
+    const hubMount = document.getElementById('sharedSpreadsheetMount');
+    if (hubMount && typeof SpreadsheetHub !== 'undefined') {
+      SpreadsheetHub.switchTab('canva');
+      hubMount.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = '/safari.html#canva';
+    }
   },
 
   handleEditModeClick() {

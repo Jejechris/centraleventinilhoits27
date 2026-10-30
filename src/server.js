@@ -13,6 +13,7 @@ const progressService = require('./services/progressService');
 const whatsappService = require('./services/whatsappService');
 const whatsappBotService = require('./services/whatsappBotService');
 const staffService = require('./services/staffService');
+const canvaService = require('./services/canvaService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -178,12 +179,12 @@ app.post('/api/drive/upload', async (req, res) => {
 });
 
 // Multi-Spreadsheet Registry Endpoints (Bisa tambah/edit banyak sheet mandiri per sub-divisi)
-app.get('/api/spreadsheets', (req, res) => {
+app.get('/api/spreadsheets', async (req, res) => {
   try {
     const { subEventId } = req.query;
     const sheets = subEventId 
-      ? spreadsheetRegistry.getSpreadsheetsBySubEvent(subEventId)
-      : spreadsheetRegistry.getAllSpreadsheets();
+      ? await spreadsheetRegistry.getSpreadsheetsBySubEvent(subEventId)
+      : await spreadsheetRegistry.getAllSpreadsheets();
     res.json({ success: true, sheets });
   } catch (err) {
     console.error('API /api/spreadsheets error:', err);
@@ -191,10 +192,10 @@ app.get('/api/spreadsheets', (req, res) => {
   }
 });
 
-app.get('/api/spreadsheets/:subEventId', (req, res) => {
+app.get('/api/spreadsheets/:subEventId', async (req, res) => {
   try {
     const { subEventId } = req.params;
-    const sheets = spreadsheetRegistry.getSpreadsheetsBySubEvent(subEventId);
+    const sheets = await spreadsheetRegistry.getSpreadsheetsBySubEvent(subEventId);
     res.json({ success: true, subEventId, sheets });
   } catch (err) {
     console.error(`API /api/spreadsheets/${req.params.subEventId} error:`, err);
@@ -202,10 +203,10 @@ app.get('/api/spreadsheets/:subEventId', (req, res) => {
   }
 });
 
-app.post('/api/spreadsheets/add', (req, res) => {
+app.post('/api/spreadsheets/add', async (req, res) => {
   try {
     const { name, sheetIdOrUrl, subEventId, uploadedFilePath, type } = req.body;
-    const added = spreadsheetRegistry.addSpreadsheet({
+    const added = await spreadsheetRegistry.addSpreadsheet({
       name,
       sheetIdOrUrl,
       subEventId,
@@ -219,13 +220,94 @@ app.post('/api/spreadsheets/add', (req, res) => {
   }
 });
 
-app.post('/api/spreadsheets/delete', (req, res) => {
+app.post('/api/spreadsheets/delete', async (req, res) => {
   try {
     const { id } = req.body;
-    const deleted = spreadsheetRegistry.deleteSpreadsheet(id);
-    res.json({ success: !!deleted, deleted });
+    const deleted = await spreadsheetRegistry.deleteSpreadsheet(id);
+    res.json({ success: !!deleted, deleted: !!deleted });
   } catch (err) {
     console.error('API /api/spreadsheets/delete error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/spreadsheets/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await spreadsheetRegistry.deleteSpreadsheet(id);
+    res.json({ success: !!deleted, deleted: !!deleted, id });
+  } catch (err) {
+    console.error(`API DELETE /api/spreadsheets/${req.params.id} error:`, err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ==========================================
+// CANVA DESIGN BANK ENDPOINTS (4 SUB-DIVISI & PUSAT)
+// ==========================================
+app.get('/api/canva', async (req, res) => {
+  try {
+    const { subEventId } = req.query;
+    const links = subEventId
+      ? await canvaService.getCanvaLinksBySubEvent(subEventId)
+      : await canvaService.getAllCanvaLinks();
+    res.json({ success: true, links });
+  } catch (err) {
+    console.error('API /api/canva error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/canva/:subEventId', async (req, res) => {
+  try {
+    const { subEventId } = req.params;
+    const links = await canvaService.getCanvaLinksBySubEvent(subEventId);
+    res.json({ success: true, subEventId, links });
+  } catch (err) {
+    console.error(`API /api/canva/${req.params.subEventId} error:`, err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/canva/add', async (req, res) => {
+  try {
+    const { name, url, subEventId, category, description, icon } = req.body;
+    if (!url) {
+      return res.status(400).json({ success: false, error: 'URL desain Canva wajib diisi' });
+    }
+    const added = await canvaService.addCanvaLink({
+      name,
+      url,
+      subEventId,
+      category,
+      description,
+      icon
+    });
+    res.json({ success: true, link: added });
+  } catch (err) {
+    console.error('API /api/canva/add error:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/canva/delete', async (req, res) => {
+  try {
+    const { id } = req.body;
+    const deleted = await canvaService.deleteCanvaLink(id);
+    res.json({ success: !!deleted, deleted: !!deleted });
+  } catch (err) {
+    console.error('API /api/canva/delete error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/canva/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await canvaService.deleteCanvaLink(id);
+    res.json({ success: !!deleted, deleted: !!deleted, id });
+  } catch (err) {
+    console.error(`API DELETE /api/canva/${req.params.id} error:`, err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

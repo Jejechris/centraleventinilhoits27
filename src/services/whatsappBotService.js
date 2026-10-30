@@ -4,6 +4,7 @@ const progressService = require('./progressService');
 const geminiService = require('./geminiService');
 const driveService = require('./driveService');
 const staffService = require('./staffService');
+const canvaService = require('./canvaService');
 
 const SUB_META = {
   safari: { id: 'safari', abbr: 'sf', code: 'SF', name: 'Safari Faculty', icon: '🏛️', dateStr: '10 Januari 2027' },
@@ -38,7 +39,7 @@ async function handleIncomingMessage(payload) {
       return getHelpMessage(senderName);
     }
     // Jika di grup atau chat pribadi ketik kata kunci langsung
-    if (!/^(status|rundown|menu|help|planb|hujan|kpi|delay|database|db|staff|panitia|progress|prog|tanya|ai)\b/i.test(cleanMsg)) {
+    if (!/^(status|rundown|menu|help|planb|hujan|kpi|delay|database|db|staff|panitia|progress|prog|canva|desain|design|tanya|ai)\b/i.test(cleanMsg)) {
       return null;
     }
   }
@@ -83,6 +84,11 @@ async function handleIncomingMessage(payload) {
     case 'panitia':
       return staffService.formatStaffForWhatsApp(args || 'all');
 
+    case 'canva':
+    case 'desain':
+    case 'design':
+      return await canvaService.formatCanvaForWhatsApp(args || 'all');
+
     case 'tanya':
     case 'ai':
       return await handleAiQuery(args, senderName, currentSubId);
@@ -118,6 +124,7 @@ Setiap perintah teknis mendukung parameter *[all/sf/sp/tcp/odl]*:
 
 👥 *DATABASE & MANAJEMEN WAKTU*
 • *!database [all/sf/sp/tcp/odl]* : Database personil panitia & LO
+• *!canva [all/sf/sp/tcp/odl]* : Bank desain Canva, template ID card & backdrop
 • *!delay [menit]* : Lapor pergeseran rundown (contoh: *!delay 10*)
 
 🧠 *AI COPILOT GEMINI 3.5 FLASH*

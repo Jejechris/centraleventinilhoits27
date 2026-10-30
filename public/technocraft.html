@@ -234,6 +234,11 @@
         </div>
       </div>
 
+      <!-- REPOSITORI SPREADSHEET & BANK DESAIN CANVA -->
+      <div class="chassis hud-corner mt-6" id="sharedSpreadsheetMount">
+        <!-- Injected dynamically by SpreadsheetHub.init('technocraft') -->
+      </div>
+
     </main>
   </div>
 
@@ -251,6 +256,7 @@
     Sidebar.init('technocraft');
     Onboarding.enforceAccess('technocraft');
     ProgressTracker.init('technocraft', 'progressTrackerMount');
+    SpreadsheetHub.init('technocraft', 'sharedSpreadsheetMount');
   </script>
 </body>
 </html>

@@ -143,10 +143,41 @@ const CE_API = {
   },
 
   async deleteSpreadsheet(id) {
-    return await this.fetchWithTimeout('/api/spreadsheets/delete', {
+    try {
+      return await this.fetchWithTimeout(`/api/spreadsheets/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      return await this.fetchWithTimeout('/api/spreadsheets/delete', {
+        method: 'POST',
+        body: JSON.stringify({ id })
+      });
+    }
+  },
+
+  async getCanvaLinks(subEventId = null) {
+    const url = subEventId ? `/api/canva/${encodeURIComponent(subEventId)}` : '/api/canva';
+    return await this.fetchWithTimeout(url);
+  },
+
+  async addCanvaLink(payload) {
+    return await this.fetchWithTimeout('/api/canva/add', {
       method: 'POST',
-      body: JSON.stringify({ id })
+      body: JSON.stringify(payload)
     });
+  },
+
+  async deleteCanvaLink(id) {
+    try {
+      return await this.fetchWithTimeout(`/api/canva/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      return await this.fetchWithTimeout('/api/canva/delete', {
+        method: 'POST',
+        body: JSON.stringify({ id })
+      });
+    }
   },
 
   async getProgress(subEventId = null) {

@@ -234,6 +234,11 @@
         </div>
       </div>
 
+      <!-- REPOSITORI SPREADSHEET & BANK DESAIN CANVA -->
+      <div class="chassis hud-corner mt-6" id="sharedSpreadsheetMount">
+        <!-- Injected dynamically by SpreadsheetHub.init('odl') -->
+      </div>
+
     </main>
   </div>
 
@@ -251,6 +256,7 @@
     Sidebar.init('odl');
     Onboarding.enforceAccess('odl');
     ProgressTracker.init('odl', 'progressTrackerMount');
+    SpreadsheetHub.init('odl', 'sharedSpreadsheetMount');
   </script>
 </body>
 </html>

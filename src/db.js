@@ -139,6 +139,22 @@ async function initSchema() {
         uploaded_at TIMESTAMPTZ DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS canva_links (
+        id VARCHAR(100) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        sub_event_id VARCHAR(50) NOT NULL,
+        sub_event_name VARCHAR(100),
+        category VARCHAR(100) DEFAULT 'Desain & Media',
+        url TEXT NOT NULL,
+        embed_url TEXT,
+        icon VARCHAR(10) DEFAULT '🎨',
+        description TEXT,
+        date VARCHAR(50),
+        is_default BOOLEAN DEFAULT false,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+
       CREATE TABLE IF NOT EXISTS progress_trackers (
         sub_event_id VARCHAR(50) PRIMARY KEY,
         percentage INTEGER NOT NULL DEFAULT 0,
@@ -194,7 +210,7 @@ async function syncLocalToSupabase() {
 
     // 2. Sync Spreadsheets (DEFAULT_SHEETS)
     const spreadsheetRegistry = require('./services/spreadsheetRegistry');
-    const allSheets = spreadsheetRegistry.getAllSpreadsheets();
+    const allSheets = await spreadsheetRegistry.getAllSpreadsheets();
     for (const s of allSheets) {
       await query(`
         INSERT INTO spreadsheets (id, sheet_id, name, sub_event_id, sub_event_name, icon, type, is_configured, is_sub_event_primary, edit_url, preview_url, external_url, date, is_default, updated_at)
@@ -219,6 +235,10 @@ async function syncLocalToSupabase() {
     // 3. Sync Progress Trackers (0-100% Khusus Staff Ahli)
     const progressService = require('./services/progressService');
     await progressService.initFromSupabase();
+
+    // 4. Sync Canva Links
+    const canvaService = require('./services/canvaService');
+    await canvaService.getAllCanvaLinks();
 
     console.log('🌟 Sinkronisasi data awal ke Supabase Cloud BERHASIL!');
     return true;
