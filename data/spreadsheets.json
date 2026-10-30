@@ -190,5 +190,21 @@
     "externalUrl": "https://docs.google.com/spreadsheets/d/1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0/edit",
     "date": "Siap Digunakan",
     "isDefault": true
+  },
+  {
+    "id": "sheet_safari_1793352404455",
+    "sheetId": "1OppzxkcGSFtOzEsHsc1aXMDxW4cDfNp7fYul8knsFTg",
+    "name": "Mastersheet",
+    "subEventId": "safari",
+    "subEventName": "Safari Faculty",
+    "icon": "🏛️",
+    "type": "google",
+    "isConfigured": true,
+    "isSubEventPrimary": false,
+    "editUrl": "https://docs.google.com/spreadsheets/d/1OppzxkcGSFtOzEsHsc1aXMDxW4cDfNp7fYul8knsFTg/edit?embedded=true",
+    "previewUrl": "https://docs.google.com/spreadsheets/d/1OppzxkcGSFtOzEsHsc1aXMDxW4cDfNp7fYul8knsFTg/htmlembed?widget=true",
+    "externalUrl": "https://docs.google.com/spreadsheets/d/1OppzxkcGSFtOzEsHsc1aXMDxW4cDfNp7fYul8knsFTg/edit",
+    "date": "Tersambung Cloud",
+    "isDefault": false
   }
 ]

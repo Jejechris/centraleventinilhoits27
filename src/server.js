@@ -20,8 +20,24 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: '1h',
+  etag: true,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+    }
+  }
+}));
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads'), {
+  maxAge: '1d',
+  etag: true,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+  }
+}));
 
 // Jaminan inisialisasi koneksi & schema Supabase Cloud untuk environment Serverless
 let dbInitStarted = false;

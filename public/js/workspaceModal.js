@@ -41,7 +41,7 @@ const WorkspaceModal = {
     if (document.getElementById('workspaceModal')) return;
 
     const modalHtml = `
-      <div id="workspaceModal" class="fixed inset-0 z-[200] bg-[#07090E]/85 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
+      <div id="workspaceModal" class="fixed inset-0 z-[200] bg-slate-900/60 dark:bg-black/75 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 transition-all duration-300 opacity-0 pointer-events-none">
         
         <div id="workspaceChassis" class="chassis w-full max-w-6xl h-[92vh] flex flex-col transition-all duration-300 transform scale-[0.98] overflow-hidden rounded-2xl shadow-2xl relative">
           <div class="chassis-core flex flex-col h-full !p-0 overflow-hidden ws-surface-primary">
@@ -246,44 +246,97 @@ const WorkspaceModal = {
             </div>
 
             <!-- 4. DIALOG IN-APP UPLOAD BERKAS -->
-            <div id="wsUploadDialog" class="absolute inset-0 z-30 bg-[#07090E]/90 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
-              <div class="chassis max-w-lg w-full p-5 ws-surface-primary border border-white/10 rounded-2xl shadow-2xl">
-                <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
-                  <div>
-                    <h4 class="text-sm font-extrabold text-white ws-text-title flex items-center gap-2">
-                      <span>📤</span> Unggah Berkas Baru ke Drive
-                    </h4>
-                    <p class="text-[11px] font-mono text-slate-400 mt-0.5" id="wsUploadTargetFolder">
-                      Target: Folder Utama
-                    </p>
+            <div id="wsUploadDialog" class="absolute inset-0 z-30 bg-slate-900/60 dark:bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 transition-all duration-300 opacity-0 pointer-events-none">
+              <div class="chassis max-w-lg w-full p-5 sm:p-6 ws-surface-primary border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl relative">
+                
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10 mb-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-600 dark:text-blue-400 flex items-center justify-center text-lg flex-shrink-0">
+                      📤
+                    </div>
+                    <div>
+                      <h4 class="text-sm font-extrabold text-slate-900 dark:text-white ws-text-title font-display flex items-center gap-1.5">
+                        Unggah Berkas ke Drive
+                      </h4>
+                      <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">Target Folder:</span>
+                        <span id="wsUploadTargetBadge" class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                          01. SF (Safari Faculty)
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <button onclick="WorkspaceModal.closeUploadModal()" class="text-slate-400 hover:text-white p-1.5 rounded-lg text-sm">✕</button>
+                  <button onclick="WorkspaceModal.closeUploadModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1.5 rounded-lg text-sm transition">✕</button>
                 </div>
 
-                <div class="space-y-4">
-                  <!-- Drag & Drop Zone -->
-                  <div id="wsDropZone" class="border-2 border-dashed border-white/15 hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer transition bay-recessed" onclick="document.getElementById('wsFileInput').click()">
-                    <span class="text-3xl block mb-2">📁</span>
-                    <div class="text-xs font-bold text-white ws-text-title mb-1" id="wsSelectedFileName">Pilih berkas dari perangkatmu</div>
-                    <div class="text-[10px] font-mono text-slate-400">Mendukung Excel (.xlsx), PDF, Word (.docx), PPT, gambar, dll. (Maks 50MB)</div>
-                    <input type="file" id="wsFileInput" class="hidden" onchange="WorkspaceModal.onFileSelected(this.files)">
+                <div class="space-y-3.5">
+                  <!-- Folder Destination Picker -->
+                  <div>
+                    <label class="block text-[10px] font-mono font-bold text-slate-600 dark:text-slate-400 mb-1 uppercase tracking-wider">
+                      PILIH FOLDER TUJUAN:
+                    </label>
+                    <select id="wsUploadFolderSelect" onchange="WorkspaceModal.onUploadFolderChange(this.value)" class="w-full px-3 py-2 rounded-xl text-xs border border-slate-300 dark:border-white/10 focus:outline-none focus:border-blue-500 font-mono bg-white dark:bg-[#0c101c] text-slate-900 dark:text-white cursor-pointer">
+                      <option value="safari">🏛️ 01. SF (Safari Faculty) Drive</option>
+                      <option value="startpoint">🚀 02. SP (Start Point) Drive</option>
+                      <option value="odl">🎓 03. ODL (One Day Lecture) Drive</option>
+                      <option value="technocraft">⚡ 04. TC (Technocraft) Drive</option>
+                      <option value="root">📂 Root Repository (Folder Utama)</option>
+                    </select>
                   </div>
 
+                  <!-- Upload Mode Switcher: File vs Folder -->
+                  <div class="flex items-center gap-1 p-1 bay-recessed rounded-xl border border-slate-200 dark:border-white/5">
+                    <button 
+                      type="button" 
+                      id="wsUploadModeFileBtn"
+                      onclick="WorkspaceModal.setUploadMode('file')"
+                      class="flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 bg-blue-600 text-white shadow-sm"
+                    >
+                      <span>📄 Unggah Berkas</span>
+                    </button>
+                    <button 
+                      type="button" 
+                      id="wsUploadModeFolderBtn"
+                      onclick="WorkspaceModal.setUploadMode('folder')"
+                      class="flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                    >
+                      <span>📁 Unggah Seluruh Folder</span>
+                    </button>
+                  </div>
+
+                  <!-- Drag & Drop Zone -->
+                  <div id="wsDropZone" class="border-2 border-dashed border-slate-300 dark:border-white/15 hover:border-blue-500 rounded-xl p-5 text-center cursor-pointer transition bay-recessed relative" onclick="WorkspaceModal.triggerFileInput()">
+                    <span id="wsDropZoneIcon" class="text-3xl block mb-1.5">📄</span>
+                    <div class="text-xs font-bold text-slate-900 dark:text-white ws-text-title mb-1" id="wsSelectedFileName">
+                      Klik atau seret berkas ke sini
+                    </div>
+                    <div class="text-[10px] font-mono text-slate-500 dark:text-slate-400" id="wsUploadHint">
+                      Mendukung Excel (.xlsx, .csv), PDF, Word, PPT, gambar, & berkas umum
+                    </div>
+                    
+                    <!-- Hidden File Inputs -->
+                    <input type="file" id="wsFileInput" class="hidden" multiple onchange="WorkspaceModal.onFileSelected(this.files)">
+                    <input type="file" id="wsFolderInput" class="hidden" webkitdirectory directory multiple onchange="WorkspaceModal.onFileSelected(this.files)">
+                  </div>
+
+                  <!-- Progress Bar -->
                   <div id="wsUploadProgressBox" class="hidden space-y-1">
-                    <div class="flex justify-between text-[10px] font-mono text-slate-400">
-                      <span>Mengunggah berkas ke server...</span>
+                    <div class="flex justify-between text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                      <span id="wsUploadStatusText">Mengunggah berkas ke server...</span>
                       <span id="wsUploadPct">0%</span>
                     </div>
-                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div class="w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
                       <div id="wsUploadBar" class="bg-blue-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                   </div>
 
-                  <div class="flex items-center justify-end gap-2 pt-2 border-t border-white/5">
-                    <button onclick="WorkspaceModal.closeUploadModal()" class="btn-ghost py-1.5 px-3 text-xs">
+                  <!-- Action Buttons -->
+                  <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-200 dark:border-white/5">
+                    <button onclick="WorkspaceModal.closeUploadModal()" class="btn-ghost py-1.5 px-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
                       Batal
                     </button>
-                    <button onclick="WorkspaceModal.submitUpload()" id="wsSubmitUploadBtn" class="btn-tactical py-1.5 px-4 text-xs font-bold" disabled>
+                    <button onclick="WorkspaceModal.submitUpload()" id="wsSubmitUploadBtn" class="btn-tactical py-2 px-4 text-xs font-bold flex items-center gap-1.5 shadow-md" disabled>
                       <span>UNGGAH SEKARANG</span>
                       <div class="btn-icon-bay">↑</div>
                     </button>
@@ -293,7 +346,7 @@ const WorkspaceModal = {
             </div>
 
             <!-- 5. DIALOG TAMBAH SPREADSHEET BARU -->
-            <div id="wsAddSheetDialog" class="absolute inset-0 z-30 bg-[#07090E]/90 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
+            <div id="wsAddSheetDialog" class="absolute inset-0 z-30 bg-slate-900/60 dark:bg-black/75 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
               <div class="chassis max-w-lg w-full p-5 ws-surface-primary border border-white/10 rounded-2xl shadow-2xl">
                 <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                   <div>
@@ -344,7 +397,7 @@ const WorkspaceModal = {
             </div>
 
             <!-- 6. DIALOG TAUTKAN GOOGLE DRIVE LINK -->
-            <div id="wsLinkDriveDialog" class="absolute inset-0 z-30 bg-[#07090E]/85 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
+            <div id="wsLinkDriveDialog" class="absolute inset-0 z-30 bg-slate-900/60 dark:bg-black/75 backdrop-blur-md flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
               <div class="chassis max-w-lg w-full p-5 sm:p-6 ws-surface-primary border border-white/10 rounded-2xl shadow-2xl">
                 <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
                   <div>
@@ -455,6 +508,8 @@ const WorkspaceModal = {
     document.getElementById('wsExplorerContainer')?.classList.remove('hidden');
     document.getElementById('wsViewerContainer')?.classList.add('hidden');
     document.getElementById('wsSheetSelectorBar')?.classList.add('hidden');
+    document.getElementById('wsUploadDialog')?.classList.add('opacity-0', 'pointer-events-none');
+    this.openedJustForUpload = false;
 
     const titleEl = document.getElementById('wsTitle');
     const badgeEl = document.getElementById('wsStatusBadge');
@@ -1591,23 +1646,52 @@ const WorkspaceModal = {
   },
 
   /**
-   * Upload Dialog Handler
+   * ================================================================
+   * FILE & FOLDER UPLOADING ENGINE IN-APP
+   * ================================================================
    */
-  selectedUploadFile: null,
+  uploadMode: 'file', // 'file' | 'folder'
+  selectedUploadFiles: [],
+  openedJustForUpload: false,
 
-  openUploadModal() {
+  isModalOpen() {
+    const modal = document.getElementById('workspaceModal');
+    return modal && !modal.classList.contains('opacity-0') && !modal.classList.contains('pointer-events-none');
+  },
+
+  openUploadModal(targetSubOrFolderId = null) {
+    this.injectModal();
+
+    const isAlreadyOpen = this.isModalOpen();
+    if (!isAlreadyOpen) {
+      this.openedJustForUpload = true;
+      this.showModal();
+      this.activeView = 'explorer';
+      document.getElementById('wsViewerContainer')?.classList.add('hidden');
+      document.getElementById('wsExplorerContainer')?.classList.remove('hidden');
+    } else {
+      this.openedJustForUpload = false;
+    }
+
+    // Determine target sub or folder
+    const target = targetSubOrFolderId 
+      || (typeof Sidebar !== 'undefined' ? Sidebar.getActiveSubEvent() : null)
+      || this.currentSubEventId 
+      || 'safari';
+
+    const folderSelect = document.getElementById('wsUploadFolderSelect');
+    if (folderSelect) {
+      if (['safari', 'startpoint', 'odl', 'technocraft', 'root'].includes(target)) {
+        folderSelect.value = target;
+      } else {
+        folderSelect.value = this.currentSubEventId || 'safari';
+      }
+    }
+
+    this.updateUploadTargetDisplay();
+    this.resetUploadForm();
+
     const dialog = document.getElementById('wsUploadDialog');
-    const targetLabel = document.getElementById('wsUploadTargetFolder');
-    const fileLabel = document.getElementById('wsSelectedFileName');
-    const submitBtn = document.getElementById('wsSubmitUploadBtn');
-    const progressBox = document.getElementById('wsUploadProgressBox');
-
-    if (targetLabel) targetLabel.innerText = `Target Folder: ${this.currentFolderName}`;
-    if (fileLabel) fileLabel.innerText = 'Pilih berkas dari perangkatmu';
-    if (submitBtn) submitBtn.disabled = true;
-    if (progressBox) progressBox.classList.add('hidden');
-    this.selectedUploadFile = null;
-
     if (dialog) {
       dialog.classList.remove('opacity-0', 'pointer-events-none');
     }
@@ -1618,79 +1702,198 @@ const WorkspaceModal = {
     if (dialog) {
       dialog.classList.add('opacity-0', 'pointer-events-none');
     }
-    this.selectedUploadFile = null;
+    this.resetUploadForm();
+
+    // If modal was opened ONLY for uploading and nothing was viewed before, close the outer modal
+    if (this.openedJustForUpload) {
+      this.openedJustForUpload = false;
+      this.close();
+    }
+  },
+
+  setUploadMode(mode) {
+    this.uploadMode = mode;
+    const fileBtn = document.getElementById('wsUploadModeFileBtn');
+    const folderBtn = document.getElementById('wsUploadModeFolderBtn');
+    const dropIcon = document.getElementById('wsDropZoneIcon');
+    const hintEl = document.getElementById('wsUploadHint');
+
+    if (mode === 'folder') {
+      if (fileBtn) {
+        fileBtn.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+      }
+      if (folderBtn) {
+        folderBtn.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 bg-blue-600 text-white shadow-sm';
+      }
+      if (dropIcon) dropIcon.innerText = '📁';
+      if (hintEl) hintEl.innerText = 'Pilih folder dari perangkatmu untuk mengunggah semua berkas di dalamnya';
+    } else {
+      if (fileBtn) {
+        fileBtn.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 bg-blue-600 text-white shadow-sm';
+      }
+      if (folderBtn) {
+        folderBtn.className = 'flex-1 py-1.5 px-3 rounded-lg text-xs font-mono font-bold transition flex items-center justify-center gap-1.5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white';
+      }
+      if (dropIcon) dropIcon.innerText = '📄';
+      if (hintEl) hintEl.innerText = 'Mendukung Excel (.xlsx, .csv), PDF, Word, PPT, gambar, & berkas umum';
+    }
+  },
+
+  triggerFileInput() {
+    if (this.uploadMode === 'folder') {
+      document.getElementById('wsFolderInput')?.click();
+    } else {
+      document.getElementById('wsFileInput')?.click();
+    }
+  },
+
+  onUploadFolderChange(val) {
+    this.updateUploadTargetDisplay(val);
+  },
+
+  updateUploadTargetDisplay(val = null) {
+    const select = document.getElementById('wsUploadFolderSelect');
+    const folderKey = val || (select ? select.value : 'safari');
+    const badge = document.getElementById('wsUploadTargetBadge');
+    if (!badge) return;
+
+    const names = {
+      safari: '01. SF (Safari Faculty)',
+      startpoint: '02. SP (Start Point)',
+      odl: '03. ODL (One Day Lecture)',
+      technocraft: '04. TC (Technocraft)',
+      root: 'Root Repository (Umum)'
+    };
+    badge.innerText = names[folderKey] || (this.currentFolderName || 'Folder Utama');
+  },
+
+  resetUploadForm() {
+    this.selectedUploadFiles = [];
+    const fileLabel = document.getElementById('wsSelectedFileName');
+    const submitBtn = document.getElementById('wsSubmitUploadBtn');
+    const progressBox = document.getElementById('wsUploadProgressBox');
+    const progressBar = document.getElementById('wsUploadBar');
+    const progressPct = document.getElementById('wsUploadPct');
+    const fileInput = document.getElementById('wsFileInput');
+    const folderInput = document.getElementById('wsFolderInput');
+
+    if (fileLabel) fileLabel.innerText = 'Klik atau seret berkas ke sini';
+    if (submitBtn) submitBtn.disabled = true;
+    if (progressBox) progressBox.classList.add('hidden');
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressPct) progressPct.innerText = '0%';
+    if (fileInput) fileInput.value = '';
+    if (folderInput) folderInput.value = '';
+    this.setUploadMode('file');
   },
 
   onFileSelected(files) {
     if (!files || files.length === 0) return;
-    const file = files[0];
-    this.selectedUploadFile = file;
+    this.selectedUploadFiles = Array.from(files);
 
     const fileLabel = document.getElementById('wsSelectedFileName');
     const submitBtn = document.getElementById('wsSubmitUploadBtn');
 
     if (fileLabel) {
-      const sizeStr = (file.size / 1024).toFixed(1) + ' KB';
-      fileLabel.innerText = `📄 ${file.name} (${sizeStr})`;
+      if (this.selectedUploadFiles.length === 1) {
+        const file = this.selectedUploadFiles[0];
+        const sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+        fileLabel.innerText = `📄 ${file.name} (${sizeStr})`;
+      } else {
+        const totalSize = this.selectedUploadFiles.reduce((acc, f) => acc + f.size, 0);
+        const sizeStr = (totalSize / (1024 * 1024)).toFixed(2) + ' MB';
+        fileLabel.innerText = `📁 ${this.selectedUploadFiles.length} Berkas Dipilih (${sizeStr})`;
+      }
     }
     if (submitBtn) submitBtn.disabled = false;
   },
 
-  async submitUpload() {
-    if (!this.selectedUploadFile) return;
+  readFileAsBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (e) => reject(e);
+      reader.readAsDataURL(file);
+    });
+  },
 
-    const file = this.selectedUploadFile;
+  async submitUpload() {
+    if (!this.selectedUploadFiles || this.selectedUploadFiles.length === 0) return;
+
+    const files = this.selectedUploadFiles;
     const submitBtn = document.getElementById('wsSubmitUploadBtn');
     const progressBox = document.getElementById('wsUploadProgressBox');
     const progressBar = document.getElementById('wsUploadBar');
     const progressPct = document.getElementById('wsUploadPct');
+    const statusText = document.getElementById('wsUploadStatusText');
 
     if (submitBtn) submitBtn.disabled = true;
     if (progressBox) progressBox.classList.remove('hidden');
-    if (progressBar) progressBar.style.width = '30%';
-    if (progressPct) progressPct.innerText = '30%';
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
+    const folderSelect = document.getElementById('wsUploadFolderSelect');
+    const chosenTarget = folderSelect ? folderSelect.value : 'safari';
+
+    let targetFolderId = this.rootFolderId;
+    let targetFolderName = 'Folder Utama';
+    if (chosenTarget === 'safari') {
+      targetFolderId = '1a-JbvPXcU0o9gWDrQEJUGZaQXTM6LQQp';
+      targetFolderName = '01. SF (Safari Faculty)';
+    } else if (chosenTarget === 'startpoint') {
+      targetFolderId = 'folder_startpoint';
+      targetFolderName = '02. SP (Start Point)';
+    } else if (chosenTarget === 'odl') {
+      targetFolderId = 'folder_odl';
+      targetFolderName = '03. ODL (One Day Lecture)';
+    } else if (chosenTarget === 'technocraft') {
+      targetFolderId = 'folder_technocraft';
+      targetFolderName = '04. TC (Technocraft)';
+    } else if (this.currentFolderId && chosenTarget === 'current') {
+      targetFolderId = this.currentFolderId;
+      targetFolderName = this.currentFolderName;
+    }
+
+    let successCount = 0;
+    const totalFiles = files.length;
+
+    for (let i = 0; i < totalFiles; i++) {
+      const file = files[i];
+      const pct = Math.round(((i + 1) / totalFiles) * 100);
+      if (statusText) statusText.innerText = `Mengunggah (${i + 1}/${totalFiles}): ${file.name}...`;
+      if (progressBar) progressBar.style.width = `${pct}%`;
+      if (progressPct) progressPct.innerText = `${pct}%`;
+
       try {
-        if (progressBar) progressBar.style.width = '70%';
-        if (progressPct) progressPct.innerText = '70%';
-
-        const base64Data = e.target.result;
+        const base64Data = await this.readFileAsBase64(file);
         const res = await CE_API.uploadDriveFile({
-          folderId: this.currentFolderId,
-          folderName: this.currentFolderName,
-          fileName: file.name,
+          folderId: targetFolderId,
+          folderName: targetFolderName,
+          fileName: file.webkitRelativePath || file.name,
           fileData: base64Data,
           fileType: file.type
         });
-
-        if (progressBar) progressBar.style.width = '100%';
-        if (progressPct) progressPct.innerText = '100%';
-
         if (res && res.success) {
-          if (typeof showToast === 'function') {
-            showToast(`Berkas "${file.name}" berhasil diunggah!`, 'success');
-          }
-          this.closeUploadModal();
-          this.refreshCurrentFolder();
-        } else {
-          throw new Error(res.error || 'Gagal mengunggah berkas');
+          successCount++;
         }
       } catch (err) {
-        console.error('Upload error:', err);
-        alert('Gagal mengunggah berkas: ' + err.message);
-        if (submitBtn) submitBtn.disabled = false;
-        if (progressBox) progressBox.classList.add('hidden');
+        console.error('File upload error for', file.name, err);
       }
-    };
+    }
 
-    reader.onerror = () => {
-      if (typeof showToast === 'function') showToast('Gagal membaca berkas dari sistem.', 'error'); else console.warn('Gagal membaca berkas dari sistem.');
+    if (successCount > 0) {
+      if (typeof showToast === 'function') {
+        showToast(`Berhasil mengunggah ${successCount} berkas ke ${targetFolderName}!`, 'success');
+      }
+      this.closeUploadModal();
+      if (this.activeView === 'explorer') {
+        this.refreshCurrentFolder();
+      }
+    } else {
+      if (typeof showToast === 'function') {
+        showToast('Gagal mengunggah berkas. Periksa ukuran berkas atau koneksi jaringan.', 'error');
+      }
       if (submitBtn) submitBtn.disabled = false;
-    };
-
-    reader.readAsDataURL(file);
+      if (progressBox) progressBox.classList.add('hidden');
+    }
   },
 
   /**

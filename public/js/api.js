@@ -4,31 +4,75 @@
  */
 
 const CE_API = {
+  _cache: new Map(), // url -> { data, timestamp }
+  _inFlight: new Map(), // url -> Promise
+
+  clearCache() {
+    this._cache.clear();
+  },
+
   async fetchWithTimeout(url, options = {}, timeout = 12000) {
+    const isGet = !options.method || options.method.toUpperCase() === 'GET';
+
+    // Invalidate cache on mutations (POST, PUT, DELETE)
+    if (!isGet) {
+      this._cache.clear();
+    } else {
+      // 1. Check recent memory cache (TTL: 2500ms)
+      const cached = this._cache.get(url);
+      if (cached && (Date.now() - cached.timestamp < 2500)) {
+        return cached.data;
+      }
+
+      // 2. In-flight request deduplication (share ongoing promise)
+      if (this._inFlight.has(url)) {
+        return await this._inFlight.get(url);
+      }
+    }
+
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {})
+
+    const executeFetch = async () => {
+      try {
+        const response = await fetch(url, {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(options.headers || {})
+          }
+        });
+        clearTimeout(id);
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
         }
-      });
-      clearTimeout(id);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        const data = await response.json();
+        if (isGet) {
+          this._cache.set(url, { data, timestamp: Date.now() });
+        }
+        return data;
+      } catch (err) {
+        clearTimeout(id);
+        if (err.name === 'AbortError') {
+          throw new Error('Permintaan ke server timeout (lebih dari 12 detik).');
+        }
+        throw err;
+      } finally {
+        if (isGet) {
+          this._inFlight.delete(url);
+        }
       }
-      return await response.json();
-    } catch (err) {
-      clearTimeout(id);
-      if (err.name === 'AbortError') {
-        throw new Error('Permintaan ke server timeout (lebih dari 12 detik).');
-      }
-      throw err;
+    };
+
+    if (isGet) {
+      const promise = executeFetch();
+      this._inFlight.set(url, promise);
+      return await promise;
     }
+
+    return await executeFetch();
   },
 
   async getStatus(subEventId = 'safari') {

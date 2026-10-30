@@ -870,6 +870,74 @@ html.light-theme #workspaceModal iframe {
   background-color: #FFFFFF !important;
 }
 
+/* Light Theme Overrides for Workspace Modal Chassis & Dialogs */
+html.light-theme #workspaceModal {
+  background-color: rgba(15, 23, 42, 0.55) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+html.light-theme #workspaceChassis {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15) !important;
+}
+
+html.light-theme #workspaceChassis .chassis-core {
+  background-color: #FFFFFF !important;
+}
+
+html.light-theme #wsUploadDialog,
+html.light-theme #wsAddSheetDialog,
+html.light-theme #wsLinkDriveDialog {
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+html.light-theme #wsUploadDialog .chassis,
+html.light-theme #wsAddSheetDialog .chassis,
+html.light-theme #wsLinkDriveDialog .chassis {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1) !important;
+}
+
+html.light-theme #wsDropZone {
+  background-color: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light-theme #wsDropZone:hover {
+  background-color: #F1F5F9 !important;
+  border-color: #2563EB !important;
+}
+
+html.light-theme #wsDropZone .ws-text-title,
+html.light-theme #wsUploadDialog .ws-text-title,
+html.light-theme #wsAddSheetDialog .ws-text-title,
+html.light-theme #wsLinkDriveDialog .ws-text-title {
+  color: #0F172A !important;
+}
+
+html.light-theme #wsDropZone .text-slate-400,
+html.light-theme #wsUploadDialog .text-slate-400 {
+  color: #64748B !important;
+}
+
+html.light-theme #wsUploadFolderSelect {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light-theme #wsBreadcrumbs {
+  color: #334155 !important;
+}
+
+html.light-theme #wsBreadcrumbs a,
+html.light-theme #wsBreadcrumbs button {
+  color: #2563EB !important;
+}
+
 /* ==========================================================================
    17. UNIVERSAL MODAL SCROLL CONTAINMENT (PREVENT BACKGROUND PAGE JITTER)
    ========================================================================== */
