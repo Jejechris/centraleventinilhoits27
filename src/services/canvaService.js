@@ -11,7 +11,7 @@ function loadDeletedCanvaIds() {
       return new Set(Array.isArray(parsed) ? parsed : []);
     }
   } catch (_) {}
-  return new Set();
+  return new Set(['canva_sf_01', 'canva_sf_02', 'canva_sf_03', 'canva_sf_04']);
 }
 
 function saveDeletedCanvaIds(set) {
@@ -28,60 +28,6 @@ let lastFetchedFromDb = 0;
 const CACHE_TTL_MS = 2500;
 
 const DEFAULT_CANVA_LINKS = [
-  // --- SAFARI FACULTY (SF) ---
-  {
-    id: 'canva_sf_01',
-    name: 'ID Card Panitia & LO Pemandu Kluster Safari',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    category: 'ID Card & Tanda Pengenal',
-    url: 'https://www.canva.com/design/DAF-idcard-safari/view?embed',
-    embedUrl: 'https://www.canva.com/design/DAF-idcard-safari/view?embed',
-    icon: '🪪',
-    description: 'Desain identitas resmi LO Kluster, Panitia Safari Faculty & Dosen Pendamping.',
-    date: 'Master Canva',
-    isDefault: true
-  },
-  {
-    id: 'canva_sf_02',
-    name: 'Banner Rute Eksplorasi 6 Fakultas & Stand Lab',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    category: 'Banner & Backdrop',
-    url: 'https://www.canva.com/design/DAF-banner-safari/view?embed',
-    embedUrl: 'https://www.canva.com/design/DAF-banner-safari/view?embed',
-    icon: '🎨',
-    description: 'Papan penunjuk rute alur Manyar-Sukolilo dan denah stand 39 departemen.',
-    date: 'Master Canva',
-    isDefault: true
-  },
-  {
-    id: 'canva_sf_03',
-    name: 'Cue Card Master MC & Pemandu Tour Lab SF',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    category: 'Cue Card & Rundown Visual',
-    url: 'https://www.canva.com/design/DAF-cuecard-safari/view?embed',
-    embedUrl: 'https://www.canva.com/design/DAF-cuecard-safari/view?embed',
-    icon: '📑',
-    description: 'Panduan narasi pembawa acara dan briefing LO saat singgah di pos laboratorium.',
-    date: 'Master Canva',
-    isDefault: true
-  },
-  {
-    id: 'canva_sf_04',
-    name: 'Slide Deck Pengenalan Riset & 6 Fakultas',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    category: 'PPT & Presentasi',
-    url: 'https://www.canva.com/design/DAF-deck-safari/view?embed',
-    embedUrl: 'https://www.canva.com/design/DAF-deck-safari/view?embed',
-    icon: '📊',
-    description: 'Template presentasi presentasi fakultas dan keunggulan departemen ITS.',
-    date: 'Master Canva',
-    isDefault: true
-  },
-
   // --- START POINT (SP) ---
   {
     id: 'canva_sp_01',
@@ -381,9 +327,9 @@ function getAllCanvaLinksSync() {
 async function getCanvaLinksBySubEvent(subEventId = 'all') {
   await refreshFromDatabase();
   if (!subEventId || subEventId === 'all') {
-    return canvaCache;
+    return canvaCache.filter(item => !deletedCanvaIds.has(item.id));
   }
-  return canvaCache.filter(item => item.subEventId === subEventId || item.subEventId === 'all');
+  return canvaCache.filter(item => item.subEventId === subEventId && !deletedCanvaIds.has(item.id));
 }
 
 /**

@@ -9,7 +9,7 @@
  */
 
 const WorkspaceModal = {
-  sheetId: '1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0',
+  sheetId: null,
   rootFolderId: '1a-JbvPXcU0o9gWDrQEJUGZaQXTM6LQQp',
   
   // State
@@ -30,7 +30,7 @@ const WorkspaceModal = {
   // Active preview file & active sheet
   activeFile: null,
   availableSheets: [],
-  activeSheetId: 'sheet_safari',
+  activeSheetId: null,
 
   init() {
     this.injectModal();
@@ -990,13 +990,6 @@ const WorkspaceModal = {
           file.previewUrl = `https://docs.google.com/spreadsheets/d/${cleanId}/htmlembed?widget=true`;
         }
         file.isConfigured = true;
-      } else if (file.subEventId === 'safari' || (!file.subEventId && this.activeSubEventId === 'safari')) {
-        // Safari Faculty always has the verified official Google Sheet ID
-        const safariId = this.sheetId || '1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0';
-        file.sheetId = safariId;
-        file.editUrl = `https://docs.google.com/spreadsheets/d/${safariId}/edit?embedded=true`;
-        file.previewUrl = `https://docs.google.com/spreadsheets/d/${safariId}/htmlembed?widget=true`;
-        file.isConfigured = true;
       }
     }
 
@@ -1442,36 +1435,16 @@ const WorkspaceModal = {
       console.warn('Could not load spreadsheet list:', err.message);
     }
 
-    // Safeguard: Safari Faculty is ALWAYS pre-configured by default with official Google Sheet
-    if (this.activeSubEventId === 'safari' && (!this.availableSheets || this.availableSheets.length === 0 || !this.availableSheets.some(s => s.isConfigured))) {
-      const safariId = this.sheetId || '1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0';
-      this.availableSheets = [{
-        id: 'sheet_safari',
-        sheetId: safariId,
-        name: '00. Master Rundown & Pos Checklist Safari Faculty',
-        subEventId: 'safari',
-        subEventName: 'Safari Faculty',
-        icon: '🏛️',
-        type: 'google',
-        isConfigured: true,
-        editUrl: `https://docs.google.com/spreadsheets/d/${safariId}/edit?embedded=true`,
-        previewUrl: `https://docs.google.com/spreadsheets/d/${safariId}/htmlembed?widget=true`,
-        externalUrl: `https://docs.google.com/spreadsheets/d/${safariId}/edit`,
-        date: 'Aktif Terhubung',
-        isDefault: true
-      }];
-    }
-
     // Find requested sheet or primary configured sheet for this sub-divisi specifically
     let selectedSheet = this.availableSheets.find(s => s.id === targetSubOrId || s.sheetId === targetSubOrId)
       || this.availableSheets.find(s => s.subEventId === this.activeSubEventId && s.isConfigured)
       || this.availableSheets.find(s => s.subEventId === this.activeSubEventId)
       || {
         id: `sheet_${this.activeSubEventId}`,
-        name: `Master Spreadsheet ${this.activeSubEventId.toUpperCase()}`,
+        name: `Master Spreadsheet ${this.activeSubEventId === 'safari' ? 'Safari Faculty' : this.activeSubEventId === 'startpoint' ? 'Start Point' : this.activeSubEventId === 'odl' ? 'One Day Lecture' : this.activeSubEventId === 'technocraft' ? 'Technocraft' : 'Central Event'}`,
         subEventId: this.activeSubEventId,
-        subEventName: this.activeSubEventId === 'odl' ? 'One Day Lecture' : this.activeSubEventId.toUpperCase(),
-        icon: this.activeSubEventId === 'odl' ? '🎓' : '📊',
+        subEventName: this.activeSubEventId === 'safari' ? 'Safari Faculty' : this.activeSubEventId === 'startpoint' ? 'Start Point' : this.activeSubEventId === 'odl' ? 'One Day Lecture' : this.activeSubEventId === 'technocraft' ? 'Technocraft' : 'Central Event',
+        icon: this.activeSubEventId === 'safari' ? '🏛️' : this.activeSubEventId === 'odl' ? '🎓' : '📊',
         isConfigured: false
       };
 

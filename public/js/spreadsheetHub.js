@@ -784,7 +784,8 @@ const SpreadsheetHub = {
 
     // 2. Find sheet
     const sheet = (this.sheets || []).find(s => s.id === itemId || s.sheetId === itemId) || { id: itemId };
-    const cleanSheetId = sheet.sheetId || (sheet.id && !sheet.id.startsWith('sheet_') && !sheet.id.startsWith('local_') ? sheet.id : null) || (itemId && !itemId.startsWith('sheet_') ? itemId : '1daAHJLSECcmeY7fnyiIeFbua2sZqTqKjOzHY69zH2O0');
+    const cleanSheetId = sheet.sheetId || (sheet.id && !sheet.id.startsWith('sheet_') && !sheet.id.startsWith('local_') ? sheet.id : null) || (itemId && !itemId.startsWith('sheet_') ? itemId : null);
+    const isConfigured = !!(sheet.isConfigured || sheet.sheetId || cleanSheetId || sheet.editUrl || sheet.previewUrl);
     const subEventId = sheet.subEventId || this.currentSubEventId || 'safari';
     const subInfo = this.subEventMap[subEventId] || { name: 'Central Event', code: 'CE' };
 
@@ -809,7 +810,7 @@ const SpreadsheetHub = {
         editUrl: editUrl,
         previewUrl: previewUrl,
         externalUrl: extUrl,
-        isConfigured: true
+        isConfigured: isConfigured
       });
     } else if (typeof WorkspaceModal !== 'undefined' && typeof WorkspaceModal.openSheet === 'function') {
       WorkspaceModal.openSheet(subEventId, 'edit');

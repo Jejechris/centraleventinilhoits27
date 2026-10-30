@@ -12,7 +12,7 @@ function loadDeletedSheetIds() {
       return new Set(Array.isArray(parsed) ? parsed : []);
     }
   } catch (_) {}
-  return new Set();
+  return new Set(['sheet_safari', 'sheet_safari_rute', 'sheet_safari_logistik', 'sheet_safari_presensi']);
 }
 
 function saveDeletedSheetIds(set) {
@@ -27,68 +27,6 @@ const deletedSheetIds = loadDeletedSheetIds();
 
 // Default initial spreadsheet banks for all 4 core sub-events of Central Event 2027
 const DEFAULT_SHEETS = [
-  // --- SAFARI FACULTY (SF) ---
-  {
-    id: 'sheet_safari',
-    sheetId: config.GOOGLE_SHEET_ID,
-    name: '00. Master Rundown & Pos Checklist Safari Faculty',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    icon: '🏛️',
-    type: 'google',
-    isConfigured: true,
-    editUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit?embedded=true`,
-    previewUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/htmlembed?widget=true`,
-    externalUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit`,
-    date: 'Aktif Terhubung (Master)',
-    isDefault: true
-  },
-  {
-    id: 'sheet_safari_rute',
-    sheetId: null,
-    name: 'Plotting Rute Eksplorasi 6 Fakultas & Distribusi Kluster',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    icon: '🗺️',
-    type: 'google',
-    isConfigured: true,
-    editUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit?embedded=true`,
-    previewUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/htmlembed?widget=true`,
-    externalUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit`,
-    date: 'Siap Digunakan',
-    isDefault: true
-  },
-  {
-    id: 'sheet_safari_logistik',
-    sheetId: null,
-    name: 'Inventaris Logistik, K3 Medis & Jalur Evakuasi Manyar-Sukolilo',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    icon: '📦',
-    type: 'google',
-    isConfigured: true,
-    editUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit?embedded=true`,
-    previewUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/htmlembed?widget=true`,
-    externalUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit`,
-    date: 'Siap Digunakan',
-    isDefault: true
-  },
-  {
-    id: 'sheet_safari_presensi',
-    sheetId: null,
-    name: 'Monitoring Presensi Maba & Penugasan Eksplorasi',
-    subEventId: 'safari',
-    subEventName: 'Safari Faculty',
-    icon: '📋',
-    type: 'google',
-    isConfigured: true,
-    editUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit?embedded=true`,
-    previewUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/htmlembed?widget=true`,
-    externalUrl: `https://docs.google.com/spreadsheets/d/${config.GOOGLE_SHEET_ID}/edit`,
-    date: 'Siap Digunakan',
-    isDefault: true
-  },
-
   // --- START POINT (SP) ---
   {
     id: 'sheet_startpoint',
