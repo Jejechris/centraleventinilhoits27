@@ -528,7 +528,95 @@ async function formatCanvaForWhatsApp(subArg = 'all') {
   return text;
 }
 
+
+/**
+ * Update / Rename Canva Link (Supabase PostgreSQL + Local Cache)
+ */
+async function updateCanvaLink({ id, name, url, category, description, subEventId, icon }) {
+  await refreshFromDatabase();
+  const index = canvaCache.findIndex(c => c.id === id);
+  if (index === -1) {
+    throw new Error(`Tautan Canva dengan ID "${id}" tidak ditemukan`);
+  }
+
+  const item = canvaCache[index];
+
+  if (name && typeof name === 'string' && name.trim()) {
+    item.name = name.trim();
+  }
+
+  if (url && typeof url === 'string' && url.trim()) {
+    const cleaned = cleanCanvaUrl(url.trim());
+    item.url = cleaned;
+    item.embedUrl = generateEmbedUrl(cleaned);
+  }
+
+  if (category && typeof category === 'string' && category.trim()) {
+    item.category = category.trim();
+  }
+
+  if (description !== undefined && typeof description === 'string') {
+    item.description = description.trim();
+  }
+
+  if (icon && typeof icon === 'string') {
+    item.icon = icon;
+  }
+
+  if (subEventId) {
+    const subMap = {
+      safari: { name: 'Safari Faculty', icon: '🏛️' },
+      startpoint: { name: 'Start Point', icon: '🚀' },
+      odl: { name: 'One Day Lecture', icon: '🎓' },
+      technocraft: { name: 'Technocraft', icon: '⚡' },
+      all: { name: 'Umum & Medkraf', icon: '🎨' }
+    };
+    const subInfo = subMap[subEventId] || subMap.all;
+    item.subEventId = subEventId;
+    item.subEventName = subInfo.name;
+  }
+
+  item.date = 'Diperbarui';
+  canvaCache[index] = item;
+  saveLocalCanva(canvaCache);
+  lastFetchedFromDb = Date.now();
+
+  try {
+    const db = require('../db');
+    await db.query(`
+      UPDATE canva_links SET
+        name = $1,
+        url = $2,
+        embed_url = $3,
+        category = $4,
+        description = $5,
+        sub_event_id = $6,
+        sub_event_name = $7,
+        icon = $8,
+        date = $9,
+        updated_at = NOW()
+      WHERE id = $10
+    `, [
+      item.name,
+      item.url,
+      item.embedUrl,
+      item.category,
+      item.description,
+      item.subEventId,
+      item.subEventName,
+      item.icon,
+      item.date,
+      item.id
+    ]);
+  } catch (err) {
+    console.warn('⚠️ Supabase canva update error:', err.message);
+  }
+
+  return item;
+}
+
 module.exports = {
+  updateCanvaLink,
   getAllCanvaLinks,
   getAllCanvaLinksSync,
   getCanvaLinksBySubEvent,

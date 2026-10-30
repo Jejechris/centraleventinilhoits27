@@ -242,6 +242,30 @@ app.delete('/api/spreadsheets/:id', async (req, res) => {
   }
 });
 
+app.post('/api/spreadsheets/update', async (req, res) => {
+  try {
+    const { id, name, sheetIdOrUrl, subEventId } = req.body;
+    if (!id) return res.status(400).json({ success: false, error: 'ID spreadsheet wajib disertakan' });
+    const updated = await spreadsheetRegistry.updateSpreadsheet({ id, name, sheetIdOrUrl, subEventId });
+    res.json({ success: true, sheet: updated });
+  } catch (err) {
+    console.error('API /api/spreadsheets/update error:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/spreadsheets/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { name, sheetIdOrUrl, subEventId } = req.body;
+    const updated = await spreadsheetRegistry.updateSpreadsheet({ id, name, sheetIdOrUrl, subEventId });
+    res.json({ success: true, sheet: updated });
+  } catch (err) {
+    console.error(`API PUT /api/spreadsheets/${req.params.id} error:`, err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 // ==========================================
 // CANVA DESIGN BANK ENDPOINTS (4 SUB-DIVISI & PUSAT)
 // ==========================================
@@ -309,6 +333,30 @@ app.delete('/api/canva/:id', async (req, res) => {
   } catch (err) {
     console.error(`API DELETE /api/canva/${req.params.id} error:`, err);
     res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/canva/update', async (req, res) => {
+  try {
+    const { id, name, url, category, description, subEventId, icon } = req.body;
+    if (!id) return res.status(400).json({ success: false, error: 'ID tautan Canva wajib disertakan' });
+    const updated = await canvaService.updateCanvaLink({ id, name, url, category, description, subEventId, icon });
+    res.json({ success: true, link: updated });
+  } catch (err) {
+    console.error('API /api/canva/update error:', err);
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+app.put('/api/canva/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { name, url, category, description, subEventId, icon } = req.body;
+    const updated = await canvaService.updateCanvaLink({ id, name, url, category, description, subEventId, icon });
+    res.json({ success: true, link: updated });
+  } catch (err) {
+    console.error(`API PUT /api/canva/${req.params.id} error:`, err);
+    res.status(400).json({ success: false, error: err.message });
   }
 });
 

@@ -142,7 +142,7 @@ const Sidebar = {
               <span class="text-[9px] font-mono text-slate-500 font-bold group-hover:text-blue-400">IN-APP ↗</span>
             </button>
 
-            <button onclick="WorkspaceModal.openSheet()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/5 transition border border-transparent group">
+            <button onclick="Sidebar.openSheetsBank()" class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs text-slate-400 hover:text-white hover:bg-white/5 transition border border-transparent group">
               <div class="flex items-center gap-2.5">
                 <span class="text-sm">📊</span>
                 <span class="font-medium">Google Sheets Live</span>
@@ -366,12 +366,20 @@ const Sidebar = {
   },
 
   openCanvaBank() {
-    const hubMount = document.getElementById('sharedSpreadsheetMount');
-    if (hubMount && typeof SpreadsheetHub !== 'undefined') {
-      SpreadsheetHub.switchTab('canva');
-      hubMount.scrollIntoView({ behavior: 'smooth' });
+    if (typeof SpreadsheetHub !== 'undefined') {
+      SpreadsheetHub.openFullCatalog('canva');
     } else {
       window.location.href = '/safari.html#canva';
+    }
+  },
+
+  openSheetsBank() {
+    if (typeof SpreadsheetHub !== 'undefined') {
+      SpreadsheetHub.openFullCatalog('sheets');
+    } else if (typeof WorkspaceModal !== 'undefined' && typeof WorkspaceModal.openSheet === 'function') {
+      WorkspaceModal.openSheet();
+    } else {
+      window.location.href = '/safari.html';
     }
   },
 

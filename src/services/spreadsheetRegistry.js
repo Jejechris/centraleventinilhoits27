@@ -305,11 +305,7 @@ async function refreshFromDatabase(force = false) {
     const db = require('../db');
     const res = await db.query('SELECT * FROM spreadsheets ORDER BY created_at ASC');
     if (res && res.rows) {
-      // Find rows that are custom (not matching default IDs)
-      const defaultIds = new Set(DEFAULT_SHEETS.map(d => d.id));
-      customSheetsCache = res.rows
-        .filter(r => !r.is_default && !defaultIds.has(r.id))
-        .map(r => ({
+      customSheetsCache = res.rows.map(r => ({
           id: r.id,
           sheetId: r.sheet_id,
           name: r.name,
@@ -338,19 +334,14 @@ async function refreshFromDatabase(force = false) {
 
 async function getAllSpreadsheets() {
   await refreshFromDatabase();
-  const merged = [];
-
+  const map = new Map();
   for (const def of DEFAULT_SHEETS) {
-    merged.push(def);
+    map.set(def.id, { ...def });
   }
-
   for (const c of customSheetsCache) {
-    if (!merged.some(m => m.id === c.id)) {
-      merged.push(c);
-    }
+    map.set(c.id, { ...c });
   }
-
-  return merged;
+  return Array.from(map.values());
 }
 
 function getAllSpreadsheetsSync() {
@@ -502,7 +493,99 @@ async function deleteSpreadsheet(id) {
   return cacheDeleted || dbDeleted || true;
 }
 
+
+/**
+ * Update / Rename Spreadsheet (Supabase PostgreSQL + Local Cache)
+ */
+async function updateSpreadsheet({ id, name, sheetIdOrUrl, subEventId }) {
+  await refreshFromDatabase();
+  let index = customSheetsCache.findIndex(s => s.id === id);
+  let sheet = null;
+  if (index !== -1) {
+    sheet = customSheetsCache[index];
+  } else {
+    const def = DEFAULT_SHEETS.find(s => s.id === id);
+    if (def) {
+      sheet = { ...def };
+      customSheetsCache.push(sheet);
+      index = customSheetsCache.length - 1;
+    }
+  }
+
+  if (!sheet) {
+    throw new Error(`Spreadsheet dengan ID "${id}" tidak ditemukan`);
+  }
+
+  if (name && typeof name === 'string' && name.trim()) {
+    sheet.name = name.trim();
+  }
+
+  if (sheetIdOrUrl && typeof sheetIdOrUrl === 'string' && sheetIdOrUrl.trim()) {
+    const cleanId = extractSheetId(sheetIdOrUrl.trim());
+    if (cleanId) {
+      sheet.sheetId = cleanId;
+      sheet.editUrl = `https://docs.google.com/spreadsheets/d/${cleanId}/edit?embedded=true`;
+      sheet.previewUrl = `https://docs.google.com/spreadsheets/d/${cleanId}/htmlembed?widget=true`;
+      sheet.externalUrl = `https://docs.google.com/spreadsheets/d/${cleanId}/edit`;
+      sheet.isConfigured = true;
+    }
+  }
+
+  if (subEventId) {
+    const subMap = {
+      safari: { name: 'Safari Faculty', icon: '🏛️' },
+      startpoint: { name: 'Start Point', icon: '🚀' },
+      odl: { name: 'One Day Lecture', icon: '🎓' },
+      technocraft: { name: 'Technocraft', icon: '⚡' },
+      all: { name: 'Semua Sub-Divisi', icon: '📊' }
+    };
+    const subInfo = subMap[subEventId] || subMap.all;
+    sheet.subEventId = subEventId;
+    sheet.subEventName = subInfo.name;
+    if (subInfo.icon) sheet.icon = subInfo.icon;
+  }
+
+  sheet.date = 'Diperbarui';
+  customSheetsCache[index] = sheet;
+  saveCustomSheetsLocal(customSheetsCache);
+  lastFetchedFromDb = Date.now();
+
+  try {
+    const db = require('../db');
+    await db.query(`
+      UPDATE spreadsheets SET
+        name = $1,
+        sheet_id = $2,
+        edit_url = $3,
+        preview_url = $4,
+        external_url = $5,
+        sub_event_id = $6,
+        sub_event_name = $7,
+        icon = $8,
+        date = $9,
+        updated_at = NOW()
+      WHERE id = $10
+    `, [
+      sheet.name,
+      sheet.sheetId || null,
+      sheet.editUrl || null,
+      sheet.previewUrl || null,
+      sheet.externalUrl || null,
+      sheet.subEventId,
+      sheet.subEventName,
+      sheet.icon || '📊',
+      sheet.date,
+      sheet.id
+    ]);
+  } catch (err) {
+    console.warn('⚠️ Supabase sheet update error:', err.message);
+  }
+
+  return sheet;
+}
+
 module.exports = {
+  updateSpreadsheet,
   getAllSpreadsheets,
   getAllSpreadsheetsSync,
   getSpreadsheetsBySubEvent,

@@ -142,6 +142,20 @@ const CE_API = {
     });
   },
 
+  async updateSpreadsheet(id, data) {
+    try {
+      return await this.fetchWithTimeout(`/api/spreadsheets/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+    } catch (e) {
+      return await this.fetchWithTimeout('/api/spreadsheets/update', {
+        method: 'POST',
+        body: JSON.stringify({ id, ...data })
+      });
+    }
+  },
+
   async deleteSpreadsheet(id) {
     try {
       return await this.fetchWithTimeout(`/api/spreadsheets/${encodeURIComponent(id)}`, {
@@ -165,6 +179,20 @@ const CE_API = {
       method: 'POST',
       body: JSON.stringify(payload)
     });
+  },
+
+  async updateCanvaLink(id, data) {
+    try {
+      return await this.fetchWithTimeout(`/api/canva/${encodeURIComponent(id)}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      });
+    } catch (e) {
+      return await this.fetchWithTimeout('/api/canva/update', {
+        method: 'POST',
+        body: JSON.stringify({ id, ...data })
+      });
+    }
   },
 
   async deleteCanvaLink(id) {
